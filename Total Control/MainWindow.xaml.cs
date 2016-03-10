@@ -1,7 +1,15 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Management.Automation;
+using System.Text;
 using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Xml.Serialization;
+using Total_Control.User;
 
 namespace Total_Control
 {
@@ -14,9 +22,8 @@ namespace Total_Control
         {
             InitializeComponent();
             InitializeDragWindow();
-            
-            _NavigationFrame.Navigate(new Dashboard());
 
+            _NavigationFrame.Navigate(new Dashboard());
         }
 
         private void MinimizeWindow(object sender, RoutedEventArgs e)
@@ -30,7 +37,7 @@ namespace Total_Control
         }
         private void MaximizeWindow(object sender, RoutedEventArgs e)
         {
-            SwitchState();         
+            SwitchState();
         }
         private void CloseWindow(object sender, RoutedEventArgs e)
         {
@@ -100,10 +107,21 @@ namespace Total_Control
         {
             _NavigationFrame.Navigate(new Dashboard());
         }
-
+        private void User_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _NavigationFrame.Navigate(new User.User());
+        }
         private void UserCreate_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            _NavigationFrame.Navigate(new User.Create());
+            //_NavigationFrame.Navigate(new User.Create());
+        }
+        private void UserEnable_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _NavigationFrame.Navigate(new User.Enable());
+        }
+        private void UserDisable_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _NavigationFrame.Navigate(new User.Disable());
         }
     }
 }

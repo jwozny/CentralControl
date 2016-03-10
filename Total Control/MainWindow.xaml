@@ -1,0 +1,505 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Total_Control"
+        x:Class="Total_Control.MainWindow"
+        Title="Total Control" 
+        Height="635" Width="1000" 
+        FontFamily="Consolas" 
+        Visibility="Visible" ResizeMode="CanMinimize" Activated="RestoreWindow" WindowStyle="None" 
+        SnapsToDevicePixels="True">
+    <Window.Resources>
+        <DropShadowEffect x:Key="PrimaryGlow" ShadowDepth="0" Color="#FFFD3333" Opacity="1" BlurRadius="30"/>
+    </Window.Resources>
+    <Grid Background="#FF404040">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF252525">
+            <Label Content="  Unified Systems" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="Gray" Background="#FF252526" FontSize="14"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="MinimizeButton" Content="-" Height="35"  Width="50" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" FontSize="25">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Foreground" Value="LightGray"/>
+                            <Setter Property="Background" Value="#FF252526"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="#FF252526"/>
+                                    <Setter Property="Background" Value="DarkGray"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <!-- Maximize Button
+                <Button x:Name="MaximizeButton" Height="30" Width="40" KeyboardNavigation.IsTabStop="False" Click="MaximizeWindow" >
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Background" Value="#FF252526"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="DarkGray"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Label Content="□" Foreground="LightGray" FontSize="20"/>
+                </Button>
+                -->
+                <Button x:Name="CloseButton" Content="×" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="CloseWindow" Foreground="LightGray" FontSize="25">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Background" Value="#FF252526"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FFE81123"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="0" Margin="0,2,0,0">
+            <Border BorderBrush="#FF252525" BorderThickness="0,0,1,0" Background="#FF383838" Width="200" HorizontalAlignment="Left" Margin="0,-2,0,0"/>
+            <StackPanel>
+                <StackPanel x:Name="Panel0" Height="28">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label Content="Dashboard" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="LightGray" MouseDown="Dashboard_MouseDown">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="BorderBrush" Value="#FF252525"/>
+                                <Setter Property="Background" Value="#FF252525"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content=" " HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                </StackPanel>
+                <StackPanel x:Name="Panel1" Height="28">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="194" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label Content="User" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="LightGray" MouseDown="User_MouseDown">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="BorderBrush" Value="#FF252525"/>
+                                <Setter Property="Background" Value="#FF252525"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Height" Value="194">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label x:Name="UserCreate" Content="Create" HorizontalContentAlignment="Center" Foreground="LightGray" MouseDown="UserCreate_MouseDown">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Reset Password" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Unlock" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Extend Expiration" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Enable" HorizontalContentAlignment="Center" Foreground="LightGray" MouseDown="UserEnable_MouseDown">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Disable" HorizontalContentAlignment="Center" Foreground="LightGray" MouseDown="UserDisable_MouseDown">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Terminate" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                </StackPanel>
+                <StackPanel x:Name="Panel2" Height="28">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="98" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label Content="Server" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="BorderBrush" Value="#FF252525"/>
+                                <Setter Property="Background" Value="#FF252525"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Service Status" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Restart" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Shutdown" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                </StackPanel>
+                <StackPanel x:Name="Panel3" Height="28">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="50" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label Content="Storage" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="BorderBrush" Value="#FF252525"/>
+                                <Setter Property="Background" Value="#FF252525"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Get Report" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                </StackPanel>
+                <StackPanel x:Name="Panel4" Height="28">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="50" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label Content="Network" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="BorderBrush" Value="#FF252525"/>
+                                <Setter Property="Background" Value="#FF252525"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Connect" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Backup" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Reload" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Shutdown" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                </StackPanel>
+                <StackPanel x:Name="Panel5" Height="28">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="98" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label Content="Settings" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="BorderBrush" Value="#FF252525"/>
+                                <Setter Property="Background" Value="#FF252525"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="General" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Network" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                    <Label Content="Credentials" HorizontalContentAlignment="Center" Foreground="LightGray">
+                        <Label.Style>
+                            <Style TargetType="Label">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF303030"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Label.Style>
+                    </Label>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <DockPanel>
+                <Frame x:Name="_NavigationFrame" NavigationUIVisibility="Hidden" />
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
