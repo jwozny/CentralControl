@@ -61,6 +61,40 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="warningConfirmLabelButtonStyle" TargetType="{x:Type Label}">
+            <Setter Property="Margin" Value="10,40,300,0"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="BorderBrush" Value="#FF808080"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="DarkRed"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="warningCancelLabelButtonStyle" TargetType="{x:Type Label}">
+            <Setter Property="Margin" Value="300,40,10,0"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="BorderBrush" Value="#FF808080"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="defaultMouseDownLabelButtonStyle" TargetType="{x:Type Label}">
             <Setter Property="Margin" Value="10"/>
             <Setter Property="Height" Value="25"/>
@@ -87,6 +121,54 @@
                     <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="syncErrorLabelButtonStyle" TargetType="{x:Type Label}">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#FFFD3333"/>
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="BorderBrush" Value="#FFFD3333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
+                    <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
+                    <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="MessageOverview" TargetType="{x:Type Label}">
+            <Setter Property="Margin" Value="-10"/>
+            <Setter Property="Height" Value="100"/>
+            <Setter Property="FontSize" Value="25"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Background" Value="#CC101010"/>
+            <Style.Triggers>
+                <Trigger Property="Visibility" Value="Visible">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" Duration="00:00:01" BeginTime="00:00:00" From="0.0" To="1.0" />
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" Duration="00:00:01" BeginTime="00:00:02" From="1.0" To="0.0" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="WarningMessageOverview" TargetType="{x:Type Label}">
+            <Setter Property="Margin" Value="-10"/>
+            <Setter Property="Height" Value="100"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="FontSize" Value="25"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Background" Value="#FF101010"/>
         </Style>
     </Page.Resources>
     <Grid Margin="10">
@@ -163,25 +245,11 @@
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave"/>
         <Label x:Name="saveLabelButton" Content="Save User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="saveLabelButton_MouseDown" MouseUp="saveLabelButton_MouseUp" MouseLeave="saveLabelButton_MouseLeave" Visibility="Hidden"/>
-        <Label x:Name="resultMessage" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Height="100" Foreground="LightGray" Background="#CC101010" FontSize="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="Hidden" MouseEnter="resultMessage_MouseEnter">
-            <Label.Style>
-                <Style TargetType="{x:Type Label}">
-                    <Style.Triggers>
-                        <Trigger Property="Visibility" Value="Visible">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" Duration="00:00:01" BeginTime="00:00:00" From="0.0" To="1.0" />
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" Duration="00:00:01" BeginTime="00:00:02" From="1.0" To="0.0" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </Label.Style>
-        </Label>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
+        <Label x:Name="confirmMessage" Content="Are you sure you want to disable this user?" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>
+        <Label x:Name="confirmYesLabelButton" Content="Disable the User, Damn it!" Style="{StaticResource warningConfirmLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmYesLabelButton_MouseDown" Visibility="Hidden"/>
+        <Label x:Name="confirmNoLabelButton" Content="Oh Shit, Nevermind!" Style="{StaticResource warningCancelLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmNoLabelButton_MouseDown" Visibility="Hidden"/>
+        <Label x:Name="resultMessage" Style="{StaticResource MessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseEnter="resultMessage_MouseEnter" Visibility="Hidden"/>
         <Label x:Name="syncLabelButton" Content="Synchronize AD Users" Style="{StaticResource syncLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave" Visibility="Hidden"/>
     </Grid>
 </Page>

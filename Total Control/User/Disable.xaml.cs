@@ -59,21 +59,20 @@ namespace Total_Control.User
 
         private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
-            var converter = new BrushConverter();
-            var ButtonRed = (Brush)converter.ConvertFromString("#FFFD3333");
+            resultMessage.Visibility = Visibility.Hidden;
 
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             syncLabelButton.Style = defaultMouseDownLabelButtonStyle;
+            Style syncErrorLabelButtonStyle = FindResource("syncErrorLabelButtonStyle") as Style;
+            syncLabelButton.Style = syncErrorLabelButtonStyle;
 
             Exception Results = ActiveDirectory.GetAllUsers();
 
-
             if (Results != null)
             {
+                syncLabelButton.Style = syncErrorLabelButtonStyle;
                 if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
                 {
-                    syncLabelButton.Foreground = ButtonRed;
-                    syncLabelButton.BorderBrush = ButtonRed;
                     if (Environment.OSVersion.ToString().Contains("10.0")
                         || Environment.OSVersion.ToString().Contains("6.3")
                         || Environment.OSVersion.ToString().Contains("6.2")
@@ -116,7 +115,6 @@ namespace Total_Control.User
                 }
                 else
                 {
-                    syncLabelButton.Background = ButtonRed;
                     if (System.Windows.Forms.MessageBox.Show(
                         Results.ToString() + "\nEmail the Developer?",
                         "Powershell Error",
@@ -132,18 +130,20 @@ namespace Total_Control.User
             {
                 curtain.Visibility = Visibility.Collapsed;
                 syncLabelButton.Visibility = Visibility.Collapsed;
+                resultMessage.Content = "User List Updated";
+                resultMessage.Visibility = Visibility.Visible;
                 BuildList();
             }
         }
         private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
-            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            lookupLabelButton.Style = defaultLabelButtonStyle;
+            Style syncLabelButtonStyle = FindResource("syncLabelButtonStyle") as Style;
+            syncLabelButton.Style = syncLabelButtonStyle;
         }
         private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
-            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            lookupLabelButton.Style = defaultLabelButtonStyle;
+            Style syncLabelButtonStyle = FindResource("syncLabelButtonStyle") as Style;
+            syncLabelButton.Style = syncLabelButtonStyle;
         }
 
         /* Search Functions */
@@ -440,21 +440,13 @@ namespace Total_Control.User
 
         private void disableLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
-            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            disableLabelButton.Style = defaultMouseDownLabelButtonStyle;
-
-            Exception Results = ActiveDirectory.DisableUser(userList.SelectedItem.ToString());
-            if (Results != null)
-            {
-                System.Windows.Forms.MessageBox.Show(Results.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-            }
-            else
-            {
-                resultMessage.Content = "User Enabled Successfully";
-                resultMessage.Visibility = Visibility.Visible;
-                ActiveDirectory.GetAllUsers();
-                BuildList();
-            }
+            resultMessage.Visibility = Visibility.Hidden;
+            curtain.Visibility = Visibility.Visible;
+            confirmMessage.Visibility = Visibility.Visible;
+            confirmYesLabelButton.Visibility = Visibility.Visible;
+            confirmYesLabelButton.IsEnabled = true;
+            confirmNoLabelButton.Visibility = Visibility.Visible;
+            confirmNoLabelButton.IsEnabled = true;
         }
         private void disableLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
@@ -465,6 +457,52 @@ namespace Total_Control.User
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
             disableLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void confirmYesLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        {
+            curtain.Visibility = Visibility.Hidden;
+            confirmMessage.Visibility = Visibility.Hidden;
+            confirmYesLabelButton.Visibility = Visibility.Hidden;
+            confirmYesLabelButton.IsEnabled = false;
+            confirmNoLabelButton.Visibility = Visibility.Hidden;
+            confirmNoLabelButton.IsEnabled = false;
+
+            Exception Results = ActiveDirectory.DisableUser(userList.SelectedItem.ToString());
+            if (Results != null)
+            {
+                System.Windows.Forms.MessageBox.Show(Results.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            else
+            {
+                resultMessage.Content = "User Disabled Successfully";
+                resultMessage.Visibility = Visibility.Visible;
+                ActiveDirectory.GetAllUsers();
+                BuildList();
+            }
+        }
+        private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        {
+            curtain.Visibility = Visibility.Hidden;
+            confirmMessage.Visibility = Visibility.Hidden;
+            confirmYesLabelButton.Visibility = Visibility.Hidden;
+            confirmYesLabelButton.IsEnabled = false;
+            confirmNoLabelButton.Visibility = Visibility.Hidden;
+            confirmNoLabelButton.IsEnabled = false;
+
+        }
+        private void confirmLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style warningConfirmLabelButtonStyle = FindResource("warningConfirmLabelButtonStyle") as Style;
+            Style warningCancelLabelButtonStyle = FindResource("warningCancelLabelButtonStyle") as Style;
+            confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
+            confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
+        }
+        private void confirmLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style warningConfirmLabelButtonStyle = FindResource("warningConfirmLabelButtonStyle") as Style;
+            Style warningCancelLabelButtonStyle = FindResource("warningCancelLabelButtonStyle") as Style;
+            confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
+            confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
         }
 
         private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
