@@ -162,7 +162,25 @@
         <TextBox x:Name="lookupText" Style="{StaticResource placeHolder}" Tag="Search for user..." Margin="10"  VerticalAlignment="Bottom" Grid.Row="3" Grid.ColumnSpan="2" Height="25" Background="#FF454545" Foreground="LightGray" KeyDown="lookupText_KeyDown" TextChanged="lookupText_TextChanged"/>
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave"/>
-        <Label x:Name="saveLabelButton" Content="Save User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="saveLabelButton_MouseDown" MouseUp="saveLabelButton_MouseUp" MouseLeave="saveLabelButton_MouseLeave"/>
+        <Label x:Name="saveLabelButton" Content="Save User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="saveLabelButton_MouseDown" MouseUp="saveLabelButton_MouseUp" MouseLeave="saveLabelButton_MouseLeave" Visibility="Hidden"/>
+        <Label x:Name="resultMessage" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Height="100" Foreground="LightGray" Background="#CC101010" FontSize="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="Hidden" MouseEnter="resultMessage_MouseEnter">
+            <Label.Style>
+                <Style TargetType="{x:Type Label}">
+                    <Style.Triggers>
+                        <Trigger Property="Visibility" Value="Visible">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" Duration="00:00:01" BeginTime="00:00:00" From="0.0" To="1.0" />
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" Duration="00:00:01" BeginTime="00:00:02" From="1.0" To="0.0" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
         <Label x:Name="syncLabelButton" Content="Synchronize AD Users" Style="{StaticResource syncLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave" Visibility="Hidden"/>
     </Grid>

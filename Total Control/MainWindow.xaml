@@ -30,7 +30,7 @@
             <Setter Property="Foreground" Value="DeepSkyBlue"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="Background" Value="#FF202020"/>
             <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
         </Style>
         <Style x:Key="ExpandedMenuStyle" TargetType="Label">
@@ -39,7 +39,7 @@
             <Setter Property="Foreground" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="Background" Value="#FF202020"/>
             <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
         </Style>
         <Style x:Key="SubMenuStyle" TargetType="Label">
@@ -48,7 +48,7 @@
             <Setter Property="Foreground" Value="LightGray"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF303030"/>
+                    <Setter Property="Background" Value="#FF2B2B2B"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -72,14 +72,14 @@
             <RowDefinition Height="35"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF202020">
-            <Label Content="  Unified Systems" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="Gray" Background="#FF252525" FontSize="14"/>
+        <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF1B1B1B">
+            <Label Content="  Unified Systems" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="Gray" Background="#FF1B1B1B" FontSize="14"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Button x:Name="MinimizeButton" Content="-" Height="35"  Width="50" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" FontSize="25">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="Foreground" Value="LightGray"/>
-                            <Setter Property="Background" Value="#FF252525"/>
+                            <Setter Property="Background" Value="#FF1B1B1B"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type Button}">
@@ -91,7 +91,7 @@
                             </Setter>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="#FF252525"/>
+                                    <Setter Property="Foreground" Value="#FF1B1B1B"/>
                                     <Setter Property="Background" Value="DarkGray"/>
                                 </Trigger>
                             </Style.Triggers>
@@ -125,7 +125,7 @@
                 <Button x:Name="CloseButton" Content="×" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="CloseWindow" Foreground="LightGray" FontSize="25">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
-                            <Setter Property="Background" Value="#FF252525"/>
+                            <Setter Property="Background" Value="#FF1B1B1B"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type Button}">

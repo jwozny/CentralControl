@@ -22,7 +22,7 @@ using System.Xml.Serialization;
 namespace Total_Control.User
 {
     /// <summary>
-    /// Interaction logic for Create.xaml
+    /// Interaction logic for Disable.xaml
     /// </summary>
     public partial class Disable : Page
     {
@@ -39,8 +39,8 @@ namespace Total_Control.User
             else
             {
                 curtain.Visibility = Visibility.Visible;
-                syncButton.IsEnabled = true;
-                syncButton.Visibility = Visibility.Visible;
+                syncLabelButton.IsEnabled = true;
+                syncLabelButton.Visibility = Visibility.Visible;
             }
 
         }
@@ -57,25 +57,93 @@ namespace Total_Control.User
             }
         }
 
-        private void syncButton_Click(object sender, RoutedEventArgs e)
+        private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             var converter = new BrushConverter();
-            var ButtonRed = (Brush)converter.ConvertFromString("#FF902020");
+            var ButtonRed = (Brush)converter.ConvertFromString("#FFFD3333");
 
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultMouseDownLabelButtonStyle;
 
             Exception Results = ActiveDirectory.GetAllUsers();
+
+
             if (Results != null)
             {
-                syncButton.Background = ButtonRed;
-                System.Windows.Forms.MessageBox.Show(Results.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-                syncButton.Content = "Retry Synchronization";
+                if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
+                {
+                    syncLabelButton.Foreground = ButtonRed;
+                    syncLabelButton.BorderBrush = ButtonRed;
+                    if (Environment.OSVersion.ToString().Contains("10.0")
+                        || Environment.OSVersion.ToString().Contains("6.3")
+                        || Environment.OSVersion.ToString().Contains("6.2")
+                        || Environment.OSVersion.ToString().Contains("6.1")
+                        || Environment.OSVersion.ToString().Contains("6.0"))
+                    {
+                        if (System.Windows.Forms.MessageBox.Show(
+                            "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
+                            "RSAT Missing",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                        {
+                            if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
+                            }
+                            if (Environment.OSVersion.ToString().Contains("6.1"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
+                            }
+                            if (Environment.OSVersion.ToString().Contains("6.0"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
+                        "RSAT Missing",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                        {
+                            System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
+                        }
+                    }
+
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
+                else
+                {
+                    syncLabelButton.Background = ButtonRed;
+                    if (System.Windows.Forms.MessageBox.Show(
+                        Results.ToString() + "\nEmail the Developer?",
+                        "Powershell Error",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
+                    }
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
             }
             else
             {
                 curtain.Visibility = Visibility.Collapsed;
-                syncButton.Visibility = Visibility.Collapsed;
+                syncLabelButton.Visibility = Visibility.Collapsed;
                 BuildList();
             }
+        }
+        private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
         }
 
         /* Search Functions */
@@ -133,15 +201,17 @@ namespace Total_Control.User
                 else
                 {
                     infoLabel.Content = "User Information";
-                    Username.Content = " ";
-                    Email.Content = " ";
-                    Title.Content = " ";
-                    Department.Content = " ";
-                    Company.Content = " ";
-                    CreatedDate.Content = " ";
-                    ExpiryDate.Content = " ";
-                    LastLogonDate.Content = " ";
-                    LockedOut.Content = " ";
+                    Username.Content = String.Empty;
+                    Email.Content = String.Empty;
+                    Title.Content = String.Empty;
+                    Department.Content = String.Empty;
+                    Company.Content = String.Empty;
+                    CreatedDate.Content = String.Empty;
+                    ExpiryDate.Content = String.Empty;
+                    LastLogonDate.Content = String.Empty;
+                    LastBadPasswordAttempt.Content = String.Empty;
+                    LockedOut.Content = String.Empty;
+                    AccountLockoutTime.Content = String.Empty;
                 }
             }
             userList.ScrollIntoView(userList.SelectedItem);
@@ -303,8 +373,11 @@ namespace Total_Control.User
             searchCount = 0;
         }
 
-        private void lookupButton_Click(object sender, RoutedEventArgs e)
+        private void lookupLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
             if (lookupText.Text != "")
             {
                 searchCount++;
@@ -314,6 +387,16 @@ namespace Total_Control.User
             {
                 userList.SelectedIndex = -1;
             }
+        }
+        private void lookupLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void lookupLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
         }
 
         private void lookupText_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -329,6 +412,10 @@ namespace Total_Control.User
                 {
                     userList.SelectedIndex = -1;
                 }
+            }
+            else if (e.Key == Key.Escape)
+            {
+                lookupText.Text = String.Empty;
             }
         }
 
@@ -351,8 +438,11 @@ namespace Total_Control.User
         }
         /* End Search Functions */
 
-        private void disableButton_Click(object sender, RoutedEventArgs e)
+        private void disableLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            disableLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
             Exception Results = ActiveDirectory.DisableUser(userList.SelectedItem.ToString());
             if (Results != null)
             {
@@ -360,12 +450,21 @@ namespace Total_Control.User
             }
             else
             {
-                resultMessage.Content = "User Disabled Successfully";
+                resultMessage.Content = "User Enabled Successfully";
                 resultMessage.Visibility = Visibility.Visible;
                 ActiveDirectory.GetAllUsers();
                 BuildList();
             }
-
+        }
+        private void disableLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            disableLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void disableLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            disableLabelButton.Style = defaultLabelButtonStyle;
         }
 
         private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)

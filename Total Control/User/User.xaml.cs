@@ -198,15 +198,17 @@ namespace Total_Control.User
                 else
                 {
                     infoLabel.Content = "User Information";
-                    Username.Content = " ";
-                    Email.Content = " ";
-                    Title.Content = " ";
-                    Department.Content = " ";
-                    Company.Content = " ";
-                    CreatedDate.Content = " ";
-                    ExpiryDate.Content = " ";
-                    LastLogonDate.Content = " ";
-                    LockedOut.Content = " ";
+                    Username.Content = String.Empty;
+                    Email.Content = String.Empty;
+                    Title.Content = String.Empty;
+                    Department.Content = String.Empty;
+                    Company.Content = String.Empty;
+                    CreatedDate.Content = String.Empty;
+                    ExpiryDate.Content = String.Empty;
+                    LastLogonDate.Content = String.Empty;
+                    LastBadPasswordAttempt.Content = String.Empty;
+                    LockedOut.Content = String.Empty;
+                    AccountLockoutTime.Content = String.Empty;
                 }
             }
             userList.ScrollIntoView(userList.SelectedItem);
@@ -431,6 +433,11 @@ namespace Total_Control.User
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
             saveLabelButton.Style = defaultLabelButtonStyle;
+        }
+        
+        private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            resultMessage.Visibility = Visibility.Hidden;
         }
     }
 
