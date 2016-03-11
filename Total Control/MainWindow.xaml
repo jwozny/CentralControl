@@ -9,6 +9,58 @@
         SnapsToDevicePixels="True">
     <Window.Resources>
         <DropShadowEffect x:Key="PrimaryGlow" ShadowDepth="0" Color="#FFFD3333" Opacity="1" BlurRadius="30"/>
+        <Style x:Key="MenuStyle" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FF252525"/>
+            <Setter Property="Background" Value="#FF252525"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#FFFD3333"/>
+                    <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SelectedMenuStyle" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#FFFF4444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FFFD3333"/>
+            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+        </Style>
+        <Style x:Key="ExpandedMenuStyle" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FFFD3333"/>
+            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
+        </Style>
+        <Style x:Key="SubMenuStyle" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF303030"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SelectedSubMenuStyle" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#FFFF4444"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF303030"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid Background="#FF404040">
         <Grid.ColumnDefinitions>
@@ -110,32 +162,8 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label Content="Dashboard" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="LightGray" MouseDown="Dashboard_MouseDown">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Setter Property="BorderBrush" Value="#FF252525"/>
-                                <Setter Property="Background" Value="#FF252525"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content=" " HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
+                    <Label x:Name="Dashboard" Content="Dashboard" Style="{StaticResource MenuStyle}" MouseDown="Dashboard_MouseDown"/>
+                    <Label Content=" " Style="{StaticResource SubMenuStyle}"/>
                 </StackPanel>
                 <StackPanel x:Name="Panel1" Height="28">
                     <StackPanel.Triggers>
@@ -152,102 +180,14 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label Content="User" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="LightGray" MouseDown="User_MouseDown">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Setter Property="BorderBrush" Value="#FF252525"/>
-                                <Setter Property="Background" Value="#FF252525"/>
-                                <Style.Triggers>
-                                    <Trigger Property="Height" Value="194">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label x:Name="UserCreate" Content="Create" HorizontalContentAlignment="Center" Foreground="LightGray" MouseDown="UserCreate_MouseDown">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Reset Password" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Unlock" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Extend Expiration" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Enable" HorizontalContentAlignment="Center" Foreground="LightGray" MouseDown="UserEnable_MouseDown">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Disable" HorizontalContentAlignment="Center" Foreground="LightGray" MouseDown="UserDisable_MouseDown">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Terminate" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
+                    <Label x:Name="User" Content="User" Style="{StaticResource MenuStyle}" MouseDown="User_MouseDown"/>
+                    <Label x:Name="UserCreate" Content="Create" Style="{StaticResource SubMenuStyle}" MouseDown="UserCreate_MouseDown"/>
+                    <Label x:Name="UserReset" Content="Reset Password"  Style="{StaticResource SubMenuStyle}" MouseDown="UserReset_MouseDown"/>
+                    <Label x:Name="UserUnlock" Content="Unlock"  Style="{StaticResource SubMenuStyle}" MouseDown="UserUnlock_MouseDown"/>
+                    <Label x:Name="UserExtend" Content="Extend Expiration"  Style="{StaticResource SubMenuStyle}" MouseDown="UserExtend_MouseDown"/>
+                    <Label x:Name="UserEnable" Content="Enable"  Style="{StaticResource SubMenuStyle}" MouseDown="UserEnable_MouseDown"/>
+                    <Label x:Name="UserDisable" Content="Disable"  Style="{StaticResource SubMenuStyle}" MouseDown="UserDisable_MouseDown"/>
+                    <Label x:Name="UserTerminate" Content="Terminate"  Style="{StaticResource SubMenuStyle}" MouseDown="UserTerminate_MouseDown"/>
                 </StackPanel>
                 <StackPanel x:Name="Panel2" Height="28">
                     <StackPanel.Triggers>
@@ -264,54 +204,10 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label Content="Server" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Setter Property="BorderBrush" Value="#FF252525"/>
-                                <Setter Property="Background" Value="#FF252525"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Service Status" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Restart" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Shutdown" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
+                    <Label x:Name="Server" Content="Server" Style="{StaticResource MenuStyle}" MouseDown="Server_MouseDown"/>
+                    <Label x:Name="ServerService" Content="Service Status"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerService_MouseDown"/>
+                    <Label x:Name="ServerRestart" Content="Restart"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerRestart_MouseDown"/>
+                    <Label x:Name="ServerShutdown" Content="Shutdown"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerShutdown_MouseDown"/>
                 </StackPanel>
                 <StackPanel x:Name="Panel3" Height="28">
                     <StackPanel.Triggers>
@@ -328,32 +224,8 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label Content="Storage" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Setter Property="BorderBrush" Value="#FF252525"/>
-                                <Setter Property="Background" Value="#FF252525"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Get Report" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
+                    <Label x:Name="Storage" Content="Storage" Style="{StaticResource MenuStyle}" MouseDown="Storage_MouseDown"/>
+                    <Label x:Name="StorageReport" Content="Get Report" Style="{StaticResource SubMenuStyle}" MouseDown="StorageReport_MouseDown"/>
                 </StackPanel>
                 <StackPanel x:Name="Panel4" Height="28">
                     <StackPanel.Triggers>
@@ -370,65 +242,11 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label Content="Network" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Setter Property="BorderBrush" Value="#FF252525"/>
-                                <Setter Property="Background" Value="#FF252525"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Connect" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Backup" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Reload" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Shutdown" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
+                    <Label x:Name="Network" Content="Network" Style="{StaticResource MenuStyle}" MouseDown="Network_MouseDown"/>
+                    <Label x:Name="NetworkConnect" Content="Connect" Style="{StaticResource SubMenuStyle}" MouseDown="NetworkConnect_MouseDown"/>
+                    <Label x:Name="NetworkBackup" Content="Backup" Style="{StaticResource SubMenuStyle}" MouseDown="NetworkBackup_MouseDown"/>
+                    <Label x:Name="NetworkReload" Content="Reload"  Style="{StaticResource SubMenuStyle}" MouseDown="NetworkReload_MouseDown"/>
+                    <Label x:Name="NetworkShutdown" Content="Shutdown"  Style="{StaticResource SubMenuStyle}" MouseDown="NetworkShutdown_MouseDown"/>
                 </StackPanel>
                 <StackPanel x:Name="Panel5" Height="28">
                     <StackPanel.Triggers>
@@ -445,60 +263,15 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label Content="Settings" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFC4C4C4">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Setter Property="BorderBrush" Value="#FF252525"/>
-                                <Setter Property="Background" Value="#FF252525"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="#FFFD3333"/>
-                                        <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="General" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Network" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
-                    <Label Content="Credentials" HorizontalContentAlignment="Center" Foreground="LightGray">
-                        <Label.Style>
-                            <Style TargetType="Label">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF303030"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>
-                    </Label>
+                    <Label x:Name="Settings" Content="Settings" Style="{StaticResource MenuStyle}" MouseDown="Settings_MouseDown"/>
+                    <Label x:Name="SettingsGeneral" Content="General" Style="{StaticResource SubMenuStyle}" MouseDown="SettingsGeneral_MouseDown"/>
+                    <Label x:Name="SettingsCredentials" Content="Credentials" Style="{StaticResource SubMenuStyle}" MouseDown="SettingsCredentials_MouseDown"/>
                 </StackPanel>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" Grid.Column="1">
             <DockPanel>
-                <Frame x:Name="_NavigationFrame" NavigationUIVisibility="Hidden" />
+                <Frame x:Name="_NavigationFrame" NavigationUIVisibility="Hidden"/>
             </DockPanel>
         </Grid>
     </Grid>

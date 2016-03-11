@@ -57,16 +57,36 @@ namespace Total_Control.User
         private void syncButton_Click(object sender, RoutedEventArgs e)
         {
             var converter = new BrushConverter();
-            var ButtonGray = (Brush)converter.ConvertFromString("#FF505050");
             var ButtonRed = (Brush)converter.ConvertFromString("#FF902020");
-
-            syncButton.Background = ButtonGray;
-
+            
             Exception Results = ActiveDirectory.GetAllUsers();
-            if (Results != null)
+
+            if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
             {
                 syncButton.Background = ButtonRed;
-                System.Windows.Forms.MessageBox.Show(Results.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+
+                if (System.Windows.Forms.MessageBox.Show(
+                    "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?",
+                    "RSAT Missing",
+                    MessageBoxButtons.YesNo, 
+                    MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                {
+                    System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
+                }
+
+                syncButton.Content = "Retry Synchronization";
+            }
+            else if (Results != null)
+            {
+                syncButton.Background = ButtonRed;
+                if (System.Windows.Forms.MessageBox.Show(
+                    Results.ToString() + "\nEmail the Developer?",
+                    "Powershell Error",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                {
+                    System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
+                }
                 syncButton.Content = "Retry Synchronization";
             }
             else
