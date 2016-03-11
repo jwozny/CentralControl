@@ -57,21 +57,50 @@ namespace Total_Control.User
         private void syncButton_Click(object sender, RoutedEventArgs e)
         {
             var converter = new BrushConverter();
-            var ButtonRed = (Brush)converter.ConvertFromString("#FF902020");
+            var ButtonRed = (Brush)converter.ConvertFromString("#FFFD3333");
             
             Exception Results = ActiveDirectory.GetAllUsers();
 
             if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
             {
-                syncButton.Background = ButtonRed;
-
-                if (System.Windows.Forms.MessageBox.Show(
-                    "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?",
-                    "RSAT Missing",
-                    MessageBoxButtons.YesNo, 
-                    MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                syncButton.Foreground = ButtonRed;
+                syncButton.BorderBrush = ButtonRed;
+                if (Environment.OSVersion.ToString().Contains("10.0")
+                    || Environment.OSVersion.ToString().Contains("6.3")
+                    || Environment.OSVersion.ToString().Contains("6.2")
+                    || Environment.OSVersion.ToString().Contains("6.1")
+                    || Environment.OSVersion.ToString().Contains("6.0"))
                 {
-                    System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
+                    if (System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
+                        "RSAT Missing",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                    {
+                        if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
+                        {
+                            System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
+                        }
+                        if (Environment.OSVersion.ToString().Contains("6.1"))
+                        {
+                            System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
+                        }
+                        if (Environment.OSVersion.ToString().Contains("6.0"))
+                        {
+                            System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
+                        }
+                    }
+                }
+                else
+                {
+                    if (System.Windows.Forms.MessageBox.Show(
+                    "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
+                    "RSAT Missing",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
+                    }
                 }
 
                 syncButton.Content = "Retry Synchronization";
