@@ -40,8 +40,8 @@ namespace Total_Control.User
             else
             {
                 curtain.Visibility = Visibility.Visible;
-                syncButton.IsEnabled = true;
-                syncButton.Visibility = Visibility.Visible;
+                syncLabelButton.IsEnabled = true;
+                syncLabelButton.Visibility = Visibility.Visible;
             }
         }
 
@@ -54,76 +54,93 @@ namespace Total_Control.User
             }
         }
 
-        private void syncButton_Click(object sender, RoutedEventArgs e)
+        private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             var converter = new BrushConverter();
             var ButtonRed = (Brush)converter.ConvertFromString("#FFFD3333");
-            
+
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
             Exception Results = ActiveDirectory.GetAllUsers();
 
-            if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
+            
+            if (Results != null)
             {
-                syncButton.Foreground = ButtonRed;
-                syncButton.BorderBrush = ButtonRed;
-                if (Environment.OSVersion.ToString().Contains("10.0")
-                    || Environment.OSVersion.ToString().Contains("6.3")
-                    || Environment.OSVersion.ToString().Contains("6.2")
-                    || Environment.OSVersion.ToString().Contains("6.1")
-                    || Environment.OSVersion.ToString().Contains("6.0"))
+                if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
                 {
-                    if (System.Windows.Forms.MessageBox.Show(
-                        "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
+                    syncLabelButton.Foreground = ButtonRed;
+                    syncLabelButton.BorderBrush = ButtonRed;
+                    if (Environment.OSVersion.ToString().Contains("10.0")
+                        || Environment.OSVersion.ToString().Contains("6.3")
+                        || Environment.OSVersion.ToString().Contains("6.2")
+                        || Environment.OSVersion.ToString().Contains("6.1")
+                        || Environment.OSVersion.ToString().Contains("6.0"))
+                    {
+                        if (System.Windows.Forms.MessageBox.Show(
+                            "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
+                            "RSAT Missing",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                        {
+                            if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
+                            }
+                            if (Environment.OSVersion.ToString().Contains("6.1"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
+                            }
+                            if (Environment.OSVersion.ToString().Contains("6.0"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
                         "RSAT Missing",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                    {
-                        if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
                         {
-                            System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
-                        }
-                        if (Environment.OSVersion.ToString().Contains("6.1"))
-                        {
-                            System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
-                        }
-                        if (Environment.OSVersion.ToString().Contains("6.0"))
-                        {
-                            System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
+                            System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
                         }
                     }
+
+                    syncLabelButton.Content = "Retry Synchronization";
                 }
                 else
                 {
+                    syncLabelButton.Background = ButtonRed;
                     if (System.Windows.Forms.MessageBox.Show(
-                    "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
-                    "RSAT Missing",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                        Results.ToString() + "\nEmail the Developer?",
+                        "Powershell Error",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
                     {
-                        System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
+                        System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
                     }
+                    syncLabelButton.Content = "Retry Synchronization";
                 }
-
-                syncButton.Content = "Retry Synchronization";
-            }
-            else if (Results != null)
-            {
-                syncButton.Background = ButtonRed;
-                if (System.Windows.Forms.MessageBox.Show(
-                    Results.ToString() + "\nEmail the Developer?",
-                    "Powershell Error",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                {
-                    System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
-                }
-                syncButton.Content = "Retry Synchronization";
             }
             else
             {
                 curtain.Visibility = Visibility.Collapsed;
-                syncButton.Visibility = Visibility.Collapsed;
+                syncLabelButton.Visibility = Visibility.Collapsed;
                 BuildList();
             }
+        }
+        private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
         }
 
         /* Search Functions */
@@ -333,8 +350,11 @@ namespace Total_Control.User
             searchCount = 0;
         }
 
-        private void lookupButton_Click(object sender, RoutedEventArgs e)
+        private void lookupLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
             if (lookupText.Text != "")
             {
                 searchCount++;
@@ -344,6 +364,16 @@ namespace Total_Control.User
             {
                 userList.SelectedIndex = -1;
             }
+        }
+        private void lookupLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void lookupLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            lookupLabelButton.Style = defaultLabelButtonStyle;
         }
 
         private void lookupText_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -359,6 +389,10 @@ namespace Total_Control.User
                 {
                     userList.SelectedIndex = -1;
                 }
+            }
+            else if (e.Key == Key.Escape)
+            {
+                lookupText.Text = String.Empty;
             }
         }
 
@@ -380,6 +414,24 @@ namespace Total_Control.User
             searchCount = 1;
         }
         /* End Search Functions */
+
+        private void saveLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        {
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+            //Do stuff here...
+        }
+        private void saveLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            saveLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void saveLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            saveLabelButton.Style = defaultLabelButtonStyle;
+        }
     }
 
     public static class ActiveDirectory
