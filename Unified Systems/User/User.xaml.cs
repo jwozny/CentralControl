@@ -19,6 +19,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using System.ComponentModel;
+using System.Threading;
 
 namespace Unified_Systems.User
 {
@@ -30,30 +32,31 @@ namespace Unified_Systems.User
         int searchResult;
         int searchCount;
 
+        /// <summary>
+        /// Primary function
+        /// </summary>
         public User()
         {
             InitializeComponent();
+            worker_Initialize();
+
             if (ActiveDirectory.Users != null)
-            {
+            {// If users are already synced, then build the list
                 BuildList();
             }
             else
-            {
+            {// Otherwise show the curtain and the sync button
                 curtain.Visibility = Visibility.Visible;
                 syncLabelButton.IsEnabled = true;
                 syncLabelButton.Visibility = Visibility.Visible;
             }
         }
-
-        public void BuildList()
-        {
-            userList.Items.Clear();
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
-            }
-        }
-
+        
+        /// <summary>
+        /// User sync label with button characteristics for refreshing the AD list
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             resultMessage.Visibility = Visibility.Hidden;
@@ -143,7 +146,23 @@ namespace Unified_Systems.User
             syncLabelButton.Style = syncLabelButtonStyle;
         }
 
-        /* Search Functions */
+        /// <summary>
+        /// Clears and rebuilds the list
+        /// </summary>
+        public void BuildList()
+        {
+            userList.Items.Clear();
+            foreach (PSObject User in ActiveDirectory.Users)
+            {
+                userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Displays more info on the selected item
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             foreach (PSObject User in ActiveDirectory.Users)
@@ -214,6 +233,11 @@ namespace Unified_Systems.User
             userList.ScrollIntoView(userList.SelectedItem);
         }
 
+        /* Search Functions */
+
+        /// <summary>
+        /// List search from lookupText
+        /// </summary>
         private void quickLookup()
         {
             foreach (string user in userList.Items)
@@ -260,7 +284,6 @@ namespace Unified_Systems.User
             }
             userList.SelectedIndex = -1;
         }
-
         private void fullLookup()
         {
             searchResult = 0;
@@ -351,7 +374,12 @@ namespace Unified_Systems.User
             }
             searchCount = 0;
         }
-
+        
+        /// <summary>
+        /// Lookup label with button characteristics
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lookupLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
@@ -378,6 +406,11 @@ namespace Unified_Systems.User
             lookupLabelButton.Style = defaultLabelButtonStyle;
         }
 
+        /// <summary>
+        /// Pressing Enter in searchbox invokes fullLookup
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lookupText_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -397,7 +430,6 @@ namespace Unified_Systems.User
                 lookupText.Text = String.Empty;
             }
         }
-
         private void lookupText_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (lookupText.Text != "")
@@ -411,12 +443,22 @@ namespace Unified_Systems.User
             }
         }
 
+        /// <summary>
+        /// Clicking the userlist (selecting an item) resets the search index
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void userList_MouseDown(object sender, MouseButtonEventArgs e)
         {
             searchCount = 1;
         }
-        /* End Search Functions */
 
+        /* Primary Action */
+        /// <summary>
+        /// Saves any changes made to the user
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void saveLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
@@ -443,6 +485,11 @@ namespace Unified_Systems.User
             saveLabelButton.Style = defaultLabelButtonStyle;
         }
 
+        /// <summary>
+        /// Warning and confirmation template if needed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void confirmYesLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             curtain.Visibility = Visibility.Hidden;
@@ -490,16 +537,81 @@ namespace Unified_Systems.User
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
         }
 
+        /// <summary>
+        /// Display outcome of the primary action
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             resultMessage.Visibility = Visibility.Hidden;
         }
+
+        /* Background Worker */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        private BackgroundWorker worker = new BackgroundWorker();
+
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        private void worker_Initialize()
+        {
+            worker.WorkerReportsProgress = true;
+            worker.WorkerSupportsCancellation = true;
+            worker.DoWork += worker_DoWork;
+            worker.ProgressChanged += worker_ProgressChanged;
+            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+
+            worker.RunWorkerAsync();
+        }
+
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                (sender as BackgroundWorker).ReportProgress(i);
+                Thread.Sleep(100);
+            }
+        }
+        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // Reported progress is updated to an element here with: SomeElement.Textorwhatever = e.ProgressPercentage;
+        }
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // Do something when worker is done....
+
+            if ((e.Cancelled == true))
+            {
+                // Worker was canceled, do this...
+            }
+
+            else if (!(e.Error == null))
+            {
+                // There was an error, do this... ("Error: " + e.Error.Message)
+            }
+
+            else
+            {
+                // Worker is done, do this...
+            }
+        }
+
     }
 
+    /// <summary>
+    /// Static class to store active directory user info collection and action scripts
+    /// </summary>
     public static class ActiveDirectory
     {
         private static Collection<PSObject> users;
-
         public static Collection<PSObject> Users
         {
             get
@@ -511,7 +623,7 @@ namespace Unified_Systems.User
                 users = value;
             }
         }
-
+        
         public static Exception ExecutePowershell(string Command)
         {
             Runspace runspace = null;
@@ -542,12 +654,10 @@ namespace Unified_Systems.User
         {
             return ExecutePowershell("Get-ADUser -Filter * -Properties * | Sort-Object SamAccountName");
         }
-
         public static Exception EnableUser(string User)
         {
             return ExecutePowershell("Enable-ADAccount -Identity " + User);
         }
-
         public static Exception DisableUser(string User)
         {
             return ExecutePowershell("Disable-ADAccount -Identity " + User);
