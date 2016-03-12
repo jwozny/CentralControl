@@ -6,7 +6,8 @@
         MinHeight="635" MinWidth="1000" 
         Height="800" Width="1200" 
         FontFamily="Consolas" 
-        Visibility="Visible" ResizeMode="CanMinimize" Activated="RestoreWindow" WindowStyle="None" 
+        Visibility="Visible" Activated="RestoreWindow" WindowStyle="None" 
+        ResizeMode="CanResizeWithGrip" AllowsTransparency="True"
         SnapsToDevicePixels="True">
     <Window.Resources>
         <DropShadowEffect x:Key="PrimaryGlow" ShadowDepth="0" Color="DeepSkyBlue" Opacity="1" BlurRadius="30"/>
@@ -72,7 +73,7 @@
             <RowDefinition Height="35"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF1B1B1B">
+        <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF1B1B1B" MouseLeftButtonDown="Titlebar_MouseLeftButtonDown" MouseLeftButtonUp="Titlebar_MouseLeftButtonUp" MouseMove="Titlebar_MouseMove">
             <Label Content="  Unified Systems" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="Gray" Background="#FF1B1B1B" FontSize="14"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Button x:Name="MinimizeButton" Content="-" Height="35"  Width="50" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" FontSize="25">
@@ -98,11 +99,11 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <!-- Maximize Button
-                <Button x:Name="MaximizeButton" Height="30" Width="40" KeyboardNavigation.IsTabStop="False" Click="MaximizeWindow" >
+                <Button x:Name="MaximizeButton" Content="□" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="MaximizeWindow" FontSize="25">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
-                            <Setter Property="Background" Value="#FF252525"/>
+                            <Setter Property="Foreground" Value="LightGray"/>
+                            <Setter Property="Background" Value="#FF1B1B1B"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type Button}">
@@ -114,17 +115,17 @@
                             </Setter>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="#FF1B1B1B"/>
                                     <Setter Property="Background" Value="DarkGray"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    <Label Content="□" Foreground="LightGray" FontSize="20"/>
                 </Button>
-                -->
-                <Button x:Name="CloseButton" Content="×" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="CloseWindow" Foreground="LightGray" FontSize="25">
+                <Button x:Name="CloseButton" Content="×" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="CloseWindow" FontSize="25">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
+                            <Setter Property="Foreground" Value="LightGray"/>
                             <Setter Property="Background" Value="#FF1B1B1B"/>
                             <Setter Property="Template">
                                 <Setter.Value>

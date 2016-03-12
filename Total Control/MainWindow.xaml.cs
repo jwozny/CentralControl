@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Total_Control.User;
+using System.Runtime.InteropServices;
 
 namespace Total_Control
 {
@@ -19,10 +20,10 @@ namespace Total_Control
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool mRestoreIfMove = false;
         public MainWindow()
         {
             InitializeComponent();
-            InitializeDragWindow();
 
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             _NavigationFrame.Navigate(new Dashboard());
@@ -65,46 +66,70 @@ namespace Total_Control
                 }
             }
         }
-        private void InitializeDragWindow()
+        private void Titlebar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var restoreIfMove = false;
-
-            Titlebar.MouseLeftButtonDown += (s, e) =>
+            if (e.ClickCount == 2)
             {
-                if (e.ClickCount == 2)
+                if ((ResizeMode == ResizeMode.CanResize) || (ResizeMode == ResizeMode.CanResizeWithGrip))
                 {
                     SwitchState();
                 }
-                else
-                {
-                    if (WindowState == WindowState.Maximized)
-                    {
-                        restoreIfMove = true;
-                    }
 
-                    DragMove();
-                }
-            };
-            Titlebar.MouseLeftButtonUp += (s, e) =>
-            {
-                restoreIfMove = false;
-            };
-            Titlebar.MouseMove += (s, e) =>
-            {
-                if (restoreIfMove)
-                {
-                    restoreIfMove = false;
-                    var mouseX = e.GetPosition(this).X;
-                    var width = RestoreBounds.Width;
-                    var x = mouseX - width / 2;
+                return;
+            }
 
-                    WindowState = WindowState.Normal;
-                    Left = x;
-                    Top = 0;
-                    DragMove();
-                }
-            };
+            else if (WindowState == WindowState.Maximized)
+            {
+                mRestoreIfMove = true;
+                return;
+            }
+
+            DragMove();
         }
+        private void Titlebar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            mRestoreIfMove = false;
+        }
+        private void Titlebar_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (mRestoreIfMove)
+            {
+                mRestoreIfMove = false;
+
+                double percentHorizontal = e.GetPosition(this).X / ActualWidth;
+                double targetHorizontal = RestoreBounds.Width * percentHorizontal;
+
+                double percentVertical = e.GetPosition(this).Y / ActualHeight;
+                double targetVertical = RestoreBounds.Height * percentVertical;
+
+                WindowState = WindowState.Normal;
+
+                POINT lMousePosition;
+                GetCursorPos(out lMousePosition);
+
+                Left = lMousePosition.X - targetHorizontal;
+                Top = lMousePosition.Y - targetVertical;
+
+                try { DragMove(); } catch { }
+            }
+        }
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetCursorPos(out POINT lpPoint);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+
+            public POINT(int x, int y)
+            {
+                this.X = x;
+                this.Y = y;
+            }
+        }
+
 
         public void ResetMenuColors()
         {
