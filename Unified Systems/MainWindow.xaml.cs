@@ -18,7 +18,7 @@ using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using WinInterop = System.Windows.Interop;
-
+using System.Management.Automation.Runspaces;
 
 namespace Unified_Systems
 {
@@ -574,6 +574,64 @@ namespace Unified_Systems
             ResetMenuColors();
             Settings.Style = expandedMenuStyle;
             SettingsCredentials.Style = selectedSubMenuStyle;
+        }
+    }
+
+    /// <summary>
+    /// Static class to store active directory user info collection and action scripts
+    /// </summary>
+    public static class ActiveDirectory
+    {
+        private static Collection<PSObject> users;
+        public static Collection<PSObject> Users
+        {
+            get
+            {
+                return users;
+            }
+            set
+            {
+                users = value;
+            }
+        }
+
+        public static Exception ExecutePowershell(string Command)
+        {
+            Runspace runspace = null;
+            Pipeline pipeline = null;
+            Exception results = null;
+
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(Command);
+                users = pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                results = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            return results;
+        }
+
+        public static Exception GetAllUsers()
+        {
+            return ExecutePowershell("Get-ADUser -Filter * -Properties * | Sort-Object SamAccountName");
+        }
+        public static Exception EnableUser(string User)
+        {
+            return ExecutePowershell("Enable-ADAccount -Identity " + User);
+        }
+        public static Exception DisableUser(string User)
+        {
+            return ExecutePowershell("Disable-ADAccount -Identity " + User);
         }
     }
 }

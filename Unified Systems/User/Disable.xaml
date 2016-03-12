@@ -104,7 +104,7 @@
             <Setter Property="Width" Value="200"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="#FFFD3333"/>
+            <Setter Property="Foreground" Value="LightGray"/>
             <Setter Property="Background" Value="#FF202020"/>
             <Setter Property="BorderBrush" Value="#FFFD3333"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -256,7 +256,7 @@
         <DataGrid x:Name="dataGrid" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray"/>
         <TextBox x:Name="lookupText" Style="{StaticResource placeHolder}" Tag="Search for user..." Margin="10"  VerticalAlignment="Bottom" Grid.Row="3" Grid.ColumnSpan="2" Height="25" Background="#FF454545" Foreground="LightGray" KeyDown="lookupText_KeyDown" TextChanged="lookupText_TextChanged"/>
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
-        <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave"/>
+        <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>
         <Label x:Name="disableLabelButton" Content="Disable User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="disableLabelButton_MouseDown" MouseUp="disableLabelButton_MouseUp" MouseLeave="disableLabelButton_MouseLeave"/>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
         <Label x:Name="confirmMessage" Content="Are you sure you want to disable this user?" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>

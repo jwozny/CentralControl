@@ -29,16 +29,14 @@ namespace Unified_Systems.User
     /// </summary>
     public partial class User : Page
     {
-        int searchResult;
-        int searchCount;
-
         /// <summary>
         /// Primary function
         /// </summary>
         public User()
         {
             InitializeComponent();
-            worker_Initialize();
+            syncWorker_Initialize();
+            commandWorker_Initialize();
 
             if (ActiveDirectory.Users != null)
             {// If users are already synced, then build the list
@@ -53,102 +51,37 @@ namespace Unified_Systems.User
         }
         
         /// <summary>
-        /// User sync label with button characteristics for refreshing the AD list
+        /// Initial AD user sync button
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
-            resultMessage.Visibility = Visibility.Hidden;
-
             Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
             syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
 
-            Exception Results = ActiveDirectory.GetAllUsers();
-
-            if (Results != null)
+            if (syncWorker.IsBusy != true)
             {
-                Style defaultSyncErrorLabelButtonStyle = FindResource("defaultSyncErrorLabelButtonStyle") as Style;
-                syncLabelButton.Style = defaultSyncErrorLabelButtonStyle;
-                if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
-                {
-                    if (Environment.OSVersion.ToString().Contains("10.0")
-                        || Environment.OSVersion.ToString().Contains("6.3")
-                        || Environment.OSVersion.ToString().Contains("6.2")
-                        || Environment.OSVersion.ToString().Contains("6.1")
-                        || Environment.OSVersion.ToString().Contains("6.0"))
-                    {
-                        if (System.Windows.Forms.MessageBox.Show(
-                            "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
-                            "RSAT Missing",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                        {
-                            if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
-                            {
-                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
-                            }
-                            if (Environment.OSVersion.ToString().Contains("6.1"))
-                            {
-                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
-                            }
-                            if (Environment.OSVersion.ToString().Contains("6.0"))
-                            {
-                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (System.Windows.Forms.MessageBox.Show(
-                        "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
-                        "RSAT Missing",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                        {
-                            System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
-                        }
-                    }
-
-                    syncLabelButton.Content = "Retry Synchronization";
-                }
-                else
-                {
-                    if (System.Windows.Forms.MessageBox.Show(
-                        Results.ToString() + "\nEmail the Developer?",
-                        "Powershell Error",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                    {
-                        System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
-                    }
-                    syncLabelButton.Content = "Retry Synchronization";
-                }
-            }
-            else
-            {
-                curtain.Visibility = Visibility.Collapsed;
-                syncLabelButton.Visibility = Visibility.Collapsed;
-                resultMessage.Content = "User List Updated";
-                resultMessage.Visibility = Visibility.Visible;
-                BuildList();
+                syncLabelButton.Content = "Please Wait";
+                syncLabelButton.IsEnabled = false;
+                syncWorker.RunWorkerAsync();
             }
         }
         private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
-            syncLabelButton.Style = defaultSyncLabelButtonStyle;
+            //syncLabelButton.Style = defaultSyncLabelButtonStyle;
         }
         private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
-            syncLabelButton.Style = defaultSyncLabelButtonStyle;
+            //syncLabelButton.Style = defaultSyncLabelButtonStyle;
         }
 
         /// <summary>
         /// Clears and rebuilds the list
         /// </summary>
-        public void BuildList()
+        private void BuildList()
         {
             userList.Items.Clear();
             foreach (PSObject User in ActiveDirectory.Users)
@@ -233,6 +166,8 @@ namespace Unified_Systems.User
         }
 
         /* Search Functions */
+        private int searchResult;
+        private int searchCount;
 
         /// <summary>
         /// List search from lookupText
@@ -406,6 +341,37 @@ namespace Unified_Systems.User
         }
 
         /// <summary>
+        /// User AD refresh button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void refreshLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        {
+            resultMessage.Visibility = Visibility.Hidden;
+            
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            refreshLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+            if (syncWorker.IsBusy != true)
+            {
+                refreshLabelButton.Content = "Please Wait";
+                refreshLabelButton.IsEnabled = false;
+                syncLabelButton.IsEnabled = false;
+                syncWorker.RunWorkerAsync();
+            }
+        }
+        private void refreshLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            refreshLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void refreshLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            refreshLabelButton.Style = defaultLabelButtonStyle;
+        }
+
+        /// <summary>
         /// Pressing Enter in searchbox invokes fullLookup
         /// </summary>
         /// <param name="sender"></param>
@@ -463,8 +429,7 @@ namespace Unified_Systems.User
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
 
-            //Do stuff here...
-
+            /* Optional Confirmation Message */
             //resultMessage.Visibility = Visibility.Hidden;
             //curtain.Visibility = Visibility.Visible;
             //confirmMessage.Visibility = Visibility.Visible;
@@ -472,6 +437,13 @@ namespace Unified_Systems.User
             //confirmYesLabelButton.IsEnabled = true;
             //confirmNoLabelButton.Visibility = Visibility.Visible;
             //confirmNoLabelButton.IsEnabled = true;
+
+            /* If no confirmation message */
+            if (commandWorker.IsBusy != true)
+            {
+                commandWorker.RunWorkerAsync();
+                saveLabelButton.IsEnabled = false;
+            }
         }
         private void saveLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
@@ -484,11 +456,13 @@ namespace Unified_Systems.User
             saveLabelButton.Style = defaultLabelButtonStyle;
         }
 
+
         /// <summary>
         /// Warning and confirmation template if needed
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        /* Optional */
         private void confirmYesLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             curtain.Visibility = Visibility.Hidden;
@@ -498,19 +472,13 @@ namespace Unified_Systems.User
             confirmNoLabelButton.Visibility = Visibility.Hidden;
             confirmNoLabelButton.IsEnabled = false;
 
-            Exception Results = ActiveDirectory.DisableUser(userList.SelectedItem.ToString());
-            if (Results != null)
+            if (commandWorker.IsBusy != true)
             {
-                System.Windows.Forms.MessageBox.Show(Results.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-            }
-            else
-            {
-                resultMessage.Content = "User Disabled Successfully";
-                resultMessage.Visibility = Visibility.Visible;
-                ActiveDirectory.GetAllUsers();
-                BuildList();
+                commandWorker.RunWorkerAsync();
+                saveLabelButton.IsEnabled = false;
             }
         }
+        /* Optional */
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             curtain.Visibility = Visibility.Hidden;
@@ -521,6 +489,7 @@ namespace Unified_Systems.User
             confirmNoLabelButton.IsEnabled = false;
 
         }
+        /* Optional */
         private void confirmLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style warningConfirmLabelButtonStyle = FindResource("warningConfirmLabelButtonStyle") as Style;
@@ -528,6 +497,7 @@ namespace Unified_Systems.User
             confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
         }
+        /* Optional */
         private void confirmLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style warningConfirmLabelButtonStyle = FindResource("warningConfirmLabelButtonStyle") as Style;
@@ -537,7 +507,7 @@ namespace Unified_Systems.User
         }
 
         /// <summary>
-        /// Display outcome of the primary action
+        /// Hide result message with mouse
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -546,24 +516,23 @@ namespace Unified_Systems.User
             resultMessage.Visibility = Visibility.Hidden;
         }
 
-        /* Background Worker */
+        /* Background Sync Worker */
         /// <summary>
         /// Create background worker instance
         /// </summary>
-        private BackgroundWorker worker = new BackgroundWorker();
+        private BackgroundWorker syncWorker = new BackgroundWorker();
+        private Exception syncResults;
 
         /// <summary>
         /// Initialize background worker with actions
         /// </summary>
-        private void worker_Initialize()
+        private void syncWorker_Initialize()
         {
-            worker.WorkerReportsProgress = true;
-            worker.WorkerSupportsCancellation = true;
-            worker.DoWork += worker_DoWork;
-            worker.ProgressChanged += worker_ProgressChanged;
-            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
-
-            worker.RunWorkerAsync();
+            syncWorker.WorkerReportsProgress = true;
+            syncWorker.WorkerSupportsCancellation = true;
+            syncWorker.DoWork += syncWorker_DoWork;
+            syncWorker.ProgressChanged += syncWorker_ProgressChanged;
+            syncWorker.RunWorkerCompleted += syncWorker_RunWorkerCompleted;
         }
 
         /// <summary>
@@ -571,95 +540,153 @@ namespace Unified_Systems.User
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void syncWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            for (int i = 0; i < 100; i++)
-            {
-                (sender as BackgroundWorker).ReportProgress(i);
-                Thread.Sleep(100);
-            }
+            syncResults = ActiveDirectory.GetAllUsers();
         }
-        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void syncWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            // Reported progress is updated to an element here with: SomeElement.Textorwhatever = e.ProgressPercentage;
+            // No Progress to report
         }
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void syncWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            // Do something when worker is done....
-
-            if ((e.Cancelled == true))
+            if (syncResults != null)
             {
-                // Worker was canceled, do this...
-            }
+                Style defaultSyncErrorLabelButtonStyle = FindResource("defaultSyncErrorLabelButtonStyle") as Style;
+                syncLabelButton.Style = defaultSyncErrorLabelButtonStyle;
+                if (syncResults.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
+                {
+                    if (Environment.OSVersion.ToString().Contains("10.0")
+                        || Environment.OSVersion.ToString().Contains("6.3")
+                        || Environment.OSVersion.ToString().Contains("6.2")
+                        || Environment.OSVersion.ToString().Contains("6.1")
+                        || Environment.OSVersion.ToString().Contains("6.0"))
+                    {
+                        if (System.Windows.Forms.MessageBox.Show(
+                            "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
+                            "RSAT Missing",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                        {
+                            if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
+                            }
+                            if (Environment.OSVersion.ToString().Contains("6.1"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
+                            }
+                            if (Environment.OSVersion.ToString().Contains("6.0"))
+                            {
+                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
+                        "RSAT Missing",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                        {
+                            System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
+                        }
+                    }
 
-            else if (!(e.Error == null))
-            {
-                // There was an error, do this... ("Error: " + e.Error.Message)
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
+                else
+                {
+                    if (System.Windows.Forms.MessageBox.Show(
+                        syncResults.ToString() + "\nEmail the Developer?",
+                        "Powershell Error",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
+                    }
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
             }
-
             else
             {
-                // Worker is done, do this...
+                syncLabelButton.Content = "Synchronize Users";
+                curtain.Visibility = Visibility.Hidden;
+                syncLabelButton.Visibility = Visibility.Hidden;
+                resultMessage.Content = "User List Updated";
+                resultMessage.Visibility = Visibility.Visible;
+                BuildList();
             }
+
+            refreshLabelButton.Content = "Refresh Users";
+            refreshLabelButton.IsEnabled = true;
+            syncLabelButton.IsEnabled = true;
         }
 
-    }
+        /* Background Command Worker */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        private BackgroundWorker commandWorker = new BackgroundWorker();
+        private Exception commandResults;
 
-    /// <summary>
-    /// Static class to store active directory user info collection and action scripts
-    /// </summary>
-    public static class ActiveDirectory
-    {
-        private static Collection<PSObject> users;
-        public static Collection<PSObject> Users
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        private void commandWorker_Initialize()
         {
-            get
-            {
-                return users;
-            }
-            set
-            {
-                users = value;
-            }
-        }
-        
-        public static Exception ExecutePowershell(string Command)
-        {
-            Runspace runspace = null;
-            Pipeline pipeline = null;
-            Exception results = null;
-
-            try
-            {
-                runspace = RunspaceFactory.CreateRunspace();
-                runspace.Open();
-                pipeline = runspace.CreatePipeline();
-                pipeline.Commands.AddScript(Command);
-                users = pipeline.Invoke();
-            }
-            catch (Exception exception)
-            {
-                results = exception;
-            }
-            finally
-            {
-                if (pipeline != null) pipeline.Dispose();
-                if (runspace != null) runspace.Dispose();
-            }
-            return results;
+            commandWorker.WorkerReportsProgress = true;
+            commandWorker.WorkerSupportsCancellation = true;
+            commandWorker.DoWork += commandWorker_DoWork;
+            commandWorker.ProgressChanged += commandWorker_ProgressChanged;
+            commandWorker.RunWorkerCompleted += commandWorker_RunWorkerCompleted;
         }
 
-        public static Exception GetAllUsers()
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void commandWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            return ExecutePowershell("Get-ADUser -Filter * -Properties * | Sort-Object SamAccountName");
+            // Add script to run in background here
+            //commandResults = ActiveDirectory.SOMESCRIPT(userList.SelectedItem.ToString());
         }
-        public static Exception EnableUser(string User)
+        private void commandWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            return ExecutePowershell("Enable-ADAccount -Identity " + User);
+            // Nothing to report
         }
-        public static Exception DisableUser(string User)
+        private void commandWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            return ExecutePowershell("Disable-ADAccount -Identity " + User);
+            if (commandResults != null)
+            {
+                System.Windows.Forms.MessageBox.Show(commandResults.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            else
+            {
+                resultMessage.Content = "User Saved Successfully";
+                resultMessage.Visibility = Visibility.Visible;
+
+
+                bool waiting = true;
+                while (waiting)
+                {
+                    if (syncWorker.IsBusy != true)
+                    {
+                        refreshLabelButton.Content = "Please Wait";
+                        refreshLabelButton.IsEnabled = false;
+                        syncWorker.RunWorkerAsync();
+                        waiting = false;
+                    }
+                    else
+                    {
+                        Thread.Sleep(200);
+                        waiting = true;
+                    }
+                }
+            }
+            saveLabelButton.IsEnabled = true;
         }
     }
 }
