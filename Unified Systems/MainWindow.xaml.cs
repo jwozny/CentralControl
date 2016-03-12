@@ -12,6 +12,13 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Unified_Systems.User;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using WinInterop = System.Windows.Interop;
+
 
 namespace Unified_Systems
 {
@@ -20,19 +27,216 @@ namespace Unified_Systems
     /// </summary>
     public partial class MainWindow : Window
     {
-        private bool mRestoreIfMove = false;
         public MainWindow()
         {
             InitializeComponent();
+            SourceInitialized += new EventHandler(MainWindow_SourceInitialized);
 
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             _NavigationFrame.Navigate(new Dashboard());
             Dashboard.Style = selectedMenuStyle;
         }
 
+        private void MainWindow_SourceInitialized(object sender, EventArgs e)
+        {
+            System.IntPtr handle = (new WinInterop.WindowInteropHelper(this)).Handle;
+            WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(WindowProc));
+        }
+        private static void WmGetMinMaxInfo(System.IntPtr hwnd, System.IntPtr lParam)
+        {
+
+            MINMAXINFO mmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
+
+            // Adjust the maximized size and position to fit the work area of the correct monitor
+            int MONITOR_DEFAULTTONEAREST = 0x00000002;
+            System.IntPtr monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+
+            if (monitor != System.IntPtr.Zero)
+            {
+
+                MONITORINFO monitorInfo = new MONITORINFO();
+                GetMonitorInfo(monitor, monitorInfo);
+                RECT rcWorkArea = monitorInfo.rcWork;
+                RECT rcMonitorArea = monitorInfo.rcMonitor;
+                mmi.ptMaxPosition.x = Math.Abs(rcWorkArea.left - rcMonitorArea.left);
+                mmi.ptMaxPosition.y = Math.Abs(rcWorkArea.top - rcMonitorArea.top);
+                mmi.ptMaxSize.x = Math.Abs(rcWorkArea.right - rcWorkArea.left);
+                mmi.ptMaxSize.y = Math.Abs(rcWorkArea.bottom - rcWorkArea.top);
+            }
+
+            Marshal.StructureToPtr(mmi, lParam, true);
+        }
+        //public override void OnApplyTemplate()
+        //{
+        //    System.IntPtr handle = (new WinInterop.WindowInteropHelper(this)).Handle;
+        //    WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(WindowProc));
+        //}
+        private static System.IntPtr WindowProc(System.IntPtr hwnd, int msg, System.IntPtr wParam, System.IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
+            {
+                case 0x0024:
+                    WmGetMinMaxInfo(hwnd, lParam);
+                    handled = false;
+                    break;
+            }
+
+            return (System.IntPtr)0;
+        }
+        /// <summary>
+        /// POINT aka POINTAPI
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            /// <summary>
+            /// x coordinate of point.
+            /// </summary>
+            public int x;
+            /// <summary>
+            /// y coordinate of point.
+            /// </summary>
+            public int y;
+
+            /// <summary>
+            /// Construct a point of coordinates (x,y).
+            /// </summary>
+            public POINT(int x, int y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MINMAXINFO
+        {
+            public POINT ptReserved;
+            public POINT ptMaxSize;
+            public POINT ptMaxPosition;
+            public POINT ptMinTrackSize;
+            public POINT ptMaxTrackSize;
+        };
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public class MONITORINFO
+        {
+            /// <summary>
+            /// </summary>            
+            public int cbSize = Marshal.SizeOf(typeof(MONITORINFO));
+
+            /// <summary>
+            /// </summary>            
+            public RECT rcMonitor = new RECT();
+
+            /// <summary>
+            /// </summary>            
+            public RECT rcWork = new RECT();
+
+            /// <summary>
+            /// </summary>            
+            public int dwFlags = 0;
+        }
+
+        /********** Win32 **********/
+        /// <summary>
+        /// Gets monitor info
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 0)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+            
+            public static readonly RECT Empty = new RECT();
+            
+            public int Width
+            {
+                get { return Math.Abs(right - left); }  // Abs needed for BIDI OS
+            }
+            public int Height
+            {
+                get { return bottom - top; }
+            }
+            
+            public RECT(int left, int top, int right, int bottom)
+            {
+                this.left = left;
+                this.top = top;
+                this.right = right;
+                this.bottom = bottom;
+            }
+            
+            public RECT(RECT rcSrc)
+            {
+                this.left = rcSrc.left;
+                this.top = rcSrc.top;
+                this.right = rcSrc.right;
+                this.bottom = rcSrc.bottom;
+            }
+            
+            public bool IsEmpty
+            {
+                get
+                {
+                    // BUGBUG : On Bidi OS (hebrew arabic) left > right
+                    return left >= right || top >= bottom;
+                }
+            }
+            /// <summary> Return a user friendly representation of this struct </summary>
+            public override string ToString()
+            {
+                if (this == RECT.Empty) { return "RECT {Empty}"; }
+                return "RECT { left : " + left + " / top : " + top + " / right : " + right + " / bottom : " + bottom + " }";
+            }
+
+            /// <summary> Determine if 2 RECT are equal (deep compare) </summary>
+            public override bool Equals(object obj)
+            {
+                if (!(obj is Rect)) { return false; }
+                return (this == (RECT)obj);
+            }
+
+            /// <summary>Return the HashCode for this struct (not garanteed to be unique)</summary>
+            public override int GetHashCode()
+            {
+                return left.GetHashCode() + top.GetHashCode() + right.GetHashCode() + bottom.GetHashCode();
+            }
+            
+            /// <summary> Determine if 2 RECT are equal (deep compare)</summary>
+            public static bool operator ==(RECT rect1, RECT rect2)
+            {
+                return (rect1.left == rect2.left && rect1.top == rect2.top && rect1.right == rect2.right && rect1.bottom == rect2.bottom);
+            }
+
+            /// <summary> Determine if 2 RECT are different(deep compare)</summary>
+            public static bool operator !=(RECT rect1, RECT rect2)
+            {
+                return !(rect1 == rect2);
+            }
+
+
+        }
+        [DllImport("user32")]
+        internal static extern bool GetMonitorInfo(IntPtr hMonitor, MONITORINFO lpmi);
+        [DllImport("User32")]
+        internal static extern IntPtr MonitorFromWindow(IntPtr handle, int flags);
+        /// <summary>
+        /// Confirms whether the cursor is on the current monitor
+        /// </summary>
+        /// This is to allow the mouse to drag the window down from maximized to normal
+        /// and keep the window on the same monitor if multiple monitors are involved.
+        /// <param name="lpPoint"></param>
+        /// <returns></returns>
+        [DllImport("user32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetCursorPos(out POINT lpPoint);
+
+        /********** Window Control Actions **********/
+        private bool mRestoreIfMove = false;
         private void MinimizeWindow(object sender, RoutedEventArgs e)
         {
-            WindowStyle = WindowStyle.SingleBorderWindow;
+            //WindowStyle = WindowStyle.SingleBorderWindow;
             WindowState = WindowState.Minimized;
         }
         private void RestoreWindow(object sender, EventArgs e)
@@ -107,30 +311,16 @@ namespace Unified_Systems
                 POINT lMousePosition;
                 GetCursorPos(out lMousePosition);
 
-                Left = lMousePosition.X - targetHorizontal;
-                Top = lMousePosition.Y - targetVertical;
+                //Left = lMousePosition.X - targetHorizontal;
+                //Top = lMousePosition.Y - targetVertical;
+                Left = lMousePosition.x - targetHorizontal;
+                Top = lMousePosition.y - targetVertical;
 
                 try { DragMove(); } catch { }
             }
         }
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetCursorPos(out POINT lpPoint);
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINT
-        {
-            public int X;
-            public int Y;
-
-            public POINT(int x, int y)
-            {
-                this.X = x;
-                this.Y = y;
-            }
-        }
-
-
+        /********** Menu Button Actions **********/
         public void ResetMenuColors()
         {
             Style defaultMenuStyle = FindResource("MenuStyle") as Style;

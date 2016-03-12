@@ -4,7 +4,7 @@
         x:Class="Unified_Systems.MainWindow"
         Title="Unified_Systems" 
         MinHeight="635" MinWidth="1000" 
-        Height="800" Width="1200" 
+        Height="635" Width="1000" 
         FontFamily="Consolas" 
         Visibility="Visible" Activated="RestoreWindow" WindowStyle="None" 
         ResizeMode="CanResizeWithGrip" AllowsTransparency="True"
