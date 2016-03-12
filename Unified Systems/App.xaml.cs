@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Total_Control
+namespace Unified_Systems
 {
     /// <summary>
     /// Interaction logic for App.xaml

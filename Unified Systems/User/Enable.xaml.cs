@@ -19,17 +19,17 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 
-namespace Total_Control.User
+namespace Unified_Systems.User
 {
     /// <summary>
-    /// Interaction logic for Disable.xaml
+    /// Interaction logic for Enable.xaml
     /// </summary>
-    public partial class Disable : Page
+    public partial class Enable : Page
     {
         int searchResult;
         int searchCount;
 
-        public Disable()
+        public Enable()
         {
             InitializeComponent();
             if (ActiveDirectory.Users != null)
@@ -50,7 +50,7 @@ namespace Total_Control.User
             userList.Items.Clear();
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
                 }
@@ -229,7 +229,7 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                     {
@@ -248,7 +248,7 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
@@ -288,7 +288,7 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                     {
@@ -315,7 +315,7 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
@@ -336,7 +336,7 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     if (!ReferenceEquals(User.Properties["Title"].Value, null))
                     {
@@ -354,7 +354,7 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Enabled"].Value.ToString() == "True")
+                if (User.Properties["Enabled"].Value.ToString() == "False")
                 {
                     if (!ReferenceEquals(User.Properties["Department"].Value, null))
                     {
@@ -438,26 +438,44 @@ namespace Total_Control.User
         }
         /* End Search Functions */
 
-        private void disableLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        private void enableLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             resultMessage.Visibility = Visibility.Hidden;
-            curtain.Visibility = Visibility.Visible;
-            confirmMessage.Visibility = Visibility.Visible;
-            confirmYesLabelButton.Visibility = Visibility.Visible;
-            confirmYesLabelButton.IsEnabled = true;
-            confirmNoLabelButton.Visibility = Visibility.Visible;
-            confirmNoLabelButton.IsEnabled = true;
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            enableLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+            Exception Results = ActiveDirectory.EnableUser(userList.SelectedItem.ToString());
+            if (Results != null)
+            {
+                System.Windows.Forms.MessageBox.Show(Results.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            else
+            {
+                resultMessage.Content = "User Enabled Successfully";
+                resultMessage.Visibility = Visibility.Visible;
+                ActiveDirectory.GetAllUsers();
+                BuildList();
+            }
+
+            //resultMessage.Visibility = Visibility.Hidden;
+            //curtain.Visibility = Visibility.Visible;
+            //confirmMessage.Visibility = Visibility.Visible;
+            //confirmYesLabelButton.Visibility = Visibility.Visible;
+            //confirmYesLabelButton.IsEnabled = true;
+            //confirmNoLabelButton.Visibility = Visibility.Visible;
+            //confirmNoLabelButton.IsEnabled = true;
         }
-        private void disableLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        private void enableLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            disableLabelButton.Style = defaultLabelButtonStyle;
+            enableLabelButton.Style = defaultLabelButtonStyle;
         }
-        private void disableLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        private void enableLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            disableLabelButton.Style = defaultLabelButtonStyle;
+            enableLabelButton.Style = defaultLabelButtonStyle;
         }
+
         private void confirmYesLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             curtain.Visibility = Visibility.Hidden;

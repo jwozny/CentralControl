@@ -10,10 +10,10 @@ using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using Total_Control.User;
+using Unified_Systems.User;
 using System.Runtime.InteropServices;
 
-namespace Total_Control
+namespace Unified_Systems
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

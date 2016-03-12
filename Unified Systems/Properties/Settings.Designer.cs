@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Total_Control.Properties
+namespace Unified_Systems.Properties
 {
 
 

@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,17 +19,17 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 
-namespace Total_Control.User
+namespace Unified_Systems.User
 {
     /// <summary>
-    /// Interaction logic for User.xaml
+    /// Interaction logic for Disable.xaml
     /// </summary>
-    public partial class User : Page
+    public partial class Disable : Page
     {
         int searchResult;
         int searchCount;
 
-        public User()
+        public Disable()
         {
             InitializeComponent();
             if (ActiveDirectory.Users != null)
@@ -43,6 +42,7 @@ namespace Total_Control.User
                 syncLabelButton.IsEnabled = true;
                 syncLabelButton.Visibility = Visibility.Visible;
             }
+
         }
 
         public void BuildList()
@@ -50,7 +50,10 @@ namespace Total_Control.User
             userList.Items.Clear();
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
+                if (User.Properties["Enabled"].Value.ToString() == "True")
+                {
+                    userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
+                }
             }
         }
 
@@ -226,10 +229,13 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                if (User.Properties["Enabled"].Value.ToString() == "True")
                 {
-                    userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                    return;
+                    if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                        return;
+                    }
                 }
             }
             foreach (string user in userList.Items)
@@ -242,17 +248,20 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (User.Properties["Enabled"].Value.ToString() == "True")
                 {
-                    if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
+                    if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        if (User.Properties["EmailAddress"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
                         {
-                            searchResult++;
-                            if (searchResult == searchCount)
+                            if (User.Properties["EmailAddress"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                             {
-                                userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                                return;
+                                searchResult++;
+                                if (searchResult == searchCount)
+                                {
+                                    userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                                    return;
+                                }
                             }
                         }
                     }
@@ -279,13 +288,16 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                if (User.Properties["Enabled"].Value.ToString() == "True")
                 {
-                    searchResult++;
-                    if (searchResult == searchCount)
+                    if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                        return;
+                        searchResult++;
+                        if (searchResult == searchCount)
+                        {
+                            userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                            return;
+                        }
                     }
                 }
             }
@@ -303,11 +315,32 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (User.Properties["Enabled"].Value.ToString() == "True")
                 {
-                    if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
+                    if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        if (User.Properties["EmailAddress"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
+                        {
+                            if (User.Properties["EmailAddress"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                searchResult++;
+                                if (searchResult == searchCount)
+                                {
+                                    userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (PSObject User in ActiveDirectory.Users)
+            {
+                if (User.Properties["Enabled"].Value.ToString() == "True")
+                {
+                    if (!ReferenceEquals(User.Properties["Title"].Value, null))
+                    {
+                        if (User.Properties["Title"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             searchResult++;
                             if (searchResult == searchCount)
@@ -321,30 +354,18 @@ namespace Total_Control.User
             }
             foreach (PSObject User in ActiveDirectory.Users)
             {
-                if (!ReferenceEquals(User.Properties["Title"].Value, null))
+                if (User.Properties["Enabled"].Value.ToString() == "True")
                 {
-                    if (User.Properties["Title"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (!ReferenceEquals(User.Properties["Department"].Value, null))
                     {
-                        searchResult++;
-                        if (searchResult == searchCount)
+                        if (User.Properties["Department"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                            return;
-                        }
-                    }
-                }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (!ReferenceEquals(User.Properties["Department"].Value, null))
-                {
-                    if (User.Properties["Department"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        searchResult++;
-                        if (searchResult == searchCount)
-                        {
-                            userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                            return;
+                            searchResult++;
+                            if (searchResult == searchCount)
+                            {
+                                userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                                return;
+                            }
                         }
                     }
                 }
@@ -417,32 +438,26 @@ namespace Total_Control.User
         }
         /* End Search Functions */
 
-        private void saveLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        private void disableLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
-            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
-
-            //Do stuff here...
-
-            //resultMessage.Visibility = Visibility.Hidden;
-            //curtain.Visibility = Visibility.Visible;
-            //confirmMessage.Visibility = Visibility.Visible;
-            //confirmYesLabelButton.Visibility = Visibility.Visible;
-            //confirmYesLabelButton.IsEnabled = true;
-            //confirmNoLabelButton.Visibility = Visibility.Visible;
-            //confirmNoLabelButton.IsEnabled = true;
+            resultMessage.Visibility = Visibility.Hidden;
+            curtain.Visibility = Visibility.Visible;
+            confirmMessage.Visibility = Visibility.Visible;
+            confirmYesLabelButton.Visibility = Visibility.Visible;
+            confirmYesLabelButton.IsEnabled = true;
+            confirmNoLabelButton.Visibility = Visibility.Visible;
+            confirmNoLabelButton.IsEnabled = true;
         }
-        private void saveLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        private void disableLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            saveLabelButton.Style = defaultLabelButtonStyle;
+            disableLabelButton.Style = defaultLabelButtonStyle;
         }
-        private void saveLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        private void disableLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            saveLabelButton.Style = defaultLabelButtonStyle;
+            disableLabelButton.Style = defaultLabelButtonStyle;
         }
-
         private void confirmYesLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             curtain.Visibility = Visibility.Hidden;
@@ -493,64 +508,6 @@ namespace Total_Control.User
         private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             resultMessage.Visibility = Visibility.Hidden;
-        }
-    }
-
-    public static class ActiveDirectory
-    {
-        private static Collection<PSObject> users;
-
-        public static Collection<PSObject> Users
-        {
-            get
-            {
-                return users;
-            }
-            set
-            {
-                users = value;
-            }
-        }
-
-        public static Exception ExecutePowershell(string Command)
-        {
-            Runspace runspace = null;
-            Pipeline pipeline = null;
-            Exception results = null;
-
-            try
-            {
-                runspace = RunspaceFactory.CreateRunspace();
-                runspace.Open();
-                pipeline = runspace.CreatePipeline();
-                pipeline.Commands.AddScript(Command);
-                users = pipeline.Invoke();
-            }
-            catch (Exception exception)
-            {
-                results = exception;
-            }
-            finally
-            {
-                if (pipeline != null) pipeline.Dispose();
-                if (runspace != null) runspace.Dispose();
-            }
-            return results;
-        }
-
-        public static Exception GetAllUsers()
-        {
-            return ExecutePowershell("Get-ADUser -Filter * -Properties * | Sort-Object SamAccountName");
-        }
-
-        public static Exception EnableUser(string User)
-        {
-            return ExecutePowershell("Enable-ADAccount -Identity " + User);
-        }
-
-        public static Exception DisableUser(string User)
-        {
-            return ExecutePowershell("Disable-ADAccount -Identity " + User);
         }
     }
 }

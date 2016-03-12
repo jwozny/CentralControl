@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Total_Control
+namespace Unified_Systems
 {
     /// <summary>
     /// Interaction logic for Dashboard.xaml
