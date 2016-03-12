@@ -61,16 +61,15 @@ namespace Unified_Systems.User
         {
             resultMessage.Visibility = Visibility.Hidden;
 
-            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            syncLabelButton.Style = defaultMouseDownLabelButtonStyle;
-            Style syncErrorLabelButtonStyle = FindResource("syncErrorLabelButtonStyle") as Style;
-            syncLabelButton.Style = syncErrorLabelButtonStyle;
+            Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
 
             Exception Results = ActiveDirectory.GetAllUsers();
 
             if (Results != null)
             {
-                syncLabelButton.Style = syncErrorLabelButtonStyle;
+                Style defaultSyncErrorLabelButtonStyle = FindResource("defaultSyncErrorLabelButtonStyle") as Style;
+                syncLabelButton.Style = defaultSyncErrorLabelButtonStyle;
                 if (Results.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
                 {
                     if (Environment.OSVersion.ToString().Contains("10.0")
@@ -137,13 +136,13 @@ namespace Unified_Systems.User
         }
         private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
-            Style syncLabelButtonStyle = FindResource("syncLabelButtonStyle") as Style;
-            syncLabelButton.Style = syncLabelButtonStyle;
+            Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultSyncLabelButtonStyle;
         }
         private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
-            Style syncLabelButtonStyle = FindResource("syncLabelButtonStyle") as Style;
-            syncLabelButton.Style = syncLabelButtonStyle;
+            Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultSyncLabelButtonStyle;
         }
 
         /* Search Functions */
