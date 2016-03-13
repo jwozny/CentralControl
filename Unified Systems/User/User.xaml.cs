@@ -542,6 +542,7 @@ namespace Unified_Systems.User
         /// <param name="e"></param>
         private void syncWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            MainWindow.closePrevention[1] = 1;
             syncResults = ActiveDirectory.GetAllUsers();
         }
         private void syncWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -556,44 +557,12 @@ namespace Unified_Systems.User
                 syncLabelButton.Style = defaultSyncErrorLabelButtonStyle;
                 if (syncResults.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
                 {
-                    if (Environment.OSVersion.ToString().Contains("10.0")
-                        || Environment.OSVersion.ToString().Contains("6.3")
-                        || Environment.OSVersion.ToString().Contains("6.2")
-                        || Environment.OSVersion.ToString().Contains("6.1")
-                        || Environment.OSVersion.ToString().Contains("6.0"))
-                    {
-                        if (System.Windows.Forms.MessageBox.Show(
-                            "Remote Server Administrative Tools are missing on this system.\nGo to RSAT download website?\n",
-                            "RSAT Missing",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                        {
-                            if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
-                            {
-                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=45520");
-                            }
-                            if (Environment.OSVersion.ToString().Contains("6.1"))
-                            {
-                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=7887");
-                            }
-                            if (Environment.OSVersion.ToString().Contains("6.0"))
-                            {
-                                System.Diagnostics.Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=21090");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (System.Windows.Forms.MessageBox.Show(
-                        "Remote Server Administrative Tools are missing on this system.\nView more details?\n",
+                    MainWindow.RSATneeded = true;
+                    System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.",
                         "RSAT Missing",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                        {
-                            System.Diagnostics.Process.Start("https://support.microsoft.com/en-us/kb/2693643");
-                        }
-                    }
-
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
                     syncLabelButton.Content = "Retry Synchronization";
                 }
                 else
@@ -622,6 +591,7 @@ namespace Unified_Systems.User
             refreshLabelButton.Content = "Refresh Users";
             refreshLabelButton.IsEnabled = true;
             syncLabelButton.IsEnabled = true;
+            MainWindow.closePrevention[1] = 0;
         }
 
         /* Background Command Worker */
@@ -650,6 +620,7 @@ namespace Unified_Systems.User
         /// <param name="e"></param>
         private void commandWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            MainWindow.closePrevention[2] = 1;
             // Add script to run in background here
             //commandResults = ActiveDirectory.SOMESCRIPT(userList.SelectedItem.ToString());
         }
@@ -687,6 +658,7 @@ namespace Unified_Systems.User
                 }
             }
             saveLabelButton.IsEnabled = true;
+            MainWindow.closePrevention[2] = 0;
         }
     }
 }

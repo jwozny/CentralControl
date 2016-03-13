@@ -1,24 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Unified_Systems.User;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using WinInterop = System.Windows.Interop;
-using System.Management.Automation.Runspaces;
 
 namespace Unified_Systems
 {
@@ -27,6 +29,9 @@ namespace Unified_Systems
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static int numberOfWorkers = 10;
+        public static int[] closePrevention = new int[numberOfWorkers];
+
         public MainWindow()
         {
             InitializeComponent();
@@ -136,7 +141,7 @@ namespace Unified_Systems
             public int dwFlags = 0;
         }
 
-        /********** Win32 **********/
+        /* Win32 */
         /// <summary>
         /// Gets monitor info
         /// </summary>
@@ -232,8 +237,12 @@ namespace Unified_Systems
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetCursorPos(out POINT lpPoint);
 
-        /********** Window Control Actions **********/
+        /* Window Control Actions */
         private bool mRestoreIfMove = false;
+        private void UnifiedSystems_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (RSATneeded) installRSAT.Visibility = Visibility.Visible;
+        }
         private void MinimizeWindow(object sender, RoutedEventArgs e)
         {
             //WindowStyle = WindowStyle.SingleBorderWindow;
@@ -250,6 +259,33 @@ namespace Unified_Systems
         private void CloseWindow(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+        private void UnifiedSystems_Closing(object sender, CancelEventArgs e)
+        {
+            bool taskRunning = false;
+            for (int i = 0; i < numberOfWorkers; i++)
+            {
+                if (closePrevention[i] != 0)
+                {
+                    taskRunning = true;
+                }
+            }
+            if (taskRunning)
+            {
+                if (System.Windows.Forms.MessageBox.Show(
+                                "There is a background operation in progress.\nYou may do some serious damage if you close now.\n\nAre you sure you want to close?",
+                                "Operation in progress",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Asterisk) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    e.Cancel = false;
+                    if(installWorker.IsBusy) installWorker.CancelAsync();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
         }
         private void SwitchState()
         {
@@ -320,7 +356,7 @@ namespace Unified_Systems
             }
         }
 
-        /********** Menu Button Actions **********/
+        /* Menu Button Actions */
         public void ResetMenuColors()
         {
             Style defaultMenuStyle = FindResource("MenuStyle") as Style;
@@ -574,6 +610,330 @@ namespace Unified_Systems
             ResetMenuColors();
             Settings.Style = expandedMenuStyle;
             SettingsCredentials.Style = selectedSubMenuStyle;
+        }
+        private void installRSAT_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            RSATneeded = false;
+            installRSAT.Visibility = Visibility.Hidden;
+            installRSATStatus.Visibility = Visibility.Visible;
+            installRSATStatusText.Visibility = Visibility.Visible;
+
+            installWorker_Initialize();
+
+            bool waiting = true;
+            while (waiting)
+            {
+                if (installWorker.IsBusy != true)
+                {
+                    installWorker.RunWorkerAsync();
+                    waiting = false;
+                }
+                else
+                {
+                    Thread.Sleep(200);
+                    waiting = true;
+                }
+            }
+        }
+
+        /* Background Command Worker */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        private static BackgroundWorker installWorker = new BackgroundWorker();
+        private static Exception installResults;
+        public static bool RSATneeded = false;
+        private static bool RSATinstalled = false;
+
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        private void installWorker_Initialize()
+        {
+            installWorker.WorkerReportsProgress = true;
+            installWorker.WorkerSupportsCancellation = true;
+            installWorker.DoWork += installWorker_DoWork;
+            installWorker.ProgressChanged += installWorker_ProgressChanged;
+            installWorker.RunWorkerCompleted += installWorker_RunWorkerCompleted;
+        }
+
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void installWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            MainWindow.closePrevention[0] = 1;
+
+            installResults = null;
+            Runspace runspace = null;
+            Pipeline pipeline = null;
+
+            installWorker.ReportProgress(0); //Detecting OS
+            string url = String.Empty;
+            string installCommand_winrs = " ";
+            if (Environment.OSVersion.ToString().Contains("10.0") || Environment.OSVersion.ToString().Contains("6.3") || Environment.OSVersion.ToString().Contains("6.2"))
+            {
+                if (Environment.Is64BitOperatingSystem)
+                {
+                    url = "https://download.microsoft.com/download/1/D/8/1D8B5022-5477-4B9A-8104-6A71FF9D98AB/WindowsTH-KB2693643-x64.msu";
+                }
+                else
+                {
+                    url = "https://download.microsoft.com/download/1/D/8/1D8B5022-5477-4B9A-8104-6A71FF9D98AB/WindowsTH-KB2693643-x86.msu";
+                }
+                installCommand_winrs = "winrs.exe -r:localhost dism.exe /online /add-package /PackagePath:C:\\Temp\\KB2693643.cab";
+            }
+            else if (Environment.OSVersion.ToString().Contains("6.1"))
+            {
+                if (Environment.Is64BitOperatingSystem)
+                {
+                    url = "https://download.microsoft.com/download/4/F/7/4F71806A-1C56-4EF2-9B4F-9870C4CFD2EE/Windows6.1-KB958830-x64-RefreshPkg.msu";
+                }
+                else
+                {
+                    url = "https://download.microsoft.com/download/4/F/7/4F71806A-1C56-4EF2-9B4F-9870C4CFD2EE/Windows6.1-KB958830-x86-RefreshPkg.msu";
+                }
+                installCommand_winrs = "winrs.exe -r:localhost dism.exe /online /add-package /PackagePath:C:\\Temp\\KB958830.cab";
+            }
+            else if (Environment.OSVersion.ToString().Contains("6.0"))
+            {
+                url = "https://download.microsoft.com/download/3/0/1/301EC38B-D8BD-40CD-A3B8-3A514A553BE8/Windows6.0-KB941314-x86_en-US.msu";
+                installCommand_winrs = "winrs.exe -r:localhost dism.exe /online /add-package /PackagePath:C:\\Temp\\KB941314.cab";
+            }
+            Thread.Sleep(1000);
+
+            string importModuleCommand = "Import-Module BitsTransfer";
+            string downloadCommand = "Start-BitsTransfer -Source \"" + url + "\" -Destination \"C:\\Temp\\rsat.msu\"";
+            string extractCommand_winrs = "winrs.exe -r:localhost wusa.exe \"C:\\Temp\\rsat.msu\" /extract:C:\\Temp";
+
+            string installCommand_wusa = "wusa.exe C:\\Temp\\rsat.msu /quiet /norestart"; //This might actually be working, just needs a reboot to take effect...
+            string installCommand = "C:\\Temp\\rsat.msu";
+
+            installWorker.ReportProgress(5); //Initiating Directory
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript("mkdir C:\\Temp");
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(1000);
+
+            installWorker.ReportProgress(10); //Importing Download Module
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(importModuleCommand);
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(1000);
+
+            installWorker.ReportProgress(20); //Downloading RSAT Installer
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(downloadCommand);
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(1000);
+
+            installWorker.ReportProgress(60); //Extracting RSAT
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(extractCommand_winrs);
+                //pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(1000);
+
+            installWorker.ReportProgress(65); //Installing RSAT
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(installCommand_wusa);
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(10000);
+
+            installWorker.ReportProgress(85); //Removing RSAT Installer
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript("del C:\\Temp\\rsat.msu");
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(1000);
+
+            installWorker.ReportProgress(95); //Testing RSAT
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript("Get-ADUser -Filter *");
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                installResults = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            if (installResults != null) return;
+            Thread.Sleep(1000);
+
+            installWorker.ReportProgress(100); //Complete
+            RSATinstalled = true;
+            Thread.Sleep(1000);
+        }
+        private void installWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            installRSATStatus.Value = e.ProgressPercentage;
+            switch (e.ProgressPercentage)
+            {
+                case 0:
+                    installRSATStatusText.Text = "Detecting OS";
+                    break;
+                case 5:
+                    installRSATStatusText.Text = "Initiating Directory";
+                    break;
+                case 10:
+                    installRSATStatusText.Text = "Importing Download Module";
+                    break;
+                case 20:
+                    installRSATStatusText.Text = "Downloading RSAT Installer";
+                    break;
+                case 60:
+                    installRSATStatusText.Text = "Extracting RSAT";
+                    break;
+                case 65:
+                    installRSATStatusText.Text = "Installing RSAT";
+                    break;
+                case 85:
+                    installRSATStatusText.Text = "Removing RSAT Installer";
+                    break;
+                case 95:
+                    installRSATStatusText.Text = "Testing RSAT";
+                    break;
+                case 100:
+                    installRSATStatusText.Text = "Complete";
+                    break;
+                default:
+                    installRSATStatusText.Text = String.Empty;
+                    break;
+            }
+        }
+        private void installWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            installRSATStatus.Visibility = Visibility.Hidden;
+            installRSATStatusText.Visibility = Visibility.Hidden;
+            if (installResults != null)
+            {
+                if (installResults.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
+                {
+                    installRSAT.Visibility = Visibility.Hidden;
+                    System.Windows.Forms.MessageBox.Show(
+                                "The system needs to reboot to complete RSAT installation",
+                                "Reboot Required",
+                                MessageBoxButtons.OK);
+                    RSATneeded = true;
+                }
+            }
+            else if (!RSATinstalled)
+            {
+                installRSAT.Content = "Retry Installing RSAT";
+                installRSAT.Visibility = Visibility.Visible;
+                System.Windows.Forms.MessageBox.Show(
+                            "There was an error installing RSAT automatically...\n\n" + installResults.Message.ToString(),
+                            "RSAT Installation Failed",
+                            MessageBoxButtons.OK);
+                RSATneeded = true;
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show(
+                            "Remote Server Administrive Tools installed successfully!",
+                            "RSAT Installation Succeeded",
+                            MessageBoxButtons.OK);
+                            RSATneeded = false;
+            }
+            MainWindow.closePrevention[0] = 0;
         }
     }
 

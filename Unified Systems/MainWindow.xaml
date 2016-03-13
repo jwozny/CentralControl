@@ -2,7 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Unified_Systems"
         x:Class="Unified_Systems.MainWindow"
-        Title="Unified_Systems" 
+        x:Name="UnifiedSystems" Closing="UnifiedSystems_Closing" MouseMove="UnifiedSystems_MouseMove"
+        Title="Unified_Systems"
         MinHeight="635" MinWidth="1000" 
         Height="635" Width="1000" 
         FontFamily="Consolas" 
@@ -270,6 +271,9 @@
                     <Label x:Name="SettingsCredentials" Content="Credentials" Style="{StaticResource SubMenuStyle}" MouseDown="SettingsCredentials_MouseDown"/>
                 </StackPanel>
             </StackPanel>
+            <Label x:Name="installRSAT" Content="Install RSAT" Style="{StaticResource MenuStyle}" VerticalAlignment="Bottom" MouseDown="installRSAT_MouseDown" Visibility="Hidden"/>
+            <ProgressBar x:Name="installRSATStatus"  Height="28" VerticalAlignment="Bottom" Minimum="0" Maximum="100" Visibility="Hidden"/>
+            <TextBlock x:Name="installRSATStatusText" Height="20" VerticalAlignment="Bottom" TextAlignment="Center" Visibility="Hidden"/>
         </Grid>
         <Grid Grid.Row="1" Grid.Column="1">
             <DockPanel>
