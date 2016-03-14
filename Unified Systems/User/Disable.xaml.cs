@@ -42,11 +42,28 @@ namespace Unified_Systems.User
             {// If users are already synced, then build the list
                 BuildList();
             }
-            else
+            else if (!MainWindow.RSATneeded)
             {// Otherwise show the curtain and the sync button
                 curtain.Visibility = Visibility.Visible;
                 syncLabelButton.IsEnabled = true;
                 syncLabelButton.Visibility = Visibility.Visible;
+
+                Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
+                syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
+
+                if (syncWorker.IsBusy != true)
+                {
+                    syncLabelButton.Content = "Please Wait";
+                    syncLabelButton.IsEnabled = false;
+                    syncWorker.RunWorkerAsync();
+                }
+            }
+            else
+            {
+                curtain.Visibility = Visibility.Visible;
+                syncLabelButton.Visibility = Visibility.Visible;
+                syncLabelButton.Content = "Install RSAT to continue";
+                syncLabelButton.IsEnabled = false;
             }
         }
 
@@ -450,6 +467,8 @@ namespace Unified_Systems.User
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             disableLabelButton.Style = defaultMouseDownLabelButtonStyle;
 
+            selectedUser = userList.SelectedItem.ToString();
+
             resultMessage.Visibility = Visibility.Hidden;
             curtain.Visibility = Visibility.Visible;
             confirmMessage.Visibility = Visibility.Visible;
@@ -605,6 +624,7 @@ namespace Unified_Systems.User
                 syncLabelButton.Content = "Synchronize Users";
                 curtain.Visibility = Visibility.Hidden;
                 syncLabelButton.Visibility = Visibility.Hidden;
+                resultMessage.Visibility = Visibility.Hidden;
                 resultMessage.Content = "User List Updated";
                 resultMessage.Visibility = Visibility.Visible;
                 BuildList();
@@ -640,10 +660,11 @@ namespace Unified_Systems.User
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        private static string selectedUser;
         private void commandWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             MainWindow.closePrevention[6] = 1;
-            commandResults = ActiveDirectory.DisableUser(userList.SelectedItem.ToString());
+            commandResults = ActiveDirectory.DisableUser(selectedUser);
         }
         private void commandWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
