@@ -258,7 +258,7 @@
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>
         <Label x:Name="disableLabelButton" Content="Disable User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="disableLabelButton_MouseDown" MouseUp="disableLabelButton_MouseUp" MouseLeave="disableLabelButton_MouseLeave"/>
-        <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
+        <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden" MouseMove="curtain_MouseMove"/>
         <Label x:Name="confirmMessage" Content="Are you sure you want to disable this user?" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>
         <Label x:Name="confirmYesLabelButton" Content="Disable the User, Damn it!" Style="{StaticResource warningConfirmLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmYesLabelButton_MouseDown" Visibility="Hidden"/>
         <Label x:Name="confirmNoLabelButton" Content="Oh Shit, Nevermind!" Style="{StaticResource warningCancelLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmNoLabelButton_MouseDown" Visibility="Hidden"/>

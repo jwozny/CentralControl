@@ -41,29 +41,37 @@ namespace Unified_Systems.User
             if (ActiveDirectory.Users != null)
             {// If users are already synced, then build the list
                 BuildList();
+                isSynced = true;
             }
-            else if (!MainWindow.RSATneeded)
-            {// Otherwise show the curtain and the sync button
+            else if (User.syncInProgress)
+            {// If no users, but there's a sync in progress
+                curtain.Visibility = Visibility.Visible;
+                syncLabelButton.Visibility = Visibility.Visible;
+                syncLabelButton.Content = "Please Wait";
+                syncLabelButton.IsEnabled = false;
+            }
+            else if (MainWindow.RSATneeded)
+            {// if no users, no sync in progress, and RSAT is needed.
+                curtain.Visibility = Visibility.Visible;
+                syncLabelButton.Visibility = Visibility.Visible;
+                syncLabelButton.Content = "Install RSAT to continue";
+                syncLabelButton.IsEnabled = false;
+            }
+            else
+            {// otherwise, show the curtain and the sync button, start a sync automatically
                 curtain.Visibility = Visibility.Visible;
                 syncLabelButton.IsEnabled = true;
                 syncLabelButton.Visibility = Visibility.Visible;
 
                 Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
                 syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
-                
+
                 if (syncWorker.IsBusy != true)
                 {
                     syncLabelButton.Content = "Please Wait";
                     syncLabelButton.IsEnabled = false;
                     syncWorker.RunWorkerAsync();
                 }
-            }
-            else
-            {
-                curtain.Visibility = Visibility.Visible;
-                syncLabelButton.Visibility = Visibility.Visible;
-                syncLabelButton.Content = "Install RSAT to continue";
-                syncLabelButton.IsEnabled = false;
             }
         }
         
@@ -161,6 +169,8 @@ namespace Unified_Systems.User
                         if (!ReferenceEquals(User.Properties["AccountLockoutTime"].Value, null))
                         { AccountLockoutTime.Content = User.Properties["AccountLockoutTime"].Value.ToString(); }
                         else { AccountLockoutTime.Content = " "; }
+
+                        //memberOfGrid.ItemsSource = User.Properties["MemberOf"];
                     }
                 }
                 else
@@ -541,6 +551,7 @@ namespace Unified_Systems.User
         /// </summary>
         private BackgroundWorker syncWorker = new BackgroundWorker();
         private Exception syncResults;
+        public static bool syncInProgress = false;
 
         /// <summary>
         /// Initialize background worker with actions
@@ -561,6 +572,7 @@ namespace Unified_Systems.User
         /// <param name="e"></param>
         private void syncWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            User.syncInProgress = true;
             MainWindow.closePrevention[1] = 1;
             syncResults = ActiveDirectory.GetAllUsers();
         }
@@ -621,6 +633,7 @@ namespace Unified_Systems.User
             refreshLabelButton.IsEnabled = true;
             syncLabelButton.IsEnabled = true;
             MainWindow.closePrevention[1] = 0;
+            User.syncInProgress = false;
         }
 
         /* Background Command Worker */
@@ -689,6 +702,28 @@ namespace Unified_Systems.User
             }
             saveLabelButton.IsEnabled = true;
             MainWindow.closePrevention[2] = 0;
+        }
+
+        private bool isSynced = false;
+        private void curtain_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (!isSynced)
+            {
+                if (ActiveDirectory.Users != null)
+                {
+                    BuildList();
+                    isSynced = true;
+                    curtain.Visibility = Visibility.Hidden;
+                    syncLabelButton.Content = "Synchronize Users";
+                    syncLabelButton.IsEnabled = true;
+                    syncLabelButton.Visibility = Visibility.Hidden;
+                    resultMessage.Visibility = Visibility.Hidden;
+                    resultMessage.Content = "User List Updated";
+                    resultMessage.Visibility = Visibility.Visible;
+                    refreshLabelButton.Content = "Refresh Users";
+                    refreshLabelButton.IsEnabled = true;
+                }
+            }
         }
     }
 }
