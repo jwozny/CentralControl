@@ -914,18 +914,18 @@ namespace Unified_Systems
                                 MessageBoxButtons.OK);
                     RSATneeded = true;
                 }
+                else
+                {
+                    installRSAT.Content = "Retry Installing RSAT";
+                    installRSAT.Visibility = Visibility.Visible;
+                    System.Windows.Forms.MessageBox.Show(
+                                "There was an error installing RSAT automatically...\n\n" + installResults.Message.ToString(),
+                                "RSAT Installation Failed",
+                                MessageBoxButtons.OK);
+                    RSATneeded = true;
+                }
             }
-            else if (!RSATinstalled)
-            {
-                installRSAT.Content = "Retry Installing RSAT";
-                installRSAT.Visibility = Visibility.Visible;
-                System.Windows.Forms.MessageBox.Show(
-                            "There was an error installing RSAT automatically...\n\n" + installResults.Message.ToString(),
-                            "RSAT Installation Failed",
-                            MessageBoxButtons.OK);
-                RSATneeded = true;
-            }
-            else
+            else if (RSATinstalled)
             {
                 System.Windows.Forms.MessageBox.Show(
                             "Remote Server Administrive Tools installed successfully!",

@@ -566,13 +566,39 @@ namespace Unified_Systems.User
         {
             if (syncResults != null)
             {
-                MainWindow.RSATneeded = true;
-                System.Windows.Forms.MessageBox.Show(
-                    "Remote Server Administrative Tools are missing on this system.",
-                    "RSAT Missing",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Asterisk);
-                syncLabelButton.Content = "Retry Synchronization";
+                Style defaultSyncErrorLabelButtonStyle = FindResource("defaultSyncErrorLabelButtonStyle") as Style;
+                syncLabelButton.Style = defaultSyncErrorLabelButtonStyle;
+                if (syncResults.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
+                {
+                    MainWindow.RSATneeded = true;
+                    System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.",
+                        "RSAT Missing",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
+                else if (syncResults.Message.Contains("Unable to find a default server with Active Directory"))
+                {
+                    System.Windows.Forms.MessageBox.Show(
+                        "Unable to find a default server with Active Directory.",
+                        "Cannot Locate Server",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
+                else
+                {
+                    if (System.Windows.Forms.MessageBox.Show(
+                        syncResults.ToString() + "\n\nEmail the Developer?",
+                        "Powershell Error",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
+                    }
+                    syncLabelButton.Content = "Retry Synchronization";
+                }
             }
             else
             {
