@@ -37,6 +37,11 @@ namespace Unified_Systems
             InitializeComponent();
             SourceInitialized += new EventHandler(MainWindow_SourceInitialized);
 
+            ActiveDirectory.GetAllUsers_Initialize();
+            ActiveDirectory.SaveUser_Initialize();
+            ActiveDirectory.EnableUser_Initialize();
+            ActiveDirectory.DisableUser_Initialize();
+
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             _NavigationFrame.Navigate(new Dashboard());
             Dashboard.Style = selectedMenuStyle;
@@ -636,7 +641,7 @@ namespace Unified_Systems
             }
         }
 
-        /* Background Command Worker */
+        /* Background Installation Worker */
         /// <summary>
         /// Create background worker instance
         /// </summary>
@@ -954,6 +959,19 @@ namespace Unified_Systems
                 users = value;
             }
         }
+        private static Collection<PSObject> previousUsers;
+        public static Collection<PSObject> PreviousUsers
+        {
+            get
+            {
+                return previousUsers;
+            }
+            set
+            {
+                previousUsers = value;
+            }
+        }
+        public static string selectedUser;
 
         public static Exception ExecutePowershell(string Command)
         {
@@ -967,7 +985,41 @@ namespace Unified_Systems
                 runspace.Open();
                 pipeline = runspace.CreatePipeline();
                 pipeline.Commands.AddScript(Command);
-                users = pipeline.Invoke();
+                pipeline.Invoke();
+            }
+            catch (Exception exception)
+            {
+                results = exception;
+            }
+            finally
+            {
+                if (pipeline != null) pipeline.Dispose();
+                if (runspace != null) runspace.Dispose();
+            }
+            return results;
+        }
+        public static Exception ExecutePowershell(string Command, string Destination)
+        {
+            Runspace runspace = null;
+            Pipeline pipeline = null;
+            Exception results = null;
+
+            try
+            {
+                runspace = RunspaceFactory.CreateRunspace();
+                runspace.Open();
+                pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(Command);
+                switch (Destination)
+                {
+                    case "Users":
+                        previousUsers = users;
+                        users = pipeline.Invoke();
+                        break;
+                    default:
+                        pipeline.Invoke();
+                        break;
+                }
             }
             catch (Exception exception)
             {
@@ -981,17 +1033,199 @@ namespace Unified_Systems
             return results;
         }
 
-        public static Exception GetAllUsers()
+        /* Background Worker - GetAllUsers */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker GetAllUsers = new BackgroundWorker();
+        public static Exception GetAllUsersResults;
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void GetAllUsers_Initialize()
         {
-            return ExecutePowershell("Get-ADUser -Filter * -Properties * | Sort-Object SamAccountName");
+            GetAllUsers.WorkerReportsProgress = true;
+            GetAllUsers.WorkerSupportsCancellation = true;
+            GetAllUsers.DoWork += GetAllUsers_DoWork;
+            GetAllUsers.ProgressChanged += GetAllUsers_ProgressChanged;
+            GetAllUsers.RunWorkerCompleted += GetAllUsers_Completed;
         }
-        public static Exception EnableUser(string User)
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void GetAllUsers_DoWork(object sender, DoWorkEventArgs e)
         {
-            return ExecutePowershell("Enable-ADAccount -Identity " + User);
+            if(!ReferenceEquals(GetAllUsersResults, null)) GetAllUsersResults.Data.Clear();
+            
+            MainWindow.closePrevention[1] = 1;
+            GetAllUsersResults = ExecutePowershell("Get-ADUser -Filter * -Properties * | Sort-Object SamAccountName", "Users");
         }
-        public static Exception DisableUser(string User)
+        private static void GetAllUsers_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            return ExecutePowershell("Disable-ADAccount -Identity " + User);
+            // No Progress to report
+        }
+        private static void GetAllUsers_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (GetAllUsersResults != null)
+            {
+                if (GetAllUsersResults.Message.Contains("The term 'Get-ADUser' is not recognized as the name of a cmdlet"))
+                {
+                    MainWindow.RSATneeded = true;
+                    System.Windows.Forms.MessageBox.Show(
+                        "Remote Server Administrative Tools are missing on this system.",
+                        "RSAT Missing",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                }
+                else if (GetAllUsersResults.Message.Contains("Unable to find a default server with Active Directory"))
+                {
+                    System.Windows.Forms.MessageBox.Show(
+                        "Unable to find a default server with Active Directory.",
+                        "Cannot Locate Server",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                }
+                else
+                {
+                    if (System.Windows.Forms.MessageBox.Show(
+                        GetAllUsersResults.ToString() + "\n\nEmail the Developer?",
+                        "Powershell Error",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Asterisk) == DialogResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start("mailto:support@dragonfire-llc.com");
+                    }
+                }
+            }
+            MainWindow.closePrevention[1] = 0;
+        }
+
+        /* Background Worker - SaveUser */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker SaveUser = new BackgroundWorker();
+        public static bool IsSaveUserActive() { return SaveUser.IsBusy; }
+        public static Exception SaveUserResults;
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void SaveUser_Initialize()
+        {
+            SaveUser.WorkerReportsProgress = true;
+            SaveUser.WorkerSupportsCancellation = true;
+            SaveUser.DoWork += SaveUser_DoWork;
+            SaveUser.ProgressChanged += SaveUser_ProgressChanged;
+            SaveUser.RunWorkerCompleted += SaveUser_Completed;
+        }
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void SaveUser_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (!ReferenceEquals(SaveUserResults, null)) SaveUserResults.Data.Clear();
+            MainWindow.closePrevention[2] = 1;
+            //SaveUserResults = ExecutePowershell("Set-ADAccount -Identity " + selectedUser);
+        }
+        private static void SaveUser_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // Nothing to report
+        }
+        private static void SaveUser_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (SaveUserResults != null)
+            {
+                System.Windows.Forms.MessageBox.Show(SaveUserResults.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            MainWindow.closePrevention[2] = 0;
+        }
+
+        /* Background Worker - EnableUser */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker EnableUser = new BackgroundWorker();
+        public static bool IsEnableUserActive() { return EnableUser.IsBusy; }
+        public static Exception EnableUserResults;
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void EnableUser_Initialize()
+        {
+            EnableUser.WorkerReportsProgress = true;
+            EnableUser.WorkerSupportsCancellation = true;
+            EnableUser.DoWork += EnableUser_DoWork;
+            EnableUser.ProgressChanged += EnableUser_ProgressChanged;
+            EnableUser.RunWorkerCompleted += EnableUser_Completed;
+        }
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void EnableUser_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (!ReferenceEquals(EnableUserResults, null)) EnableUserResults.Data.Clear();
+            MainWindow.closePrevention[3] = 1;
+            EnableUserResults = ExecutePowershell("Enable-ADAccount -Identity " + selectedUser);
+        }
+        private static void EnableUser_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // Nothing to report
+        }
+        private static void EnableUser_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (EnableUserResults != null)
+            {
+                System.Windows.Forms.MessageBox.Show(EnableUserResults.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            MainWindow.closePrevention[3] = 0;
+        }
+
+        /* Background Worker - DisableUser */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker DisableUser = new BackgroundWorker();
+        public static bool IsDisableUserActive() { return DisableUser.IsBusy; }
+        public static Exception DisableUserResults;
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void DisableUser_Initialize()
+        {
+            DisableUser.WorkerReportsProgress = true;
+            DisableUser.WorkerSupportsCancellation = true;
+            DisableUser.DoWork += DisableUser_DoWork;
+            DisableUser.ProgressChanged += DisableUser_ProgressChanged;
+            DisableUser.RunWorkerCompleted += DisableUser_Completed;
+        }
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void DisableUser_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (!ReferenceEquals(DisableUserResults, null)) DisableUserResults.Data.Clear();
+            MainWindow.closePrevention[4] = 1;
+            DisableUserResults = ExecutePowershell("Disable-ADAccount -Identity " + selectedUser);
+        }
+        private static void DisableUser_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // Nothing to report
+        }
+        private static void DisableUser_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (DisableUserResults != null)
+            {
+                System.Windows.Forms.MessageBox.Show(DisableUserResults.ToString(), "Powershell Error", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            MainWindow.closePrevention[4] = 0;
         }
     }
 }
