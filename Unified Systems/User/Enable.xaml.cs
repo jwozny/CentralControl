@@ -21,6 +21,8 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using System.Threading;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 
 namespace Unified_Systems.User
 {
@@ -35,100 +37,8 @@ namespace Unified_Systems.User
         public Enable()
         {
             InitializeComponent();
-            ActiveDirectory.GetAllUsers.RunWorkerCompleted += this.GetAllUsers_Completed;
-            ActiveDirectory.EnableUser.RunWorkerCompleted += this.EnableUser_Completed;
-
-            if (ActiveDirectory.Users != null)
-            {// If users are already synced, then build the list
-                BuildList();
-                if (!ActiveDirectory.GetAllUsers.IsBusy)
-                {
-                    refreshLabelButton.Content = "Refresh Users";
-                    refreshLabelButton.IsEnabled = true;
-                }
-            }
-            else if (ActiveDirectory.GetAllUsers.IsBusy)
-            {// If no users, but there's a sync in progress
-                curtain.Visibility = Visibility.Visible;
-                syncLabelButton.Visibility = Visibility.Visible;
-                syncLabelButton.Content = "Please Wait";
-                syncLabelButton.IsEnabled = false;
-            }
-            else if (MainWindow.RSATneeded)
-            {// if no users, no sync in progress, and RSAT is needed.
-                curtain.Visibility = Visibility.Visible;
-                syncLabelButton.Visibility = Visibility.Visible;
-                syncLabelButton.Content = "Install RSAT to continue";
-                syncLabelButton.IsEnabled = false;
-            }
-            else
-            {// otherwise, show the curtain and the sync button, start a sync automatically
-                curtain.Visibility = Visibility.Visible;
-                syncLabelButton.IsEnabled = true;
-                syncLabelButton.Visibility = Visibility.Visible;
-
-                Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
-                syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
-
-                if (!ActiveDirectory.GetAllUsers.IsBusy)
-                {
-                    syncLabelButton.Content = "Please Wait";
-                    syncLabelButton.IsEnabled = false;
-                    ActiveDirectory.GetAllUsers.RunWorkerAsync();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Initial AD user sync button
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
-        {
-            Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
-            syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
-
-            if (!ActiveDirectory.GetAllUsers.IsBusy)
-            {
-                syncLabelButton.Content = "Please Wait";
-                syncLabelButton.IsEnabled = false;
-                ActiveDirectory.GetAllUsers.RunWorkerAsync();
-            }
-        }
-        private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
-        {
-            Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
-            //syncLabelButton.Style = defaultSyncLabelButtonStyle;
-        }
-        private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
-        {
-            Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
-            //syncLabelButton.Style = defaultSyncLabelButtonStyle;
-        }
-        private void GetAllUsers_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (ActiveDirectory.GetAllUsersResults != null)
-            {
-                Style defaultSyncErrorLabelButtonStyle = FindResource("defaultSyncErrorLabelButtonStyle") as Style;
-                syncLabelButton.Style = defaultSyncErrorLabelButtonStyle;
-                syncLabelButton.Content = "Retry Synchronization";
-            }
-            else
-            {
-                syncLabelButton.Content = "Synchronize Users";
-                curtain.Visibility = Visibility.Hidden;
-                syncLabelButton.Visibility = Visibility.Hidden;
-
-                resultMessage.Visibility = Visibility.Hidden;
-                resultMessage.Content = "User List Updated";
-                resultMessage.Visibility = Visibility.Visible;
-                BuildList();
-            }
-
-            refreshLabelButton.Content = "Refresh Users";
-            refreshLabelButton.IsEnabled = true;
-            syncLabelButton.IsEnabled = true;
+            BuildList();
+            lookupText.Focus();
         }
 
         /// <summary>
@@ -137,23 +47,25 @@ namespace Unified_Systems.User
         private void BuildList()
         {
             userList.Items.Clear();
-            if (ActiveDirectory.GetAllUsers.IsBusy)
+
+            foreach (UserPrincipal User in ActiveDirectory.Users)
             {
-                foreach (PSObject User in ActiveDirectory.PreviousUsers)
+                if (User.Enabled == false)
                 {
-                    if (User.Properties["Enabled"].Value.ToString() == "False")
-                    {
-                        userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
-                    }
+                    userList.Items.Add(User.SamAccountName);
                 }
             }
-            else
+
+            enableLabelButton.IsEnabled = false;
+            if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
             {
-                foreach (PSObject User in ActiveDirectory.Users)
+                foreach (string user in userList.Items)
                 {
-                    if (User.Properties["Enabled"].Value.ToString() == "False")
+                    if (ActiveDirectory.SelectedUser.SamAccountName == user)
                     {
-                        userList.Items.Add(User.Properties["SamAccountName"].Value.ToString());
+                        enableLabelButton.IsEnabled = true;
+                        userList.SelectedItem = user;
+                        break;
                     }
                 }
             }
@@ -166,76 +78,91 @@ namespace Unified_Systems.User
         /// <param name="e"></param>
         private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!ReferenceEquals(userList.SelectedItem, null))
-            {
-                ActiveDirectory.selectedUser = userList.SelectedItem.ToString();
-            }
             userList.ScrollIntoView(userList.SelectedItem);
-            foreach (PSObject User in ActiveDirectory.Users)
+            groupList.Items.Clear();
+
+            if (userList.SelectedItem != null)
             {
-                if (userList.SelectedItem != null)
+                foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.Properties["SamAccountName"].Value.ToString() == userList.SelectedItem.ToString())
+                    if (User.SamAccountName == userList.SelectedItem.ToString())
                     {
-                        infoLabel.Content = User.Properties["Name"].Value.ToString();
-
-                        Username.Content = User.Properties["SamAccountName"].Value.ToString();
-
-                        if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
-                        { Email.Content = User.Properties["EmailAddress"].Value.ToString(); }
-                        else { Email.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["Title"].Value, null))
-                        { Title.Content = User.Properties["Title"].Value.ToString(); }
-                        else { Title.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["Department"].Value, null))
-                        { Department.Content = User.Properties["Department"].Value.ToString(); }
-                        else { Department.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["Company"].Value, null))
-                        { Company.Content = User.Properties["Company"].Value.ToString(); }
-                        else { Company.Content = " "; }
-
-                        CreatedDate.Content = User.Properties["Created"].Value.ToString();
-
-                        if (!ReferenceEquals(User.Properties["AccountExpirationDate"].Value, null))
-                        { ExpiryDate.Content = User.Properties["AccountExpirationDate"].Value.ToString(); }
-                        else { ExpiryDate.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["LastLogonDate"].Value, null))
-                        { LastLogonDate.Content = User.Properties["LastLogonDate"].Value.ToString(); }
-                        else { LastLogonDate.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["LastBadPasswordAttempt"].Value, null))
-                        { LastBadPasswordAttempt.Content = User.Properties["LastBadPasswordAttempt"].Value.ToString(); }
-                        else { LastBadPasswordAttempt.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["LockedOut"].Value, null))
-                        { LockedOut.Content = User.Properties["LockedOut"].Value.ToString(); }
-                        else { LockedOut.Content = " "; }
-
-                        if (!ReferenceEquals(User.Properties["AccountLockoutTime"].Value, null))
-                        { AccountLockoutTime.Content = User.Properties["AccountLockoutTime"].Value.ToString(); }
-                        else { AccountLockoutTime.Content = " "; }
+                        ActiveDirectory.SelectedUser = User;
                     }
                 }
-                else
+
+                infoLabel.Content = ActiveDirectory.SelectedUser.Name;
+
+                Username.Content = ActiveDirectory.SelectedUser.SamAccountName;
+
+                /*if (!ReferenceEquals(User.EmailAddress, null))
+                { Email.Content = User.EmailAddress; }
+                else { Email.Content = " "; }*/
+                Email.Content = ActiveDirectory.SelectedUser.EmailAddress;
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetTitle(), null))
+                { Title.Content = ActiveDirectory.SelectedUser.GetTitle(); }
+                else { Title.Content = " "; }
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetDepartment(), null))
+                { Department.Content = ActiveDirectory.SelectedUser.GetDepartment(); }
+                else { Department.Content = " "; }
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetCompany(), null))
+                { Company.Content = ActiveDirectory.SelectedUser.GetCompany(); }
+                else { Company.Content = " "; }
+
+                //CreatedDate.Content = User.Created;
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountExpirationDate, null))
+                { ExpiryDate.Content = ActiveDirectory.SelectedUser.AccountExpirationDate; }
+                else { ExpiryDate.Content = " "; }
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.LastLogon, null))
+                { LastLogonDate.Content = ActiveDirectory.SelectedUser.LastLogon; }
+                else { LastLogonDate.Content = " "; }
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.LastBadPasswordAttempt, null))
+                { LastBadPasswordAttempt.Content = ActiveDirectory.SelectedUser.LastBadPasswordAttempt; }
+                else { LastBadPasswordAttempt.Content = " "; }
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.IsAccountLockedOut(), null))
+                { LockedOut.Content = ActiveDirectory.SelectedUser.IsAccountLockedOut().ToString(); }
+                else { LockedOut.Content = " "; }
+
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountLockoutTime, null))
+                { AccountLockoutTime.Content = ActiveDirectory.SelectedUser.AccountLockoutTime; }
+                else { AccountLockoutTime.Content = " "; }
+
+                foreach (var Group in ActiveDirectory.SelectedUser.GetGroups())
                 {
-                    infoLabel.Content = "User Information";
-                    Username.Content = String.Empty;
-                    Email.Content = String.Empty;
-                    Title.Content = String.Empty;
-                    Department.Content = String.Empty;
-                    Company.Content = String.Empty;
-                    CreatedDate.Content = String.Empty;
-                    ExpiryDate.Content = String.Empty;
-                    LastLogonDate.Content = String.Empty;
-                    LastBadPasswordAttempt.Content = String.Empty;
-                    LockedOut.Content = String.Empty;
-                    AccountLockoutTime.Content = String.Empty;
+                    groupList.Items.Add(Group.Name);
                 }
+
+                enableLabelButton.IsEnabled = true;
             }
+            else
+            {
+                infoLabel.Content = "User Information";
+                Username.Content = String.Empty;
+                Email.Content = String.Empty;
+                Title.Content = String.Empty;
+                Department.Content = String.Empty;
+                Company.Content = String.Empty;
+                CreatedDate.Content = String.Empty;
+                ExpiryDate.Content = String.Empty;
+                LastLogonDate.Content = String.Empty;
+                LastBadPasswordAttempt.Content = String.Empty;
+                LockedOut.Content = String.Empty;
+                AccountLockoutTime.Content = String.Empty;
+
+                enableLabelButton.IsEnabled = false;
+            }
+        }
+        private void ClearSelection()
+        {
+            userList.SelectedIndex = -1;
+            enableLabelButton.IsEnabled = false;
         }
 
         /* Search Functions */
@@ -245,159 +172,114 @@ namespace Unified_Systems.User
         /// <summary>
         /// List search from lookupText
         /// </summary>
-        private void quickLookup()
-        {
-            foreach (string user in userList.Items)
-            {
-                if (user == lookupText.ToString())
-                {
-                    userList.SelectedItem = user;
-                    return;
-                }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (User.Properties["Enabled"].Value.ToString() == "False")
-                {
-                    if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                    return;
-                }
-                }
-            }
-            foreach (string user in userList.Items)
-            {
-                if (user.IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    userList.SelectedItem = user;
-                    return;
-                }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (User.Properties["Enabled"].Value.ToString() == "False")
-                {
-                    if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
-                    {
-                        if (User.Properties["EmailAddress"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            searchResult++;
-                            if (searchResult == searchCount)
-                            {
-                                userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                                return;
-                            }
-                        }
-                    }
-                }
-                }
-            }
-            userList.SelectedIndex = -1;
-        }
         private void fullLookup()
         {
             searchResult = 0;
-            foreach (string user in userList.Items)
+            int retry = 0;
+            while (retry <= 1)
             {
-                if (user == lookupText.ToString())
+                foreach (string user in userList.Items)
                 {
-                    searchResult++;
-                    if (searchResult == searchCount)
+                    if (user == lookupText.Text)
                     {
-                        userList.SelectedItem = user;
-                        int selected = userList.SelectedIndex;
-                        return;
+                        searchResult++;
+                        if (searchResult == searchCount)
+                        {
+                            userList.SelectedItem = user;
+                            int selected = userList.SelectedIndex;
+                            return;
+                        }
                     }
                 }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (User.Properties["Enabled"].Value.ToString() == "False")
+                foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.Properties["Name"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    searchResult++;
-                    if (searchResult == searchCount)
+                    if (User.Enabled == false)
                     {
-                        userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                        return;
-                    }
-                }
-                }
-            }
-            foreach (string user in userList.Items)
-            {
-                if (user.IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    searchResult++;
-                    if (searchResult == searchCount)
-                    {
-                        userList.SelectedItem = user;
-                        return;
-                    }
-                }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (User.Properties["Enabled"].Value.ToString() == "False")
-                {
-                    if (lookupText.Text.ToString().IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    if (!ReferenceEquals(User.Properties["EmailAddress"].Value, null))
-                    {
-                        if (User.Properties["EmailAddress"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (User.Name.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             searchResult++;
                             if (searchResult == searchCount)
                             {
-                                userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                                userList.SelectedItem = User.SamAccountName;
                                 return;
                             }
                         }
                     }
                 }
-                }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (User.Properties["Enabled"].Value.ToString() == "False")
+                foreach (string user in userList.Items)
                 {
-                    if (!ReferenceEquals(User.Properties["Title"].Value, null))
-                {
-                    if (User.Properties["Title"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (user.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         searchResult++;
                         if (searchResult == searchCount)
                         {
-                            userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
+                            userList.SelectedItem = user;
                             return;
                         }
                     }
                 }
-                }
-            }
-            foreach (PSObject User in ActiveDirectory.Users)
-            {
-                if (User.Properties["Enabled"].Value.ToString() == "False")
+                foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (!ReferenceEquals(User.Properties["Department"].Value, null))
-                {
-                    if (User.Properties["Department"].Value.ToString().IndexOf(lookupText.Text.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (User.Enabled == false)
                     {
-                        searchResult++;
-                        if (searchResult == searchCount)
+                        if (lookupText.Text.IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            userList.SelectedItem = User.Properties["SamAccountName"].Value.ToString();
-                            return;
+                            if (!ReferenceEquals(User.EmailAddress, null))
+                            {
+                                if (User.EmailAddress.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    searchResult++;
+                                    if (searchResult == searchCount)
+                                    {
+                                        userList.SelectedItem = User.SamAccountName;
+                                        return;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+                foreach (UserPrincipal User in ActiveDirectory.Users)
+                {
+                    if (User.Enabled == false)
+                    {
+                        if (!ReferenceEquals(User.GetTitle(), null))
+                        {
+                            if (User.GetTitle().IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                searchResult++;
+                                if (searchResult == searchCount)
+                                {
+                                    userList.SelectedItem = User.SamAccountName;
+                                    return;
+                                }
+                            }
+                        }
+                    }
                 }
+                foreach (UserPrincipal User in ActiveDirectory.Users)
+                {
+                    if (User.Enabled == false)
+                    {
+                        if (!ReferenceEquals(User.GetDepartment(), null))
+                        {
+                            if (User.GetDepartment().IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                searchResult++;
+                                if (searchResult == searchCount)
+                                {
+                                    userList.SelectedItem = User.SamAccountName;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                searchCount = 1;
+                searchResult = 0;
+                retry++;
             }
-            searchCount = 0;
+            ClearSelection();
         }
 
         /// <summary>
@@ -417,7 +299,7 @@ namespace Unified_Systems.User
             }
             else
             {
-                userList.SelectedIndex = -1;
+                ClearSelection();
             }
         }
         private void lookupLabelButton_MouseUp(object sender, RoutedEventArgs e)
@@ -443,12 +325,12 @@ namespace Unified_Systems.User
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             refreshLabelButton.Style = defaultMouseDownLabelButtonStyle;
 
-            if (!ActiveDirectory.GetAllUsers.IsBusy)
-            {
-                refreshLabelButton.Content = "Please Wait";
-                refreshLabelButton.IsEnabled = false;
-                ActiveDirectory.GetAllUsers.RunWorkerAsync();
-            }
+            ActiveDirectory.RefreshUsers();
+            BuildList();
+
+            resultMessage.Visibility = Visibility.Hidden;
+            resultMessage.Content = "User List Updated";
+            resultMessage.Visibility = Visibility.Visible;
         }
         private void refreshLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
@@ -477,12 +359,13 @@ namespace Unified_Systems.User
                 }
                 else
                 {
-                    userList.SelectedIndex = -1;
+                    ClearSelection();
                 }
             }
             else if (e.Key == Key.Escape)
             {
                 lookupText.Text = String.Empty;
+                ClearSelection();
             }
         }
         private void lookupText_TextChanged(object sender, TextChangedEventArgs e)
@@ -490,11 +373,11 @@ namespace Unified_Systems.User
             if (lookupText.Text != "")
             {
                 searchCount = 1;
-                quickLookup();
+                fullLookup();
             }
             else
             {
-                userList.SelectedIndex = -1;
+                ClearSelection();
             }
         }
 
@@ -519,11 +402,13 @@ namespace Unified_Systems.User
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             enableLabelButton.Style = defaultMouseDownLabelButtonStyle;
+            resultMessage.Visibility = Visibility.Hidden;
 
             if (confirmAction)
             {
-                resultMessage.Visibility = Visibility.Hidden;
                 curtain.Visibility = Visibility.Visible;
+                confirmMessage.Content = "Are you sure you want to enable " + ActiveDirectory.SelectedUser.SamAccountName + "?";
+                confirmYesLabelButton.Content = "Enable " + ActiveDirectory.SelectedUser.SamAccountName;
                 confirmMessage.Visibility = Visibility.Visible;
                 confirmYesLabelButton.Visibility = Visibility.Visible;
                 confirmYesLabelButton.IsEnabled = true;
@@ -532,11 +417,14 @@ namespace Unified_Systems.User
             }
             else
             {
-                if (!ActiveDirectory.EnableUser.IsBusy)
+                if (ActiveDirectory.SelectedUser.EnableUser())
                 {
-                    ActiveDirectory.EnableUser.RunWorkerAsync();
-                    enableLabelButton.IsEnabled = false;
+                    resultMessage.Content = "User Enable Successfully";
+                    resultMessage.Visibility = Visibility.Visible;
+                    ActiveDirectory.RefreshUsers();
+                    BuildList();
                 }
+                enableLabelButton.IsEnabled = true;
             }
         }
         private void enableLabelButton_MouseUp(object sender, RoutedEventArgs e)
@@ -563,11 +451,14 @@ namespace Unified_Systems.User
             confirmNoLabelButton.Visibility = Visibility.Hidden;
             confirmNoLabelButton.IsEnabled = false;
 
-            if (!ActiveDirectory.EnableUser.IsBusy)
+            if (ActiveDirectory.SelectedUser.EnableUser())
             {
-                ActiveDirectory.EnableUser.RunWorkerAsync();
-                enableLabelButton.IsEnabled = false;
+                resultMessage.Content = "User Enable Successfully";
+                resultMessage.Visibility = Visibility.Visible;
+                ActiveDirectory.RefreshUsers();
+                BuildList();
             }
+            enableLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
@@ -593,27 +484,6 @@ namespace Unified_Systems.User
             confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
         }
-        /// <summary>
-        /// Custom background worker complete event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void EnableUser_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (ActiveDirectory.EnableUserResults == null)
-            {
-                resultMessage.Content = "User Enabled Successfully";
-                resultMessage.Visibility = Visibility.Visible;
-
-                if (!ActiveDirectory.GetAllUsers.IsBusy)
-                {
-                    refreshLabelButton.Content = "Please Wait";
-                    refreshLabelButton.IsEnabled = false;
-                    ActiveDirectory.GetAllUsers.RunWorkerAsync();
-                }
-            }
-            enableLabelButton.IsEnabled = true;
-        }
 
         /// <summary>
         /// Hide result message with mouse
@@ -622,7 +492,7 @@ namespace Unified_Systems.User
         /// <param name="e"></param>
         private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            resultMessage.Visibility = Visibility.Hidden;
+            //resultMessage.Visibility = Visibility.Hidden;
         }
     }
 }

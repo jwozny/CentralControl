@@ -253,16 +253,15 @@
                 <Label x:Name="AccountLockoutTime" Foreground="LightGray" Height="22"/>
             </StackPanel>
         </Grid>
-        <DataGrid x:Name="dataGrid" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray"/>
+        <ListBox x:Name="groupList" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray"/>
         <TextBox x:Name="lookupText" Style="{StaticResource placeHolder}" Tag="Search for user..." Margin="10"  VerticalAlignment="Bottom" Grid.Row="3" Grid.ColumnSpan="2" Height="25" Background="#FF454545" Foreground="LightGray" KeyDown="lookupText_KeyDown" TextChanged="lookupText_TextChanged"/>
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
-        <Label x:Name="refreshLabelButton" Content="Please wait" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave" IsEnabled="False"/>
+        <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>
         <Label x:Name="enableLabelButton" Content="Enable User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="enableLabelButton_MouseDown" MouseUp="enableLabelButton_MouseUp" MouseLeave="enableLabelButton_MouseLeave"/>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
-        <Label x:Name="confirmMessage" Content="Are you sure you want to disable this user?" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>
-        <Label x:Name="confirmYesLabelButton" Content="Disable the User, Damn it!" Style="{StaticResource warningConfirmLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmYesLabelButton_MouseDown" Visibility="Hidden"/>
-        <Label x:Name="confirmNoLabelButton" Content="Oh Shit, Nevermind!" Style="{StaticResource warningCancelLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmNoLabelButton_MouseDown" Visibility="Hidden"/>
-        <Label x:Name="resultMessage" Style="{StaticResource MessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseEnter="resultMessage_MouseEnter" Visibility="Hidden"/>
-        <Label x:Name="syncLabelButton" Content="Synchronize AD Users" Style="{StaticResource defaultSyncLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave" Visibility="Hidden"/>
+        <Label x:Name="confirmMessage" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>
+        <Label x:Name="confirmYesLabelButton" Style="{StaticResource warningConfirmLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmYesLabelButton_MouseDown" Visibility="Hidden"/>
+        <Label x:Name="confirmNoLabelButton" Content="Cancel" Style="{StaticResource warningCancelLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmNoLabelButton_MouseDown" Visibility="Hidden"/>
+        <Label x:Name="resultMessage" Style="{StaticResource MessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseEnter="resultMessage_MouseEnter" Visibility="Hidden" IsHitTestVisible="False"/>
     </Grid>
 </Page>
