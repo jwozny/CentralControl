@@ -109,6 +109,9 @@
     <Compile Include="User\Enable.xaml.cs">
       <DependentUpon>Enable.xaml</DependentUpon>
     </Compile>
+    <Compile Include="User\Extend.xaml.cs">
+      <DependentUpon>Extend.xaml</DependentUpon>
+    </Compile>
     <Compile Include="User\User.xaml.cs">
       <DependentUpon>User.xaml</DependentUpon>
     </Compile>
@@ -135,6 +138,10 @@
     <Page Include="User\Enable.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="User\Extend.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="User\User.xaml">
       <SubType>Designer</SubType>

@@ -415,8 +415,7 @@ namespace Unified_Systems
         {
             Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
             Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new User.Extend());
-            _NavigationFrame.Navigate(null);
+            _NavigationFrame.Navigate(new User.Extend());
             ResetMenuColors();
             User.Style = expandedMenuStyle;
             UserExtend.Style = selectedSubMenuStyle;
@@ -643,6 +642,22 @@ namespace Unified_Systems
             return principal.GetProperty("company");
         }
 
+        public static bool IsAccountExpired(this UserPrincipal User)
+        {
+            if (!ReferenceEquals(User.AccountExpirationDate, null))
+            {
+                if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) > 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static bool SaveUser(this UserPrincipal User)
         {
             //try
@@ -666,6 +681,28 @@ namespace Unified_Systems
             //}
             //return true;
             return false;
+        }
+        public static bool ExtendUser(this UserPrincipal User, int Days)
+        {
+            try
+            {
+                DirectoryEntry usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
+                DateTime expire = System.DateTime.Now.AddDays(Days);
+                usr.Properties["accountExpires"].Value = Convert.ToString((Int64)expire.ToFileTime());
+
+                usr.CommitChanges();
+                usr.Close();
+            }
+            catch (System.DirectoryServices.DirectoryServicesCOMException E)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                        "There was an error:\n\n" + E.Message.ToString(),
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                return false;
+            }
+            return true;
         }
         public static bool EnableUser(this UserPrincipal User)
         {
