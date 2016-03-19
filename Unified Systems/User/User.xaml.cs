@@ -37,8 +37,45 @@ namespace Unified_Systems.User
         public User()
         {
             InitializeComponent();
-            BuildList();
-            lookupText.Focus();
+
+            if (!ActiveDirectory.IsConnected)
+            {
+                curtain.Visibility = Visibility.Visible;
+                syncLabelButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                BuildList();
+                lookupText.Focus();
+            }
+        }
+
+        private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        {
+            Style defaultSyncMouseDownLabelButtonStyle = FindResource("defaultSyncMouseDownLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultSyncMouseDownLabelButtonStyle;
+
+            ActiveDirectory.IsConnected = ActiveDirectory.InitializeDomain();
+            if (ActiveDirectory.IsConnected)
+            {
+                curtain.Visibility = Visibility.Hidden;
+                syncLabelButton.Visibility = Visibility.Hidden;
+                resultMessage.Visibility = Visibility.Hidden;
+                resultMessage.Content = "AD Connection Successful";
+                resultMessage.Visibility = Visibility.Visible;
+                ActiveDirectory.RefreshUsers();
+                BuildList();
+            }
+        }
+        private void syncLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultSyncLabelButtonStyle;
+        }
+        private void syncLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultSyncLabelButtonStyle = FindResource("defaultSyncLabelButtonStyle") as Style;
+            syncLabelButton.Style = defaultSyncLabelButtonStyle;
         }
 
         /// <summary>

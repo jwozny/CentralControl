@@ -184,7 +184,7 @@
         </Style>
         
     </Page.Resources>
-    <Grid Margin="10">
+    <Grid Margin="10" Background="#FF303030">
         <Grid.RowDefinitions>
             <RowDefinition Height="31"/>
             <RowDefinition Height="345"/>
@@ -200,10 +200,10 @@
             <ColumnDefinition Width="130"/>
         </Grid.ColumnDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="10,0,0,0" Content="Select User to View Details" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20" FontWeight="Bold" Foreground="LightGray"/>
-        <ListBox x:Name="userList" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="10" Foreground="LightGray" Background="#FF454545" SelectionChanged="listBox_SelectionChanged" MouseDown="userList_MouseDown"/>
-        <Grid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Margin="10">
+        <ListBox x:Name="userList" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="10,15,10,10" Foreground="LightGray" Background="#FF454545" SelectionChanged="listBox_SelectionChanged" MouseDown="userList_MouseDown"/>
+        <Grid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Margin="10,-10,10,10">
             <Grid.RowDefinitions>
-                <RowDefinition Height="46"/>
+                <RowDefinition Height="38"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -211,8 +211,8 @@
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1"/>
-            <Label x:Name="infoLabel" Grid.ColumnSpan="3" Margin="10,0,0,0" VerticalAlignment="Bottom" Content ="User Information" Foreground="LightGray" FontSize="15"/>
+            <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1" Margin="0,25,0,0"/>
+            <Label x:Name="infoLabel" Grid.ColumnSpan="3" Margin="10,0,0,0" VerticalAlignment="Bottom" Content ="User Information" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="1" Grid.Column="0" Margin="10,10,0,10">
                 <Label Content ="Username" Foreground="LightGray" Height="22"/>
                 <Label Content ="Email" Foreground="LightGray" Height="22"/>
@@ -259,6 +259,7 @@
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>
         <Label x:Name="saveLabelButton" Content="Save User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="saveLabelButton_MouseDown" MouseUp="saveLabelButton_MouseUp" MouseLeave="saveLabelButton_MouseLeave" Visibility="Hidden"/>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
+        <Label x:Name="syncLabelButton" Content="Retry Connection" Style="{StaticResource defaultSyncLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="syncLabelButton_MouseDown" MouseUp="syncLabelButton_MouseUp" MouseLeave="syncLabelButton_MouseLeave" Visibility="Hidden"/>
         <Label x:Name="confirmMessage" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>
         <Label x:Name="confirmYesLabelButton" Style="{StaticResource warningConfirmLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmYesLabelButton_MouseDown" Visibility="Hidden"/>
         <Label x:Name="confirmNoLabelButton" Content="Cancel" Style="{StaticResource warningCancelLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmNoLabelButton_MouseDown" Visibility="Hidden"/>

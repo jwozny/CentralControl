@@ -75,7 +75,8 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF1B1B1B" MouseLeftButtonDown="Titlebar_MouseLeftButtonDown" MouseLeftButtonUp="Titlebar_MouseLeftButtonUp" MouseMove="Titlebar_MouseMove">
-            <Label Content="  Unified Systems" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="Gray" Background="#FF1B1B1B" FontSize="14"/>
+            <!--<Image HorizontalAlignment="Left" VerticalAlignment="Center" Source="Toolbox.ico" Margin="10"/>-->
+            <Label Content="Unified Systems" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" Background="#FF1B1B1B" FontSize="14"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Button x:Name="MinimizeButton" Content="-" Height="35"  Width="50" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" FontSize="25">
                     <Button.Style>

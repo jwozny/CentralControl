@@ -103,6 +103,9 @@
     <Compile Include="Dashboard.xaml.cs">
       <DependentUpon>Dashboard.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings\Credentials.xaml.cs">
+      <DependentUpon>Credentials.xaml</DependentUpon>
+    </Compile>
     <Compile Include="User\Disable.xaml.cs">
       <DependentUpon>Disable.xaml</DependentUpon>
     </Compile>
@@ -131,6 +134,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Settings\Credentials.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="User\Disable.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -8,6 +8,7 @@ using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -35,8 +36,6 @@ namespace Unified_Systems
         {
             InitializeComponent();
             SourceInitialized += new EventHandler(MainWindow_SourceInitialized);
-            ActiveDirectory.InitializeDomain();
-            ActiveDirectory.RefreshUsers();
 
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             _NavigationFrame.Navigate(new Dashboard());
@@ -376,83 +375,110 @@ namespace Unified_Systems
         }
         private void User_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (ReferenceEquals(ActiveDirectory.Users, null) || !ActiveDirectory.IsConnected)
+            {
+                ActiveDirectory.IsConnected = ActiveDirectory.InitializeDomain();
+                if (ActiveDirectory.IsConnected) ActiveDirectory.RefreshUsers();
+            }
+
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            _NavigationFrame.Navigate(new User.User());
+            //_NavigationFrame.Navigate(new User.User());
             ResetMenuColors();
             User.Style = selectedMenuStyle;
         }
         private void UserCreate_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new User.Create());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserCreate.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                //_NavigationFrame.Navigate(new User.Create());
+                _NavigationFrame.Navigate(null);
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserCreate.Style = selectedSubMenuStyle;
+            }
         }
         private void UserReset_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new User.Reset());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserReset.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                //_NavigationFrame.Navigate(new User.Reset());
+                _NavigationFrame.Navigate(null);
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserReset.Style = selectedSubMenuStyle;
+            }
         }
         private void UserUnlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new User.Unlock());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserUnlock.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                //_NavigationFrame.Navigate(new User.Unlock());
+                _NavigationFrame.Navigate(null);
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserUnlock.Style = selectedSubMenuStyle;
+            }
         }
         private void UserExtend_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            _NavigationFrame.Navigate(new User.Extend());
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserExtend.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                _NavigationFrame.Navigate(new User.Extend());
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserExtend.Style = selectedSubMenuStyle;
+            }
         }
         private void UserEnable_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            _NavigationFrame.Navigate(new User.Enable());
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserEnable.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                _NavigationFrame.Navigate(new User.Enable());
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserEnable.Style = selectedSubMenuStyle;
+            }
         }
         private void UserDisable_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            _NavigationFrame.Navigate(new User.Disable());
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserDisable.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                _NavigationFrame.Navigate(new User.Disable());
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserDisable.Style = selectedSubMenuStyle;
+            }
         }
         private void UserTerminate_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new User.Terminate());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-            UserTerminate.Style = selectedSubMenuStyle;
+            if (ActiveDirectory.IsConnected)
+            {
+                Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+                Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+                //_NavigationFrame.Navigate(new User.Terminate());
+                _NavigationFrame.Navigate(null);
+                ResetMenuColors();
+                User.Style = expandedMenuStyle;
+                UserTerminate.Style = selectedSubMenuStyle;
+            }
         }
         private void Server_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             //_NavigationFrame.Navigate(new Server());
-            _NavigationFrame.Navigate(null);
+            //_NavigationFrame.Navigate(null);
             ResetMenuColors();
             Server.Style = selectedMenuStyle;
         }
@@ -490,7 +516,7 @@ namespace Unified_Systems
         {
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             //_NavigationFrame.Navigate(new Storage());
-            _NavigationFrame.Navigate(null);
+            //_NavigationFrame.Navigate(null);
             ResetMenuColors();
             Storage.Style = selectedMenuStyle;
         }
@@ -508,7 +534,7 @@ namespace Unified_Systems
         {
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             //_NavigationFrame.Navigate(new Network());
-            _NavigationFrame.Navigate(null);
+            //_NavigationFrame.Navigate(null);
             ResetMenuColors();
             Network.Style = selectedMenuStyle;
         }
@@ -556,7 +582,7 @@ namespace Unified_Systems
         {
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             //_NavigationFrame.Navigate(new Settings());
-            _NavigationFrame.Navigate(null);
+            //_NavigationFrame.Navigate(null);
             ResetMenuColors();
             Settings.Style = selectedMenuStyle;
         }
@@ -574,8 +600,7 @@ namespace Unified_Systems
         {
             Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
             Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Settings.Credentials());
-            _NavigationFrame.Navigate(null);
+            _NavigationFrame.Navigate(new Settings.Credentials());
             ResetMenuColors();
             Settings.Style = expandedMenuStyle;
             SettingsCredentials.Style = selectedSubMenuStyle;
@@ -587,13 +612,66 @@ namespace Unified_Systems
     /// </summary>
     public static class ActiveDirectory
     {
+        public static string DomainName { get; set; }
+        public static string AuthenticatingUsername { get; set; }
+        public static SecureString AuthenticatingPassword { get; set; }
+        public static bool AuthenticatingPasswordExists()
+        {
+            if (ReferenceEquals(AuthenticatingPassword, null)) return false;
+            if (AuthenticatingPassword == null) return false;
+            return true;
+        }
+        public static bool IsConnected;
+
         public static PrincipalContext Domain;
         public static PrincipalSearcher Searcher;
-        public static void InitializeDomain()
+        public static bool InitializeDomain()
         {
-            Domain = new PrincipalContext(ContextType.Domain, "asse.org");
-            Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
-            users = new List<UserPrincipal>();
+            try
+            {
+                if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null) && !ReferenceEquals(DomainName, null))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, DomainName, AuthenticatingUsername, AuthenticatingPassword.ToString());
+                }
+                else if (!ReferenceEquals(DomainName, null))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, DomainName);
+                }
+                else
+                {
+                    Domain = new PrincipalContext(ContextType.Domain);
+                }
+                Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
+                users = new List<UserPrincipal>();
+            }
+            catch (System.DirectoryServices.AccountManagement.PrincipalServerDownException E)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                        E.Message.ToString(),
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                return false;
+            }
+            catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                        E.Message.ToString(),
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                return false;
+            }
+            catch (System.DirectoryServices.DirectoryServicesCOMException E)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                        E.Message.ToString(),
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Asterisk);
+                return false;
+            }
+            return true;
         }
         private static List<UserPrincipal> users;
         public static List<UserPrincipal> Users
