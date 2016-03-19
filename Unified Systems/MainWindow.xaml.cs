@@ -614,11 +614,13 @@ namespace Unified_Systems
     {
         public static string DomainName { get; set; }
         public static string AuthenticatingUsername { get; set; }
-        public static SecureString AuthenticatingPassword { get; set; }
+        public static string AuthenticatingPassword { private get; set; }
         public static bool AuthenticatingPasswordExists()
         {
             if (ReferenceEquals(AuthenticatingPassword, null)) return false;
             if (AuthenticatingPassword == null) return false;
+            if (AuthenticatingPassword == "") return false;
+            if (AuthenticatingPassword == String.Empty) return false;
             return true;
         }
         public static bool IsConnected;
@@ -631,7 +633,7 @@ namespace Unified_Systems
             {
                 if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null) && !ReferenceEquals(DomainName, null))
                 {
-                    Domain = new PrincipalContext(ContextType.Domain, DomainName, AuthenticatingUsername, AuthenticatingPassword.ToString());
+                    Domain = new PrincipalContext(ContextType.Domain, DomainName, AuthenticatingUsername, AuthenticatingPassword);
                 }
                 else if (!ReferenceEquals(DomainName, null))
                 {

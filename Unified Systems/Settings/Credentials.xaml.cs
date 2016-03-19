@@ -29,105 +29,9 @@ namespace Unified_Systems.Settings
 
         public void InitializeSavedInfo()
         {
-            ADdomain_TextBox.Text = ActiveDirectory.DomainName;
-            ADuser_TextBox.Text = ActiveDirectory.AuthenticatingUsername;
-            if (ActiveDirectory.AuthenticatingPasswordExists()) ADpass_TextBox.Text = "********";
-        }
-
-        char _passwordChar = '●';
-        private char PasswordChar
-        {
-            get { return _passwordChar; }
-            set { _passwordChar = value; }
-        }
-        private SecureString ADpass_secureString = new SecureString();
-        private SecureString ADpass_SecureString
-        {
-            get { return ADpass_secureString; }
-        }
-        private void ADpass_TextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-
-            if (IsIgnorableKey(e.Key))
-            {
-                e.Handled = true;
-            }
-            else if (e.Key == Key.Delete)
-            {
-                ADpass_ProcessDelete();
-                e.Handled = true;
-            }
-            else if (e.Key == Key.Back)
-            {
-                ADpass_ProcessBackspace();
-                e.Handled = true;
-            }
-            else
-            {
-                ADpass_ProcessNewCharacter(e.Key.ToString().ToCharArray());
-            }
-        }
-        private bool IsIgnorableKey(Key key)
-        {
-            return key == Key.Escape
-                || key == Key.Enter
-                || key == Key.RightShift
-                || key == Key.LeftShift
-                || key == Key.RightAlt
-                || key == Key.LeftAlt
-                || key == Key.RightCtrl
-                || key == Key.LeftCtrl;
-        }
-        private void ADpass_ProcessDelete()
-        {
-            if (ADpass_TextBox.SelectionLength > 0)
-            {
-                ADpass_RemoveSelectedCharacters();
-            }
-            else if (ADpass_TextBox.SelectionStart < ADpass_TextBox.Text.Length)
-            {
-                ADpass_secureString.RemoveAt(ADpass_TextBox.SelectionStart);
-            }
-
-            ADpass_ResetDisplayCharacters(ADpass_TextBox.SelectionStart);
-        }
-        private void ADpass_ProcessBackspace()
-        {
-            if (ADpass_TextBox.SelectionLength > 0)
-            {
-                ADpass_RemoveSelectedCharacters();
-                ADpass_ResetDisplayCharacters(ADpass_TextBox.SelectionStart);
-            }
-            else if (ADpass_TextBox.SelectionStart > 0)
-            {
-                ADpass_secureString.RemoveAt(ADpass_TextBox.SelectionStart - 1);
-                ADpass_ResetDisplayCharacters(ADpass_TextBox.SelectionStart - 1);
-            }
-        }
-        private void ADpass_ProcessNewCharacter(char[] character)
-        {
-            if (ADpass_TextBox.SelectionLength > 0)
-            {
-                ADpass_RemoveSelectedCharacters();
-            }
-
-            if (character.Length == 2)
-                ADpass_secureString.InsertAt(ADpass_TextBox.SelectionStart, character[1]);
-            else
-                ADpass_secureString.InsertAt(ADpass_TextBox.SelectionStart, character[0]);
-            ADpass_ResetDisplayCharacters(ADpass_TextBox.SelectionStart + 1);
-        }
-        private void ADpass_RemoveSelectedCharacters()
-        {
-            for (int i = 0; i < ADpass_TextBox.SelectionLength; i++)
-            {
-                ADpass_secureString.RemoveAt(ADpass_TextBox.SelectionStart);
-            }
-        }
-        private void ADpass_ResetDisplayCharacters(int caretPosition)
-        {
-            ADpass_TextBox.Text = new string(_passwordChar, ADpass_secureString.Length);
-            ADpass_TextBox.SelectionStart = caretPosition;
+            ADdomainTextBox.Text = ActiveDirectory.DomainName;
+            ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
+            if (ActiveDirectory.AuthenticatingPasswordExists()) ADpassTextBox.Text = "********";
         }
 
         /* Primary Action */
@@ -223,9 +127,9 @@ namespace Unified_Systems.Settings
         {
             try
             {
-                ActiveDirectory.DomainName = ADdomain_TextBox.Text;
-                ActiveDirectory.AuthenticatingUsername = ADuser_TextBox.Text;
-                ActiveDirectory.AuthenticatingPassword = ADpass_SecureString;
+                ActiveDirectory.DomainName = ADdomainTextBox.Text;
+                ActiveDirectory.AuthenticatingUsername = ADuserTextBox.Text;
+                ActiveDirectory.AuthenticatingPassword = ADpassTextBox.Text;
             }
             catch
             {
