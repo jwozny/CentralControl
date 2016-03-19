@@ -166,7 +166,7 @@
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label x:Name="Dashboard" Content="Dashboard" Style="{StaticResource MenuStyle}" MouseDown="Dashboard_MouseDown"/>
+                    <Label x:Name="Dashboard" Content="Dashboard" Style="{StaticResource SelectedMenuStyle}" MouseDown="Dashboard_MouseDown"/>
                     <Label Content=" " Style="{StaticResource SubMenuStyle}"/>
                 </StackPanel>
                 <StackPanel x:Name="Panel1" Height="28">
@@ -240,7 +240,7 @@
                                     <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="50" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="122" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
@@ -262,7 +262,7 @@
                                     <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="98" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="74" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>

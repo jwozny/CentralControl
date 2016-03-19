@@ -201,7 +201,7 @@
         </Grid.ColumnDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="10,0,0,0" Content="Select User to Extend" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20" FontWeight="Bold" Foreground="LightGray"/>
         <ListBox x:Name="userList" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="10,15,10,10" Foreground="LightGray" Background="#FF454545" SelectionChanged="listBox_SelectionChanged" MouseDown="userList_MouseDown"/>
-        <Grid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Margin="10,-10,10,10">
+        <Grid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Margin="10,-15,10,10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="38"/>
                 <RowDefinition/>
@@ -211,8 +211,8 @@
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1" Margin="0,25,0,0"/>
-            <Label x:Name="infoLabel" Grid.ColumnSpan="3" Margin="10,0,0,0" VerticalAlignment="Bottom" Content ="User Information" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
+            <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1" Margin="0,30,0,0"/>
+            <Label x:Name="infoLabel" Grid.ColumnSpan="3" Margin="20,0,0,0" VerticalAlignment="Bottom" Content ="User Information" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="1" Grid.Column="0" Margin="10,10,0,10">
                 <Label Content ="Username" Foreground="LightGray" Height="22"/>
                 <Label Content ="Email" Foreground="LightGray" Height="22"/>

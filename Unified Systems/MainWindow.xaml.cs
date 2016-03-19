@@ -37,10 +37,21 @@ namespace Unified_Systems
             InitializeComponent();
             SourceInitialized += new EventHandler(MainWindow_SourceInitialized);
 
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            _NavigationFrame.Navigate(new Dashboard());
-            Dashboard.Style = selectedMenuStyle;
+            try
+            {
+                configs = EncryptDecrypt.LoadConfig();
+            }
+            catch
+            {
+                File.Delete(@".\~onfig");
+            }
+
+            ActiveDirectory.DomainName = configs.DomainName;
+            ActiveDirectory.AuthenticatingUsername = configs.ADUsername;
+            ActiveDirectory.AuthenticatingPassword = configs.ADPassword;
         }
+
+        private Configuration configs = new Configuration();
 
         private void MainWindow_SourceInitialized(object sender, EventArgs e)
         {
@@ -373,6 +384,7 @@ namespace Unified_Systems
             ResetMenuColors();
             Dashboard.Style = selectedMenuStyle;
         }
+        private User.User User_User = new User.User();
         private void User_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (ReferenceEquals(ActiveDirectory.Users, null) || !ActiveDirectory.IsConnected)
@@ -382,7 +394,7 @@ namespace Unified_Systems
             }
 
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new User.User());
+            _NavigationFrame.Navigate(User_User);
             ResetMenuColors();
             User.Style = selectedMenuStyle;
         }
@@ -596,239 +608,15 @@ namespace Unified_Systems
             Settings.Style = expandedMenuStyle;
             SettingsGeneral.Style = selectedSubMenuStyle;
         }
+        private Settings.Credentials Settings_Credentials = new Settings.Credentials();
         private void SettingsCredentials_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
             Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            _NavigationFrame.Navigate(new Settings.Credentials());
+            _NavigationFrame.Navigate(Settings_Credentials);
             ResetMenuColors();
             Settings.Style = expandedMenuStyle;
             SettingsCredentials.Style = selectedSubMenuStyle;
-        }
-    }
-
-    /// <summary>
-    /// Static class to store active directory user info collection and action scripts
-    /// </summary>
-    public static class ActiveDirectory
-    {
-        public static string DomainName { get; set; }
-        public static string AuthenticatingUsername { get; set; }
-        public static string AuthenticatingPassword { private get; set; }
-        public static bool AuthenticatingPasswordExists()
-        {
-            if (ReferenceEquals(AuthenticatingPassword, null)) return false;
-            if (AuthenticatingPassword == null) return false;
-            if (AuthenticatingPassword == "") return false;
-            if (AuthenticatingPassword == String.Empty) return false;
-            return true;
-        }
-        public static bool IsConnected;
-
-        public static PrincipalContext Domain;
-        public static PrincipalSearcher Searcher;
-        public static bool InitializeDomain()
-        {
-            try
-            {
-                if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null) && !ReferenceEquals(DomainName, null))
-                {
-                    Domain = new PrincipalContext(ContextType.Domain, DomainName, AuthenticatingUsername, AuthenticatingPassword);
-                }
-                else if (!ReferenceEquals(DomainName, null))
-                {
-                    Domain = new PrincipalContext(ContextType.Domain, DomainName);
-                }
-                else
-                {
-                    Domain = new PrincipalContext(ContextType.Domain);
-                }
-                Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
-                users = new List<UserPrincipal>();
-            }
-            catch (System.DirectoryServices.AccountManagement.PrincipalServerDownException E)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                        E.Message.ToString(),
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk);
-                return false;
-            }
-            catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                        E.Message.ToString(),
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk);
-                return false;
-            }
-            catch (System.DirectoryServices.DirectoryServicesCOMException E)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                        E.Message.ToString(),
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk);
-                return false;
-            }
-            return true;
-        }
-        private static List<UserPrincipal> users;
-        public static List<UserPrincipal> Users
-        {
-            get
-            {
-                return users;
-            }
-        }
-        public static UserPrincipal SelectedUser;
-
-        public static void RefreshUsers()
-        {
-            Searcher.Dispose();
-            Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
-            if (!ReferenceEquals(users, null))
-            {
-                users.Clear();
-            }
-            foreach (UserPrincipal User in Searcher.FindAll())
-            {
-                users.Add(User);
-            }
-            //users.Sort();
-        }
-
-        /* Extensions */
-        private static string GetProperty(this Principal principal, string property)
-        {
-            DirectoryEntry directoryEntry = principal.GetUnderlyingObject() as DirectoryEntry;
-            if (directoryEntry.Properties.Contains(property))
-                return directoryEntry.Properties[property].Value.ToString();
-            else
-                return string.Empty;
-        }
-        public static string GetTitle(this Principal principal)
-        {
-            return principal.GetProperty("title");
-        }
-        public static string GetDepartment(this Principal principal)
-        {
-            return principal.GetProperty("department");
-        }
-        public static string GetCompany(this Principal principal)
-        {
-            return principal.GetProperty("company");
-        }
-
-        public static bool IsAccountExpired(this UserPrincipal User)
-        {
-            if (!ReferenceEquals(User.AccountExpirationDate, null))
-            {
-                if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) > 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static bool SaveUser(this UserPrincipal User)
-        {
-            //try
-            //{
-            //    DirectoryEntry usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
-            //    int val = (int)usr.Properties["userAccountControl"].Value;
-            //    usr.Properties["userAccountControl"].Value = val | 0x2;
-            //    //ADS_UF_ACCOUNTDISABLE
-
-            //    usr.CommitChanges();
-            //    usr.Close();
-            //}
-            //catch (System.DirectoryServices.DirectoryServicesCOMException E)
-            //{
-            //    System.Windows.Forms.MessageBox.Show(
-            //            "There was an error:\n\n" + E.Message.ToString(),
-            //            "Error",
-            //            MessageBoxButtons.OK,
-            //            MessageBoxIcon.Asterisk);
-            //    return false;
-            //}
-            //return true;
-            return false;
-        }
-        public static bool ExtendUser(this UserPrincipal User, int Days)
-        {
-            try
-            {
-                DirectoryEntry usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
-                DateTime expire = System.DateTime.Now.AddDays(Days);
-                usr.Properties["accountExpires"].Value = Convert.ToString((Int64)expire.ToFileTime());
-
-                usr.CommitChanges();
-                usr.Close();
-            }
-            catch (System.DirectoryServices.DirectoryServicesCOMException E)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                        "There was an error:\n\n" + E.Message.ToString(),
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk);
-                return false;
-            }
-            return true;
-        }
-        public static bool EnableUser(this UserPrincipal User)
-        {
-            try
-            {
-                DirectoryEntry usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
-                int val = (int)usr.Properties["userAccountControl"].Value;
-                usr.Properties["userAccountControl"].Value = val & ~0x2;
-                //ADS_UF_ACCOUNTDISABLE
-
-                usr.CommitChanges();
-                usr.Close();
-            }
-            catch (System.DirectoryServices.DirectoryServicesCOMException E)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                        "There was an error:\n\n" + E.Message.ToString(),
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk);
-                return false;
-            }
-            return true;
-        }
-        public static bool DisableUser(this UserPrincipal User)
-        {
-            try
-            {
-                DirectoryEntry usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
-                int val = (int)usr.Properties["userAccountControl"].Value;
-                usr.Properties["userAccountControl"].Value = val | 0x2;
-                //ADS_UF_ACCOUNTDISABLE
-
-                usr.CommitChanges();
-                usr.Close();
-            }
-            catch (System.DirectoryServices.DirectoryServicesCOMException E)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                        "There was an error:\n\n" + E.Message.ToString(),
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Asterisk);
-                return false;
-            }
-            return true;
         }
     }
 }

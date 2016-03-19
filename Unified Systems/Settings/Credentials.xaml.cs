@@ -13,6 +13,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Forms;
+using System.IO;
+using System.Xml.Serialization;
+using System.Runtime.InteropServices;
 
 namespace Unified_Systems.Settings
 {
@@ -24,14 +28,20 @@ namespace Unified_Systems.Settings
         public Credentials()
         {
             InitializeComponent();
-            InitializeSavedInfo();
         }
+        Configuration configs = new Configuration();
 
-        public void InitializeSavedInfo()
+        private void Credentials_Loaded(object sender, RoutedEventArgs e)
         {
-            ADdomainTextBox.Text = ActiveDirectory.DomainName;
-            ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
-            if (ActiveDirectory.AuthenticatingPasswordExists()) ADpassTextBox.Text = "********";
+            try { configs = EncryptDecrypt.LoadConfig(); }
+            catch { }
+
+            ActiveDirectory.DomainName = configs.DomainName;
+            ADdomainTextBox.Text = configs.DomainName;
+            ActiveDirectory.AuthenticatingUsername = configs.ADUsername;
+            ADuserTextBox.Text = configs.ADUsername;
+            ActiveDirectory.AuthenticatingPassword = configs.ADPassword;
+            ADpassPasswordBox.Password = configs.ADPassword;
         }
 
         /* Primary Action */
@@ -128,13 +138,18 @@ namespace Unified_Systems.Settings
             try
             {
                 ActiveDirectory.DomainName = ADdomainTextBox.Text;
+                configs.DomainName = ADdomainTextBox.Text;
                 ActiveDirectory.AuthenticatingUsername = ADuserTextBox.Text;
-                ActiveDirectory.AuthenticatingPassword = ADpassTextBox.Text;
+                configs.ADUsername = ADuserTextBox.Text;
+                ActiveDirectory.AuthenticatingPassword = ADpassPasswordBox.Password;
+                configs.ADPassword = ADpassPasswordBox.Password;
+
             }
             catch
             {
                 return false;
             }
+            EncryptDecrypt.SaveConfig(configs);
             return true;
         }
 

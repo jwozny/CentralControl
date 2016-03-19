@@ -49,6 +49,16 @@ namespace Unified_Systems.User
                 lookupText.Focus();
             }
         }
+        private void User_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ActiveDirectory.IsConnected)
+            {
+                curtain.Visibility = Visibility.Hidden;
+                syncLabelButton.Visibility = Visibility.Hidden;
+                BuildList();
+            }
+            lookupText.Focus();
+        }
 
         private void syncLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
