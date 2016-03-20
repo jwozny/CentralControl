@@ -33,15 +33,9 @@ namespace Unified_Systems.Settings
 
         private void Credentials_Loaded(object sender, RoutedEventArgs e)
         {
-            try { configs = EncryptDecrypt.LoadConfig(); }
-            catch { }
-
-            ActiveDirectory.DomainName = configs.DomainName;
-            ADdomainTextBox.Text = configs.DomainName;
-            ActiveDirectory.AuthenticatingUsername = configs.ADUsername;
-            ADuserTextBox.Text = configs.ADUsername;
-            ActiveDirectory.AuthenticatingPassword = configs.ADPassword;
-            ADpassPasswordBox.Password = configs.ADPassword;
+            ADdomainTextBox.Text = ActiveDirectory.DomainName;
+            ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
+            ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
         }
 
         /* Primary Action */
@@ -143,13 +137,12 @@ namespace Unified_Systems.Settings
                 configs.ADUsername = ADuserTextBox.Text;
                 ActiveDirectory.AuthenticatingPassword = ADpassPasswordBox.Password;
                 configs.ADPassword = ADpassPasswordBox.Password;
-
             }
             catch
             {
                 return false;
             }
-            EncryptDecrypt.SaveConfig(configs);
+            ConfigActions.SaveConfig(configs);
             return true;
         }
 

@@ -40,6 +40,106 @@ namespace Unified_Systems.User
             BuildList();
             lookupText.Focus();
         }
+        private void Disable_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ReferenceEquals(ActiveDirectory.Users, null) || !ActiveDirectory.IsConnected)
+            {
+                Connect();
+                if (ActiveDirectory.IsConnected)
+                {
+                    resultMessage.Content = "AD Connection Successful";
+                    resultMessage.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        Configuration configs = new Configuration();
+        private void showCredInput()
+        {
+            curtain.Visibility = Visibility.Visible;
+            credInputs.Visibility = Visibility.Visible;
+
+            ADdomainTextBox.Text = ActiveDirectory.DomainName;
+            ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
+            ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
+        }
+        private void hideCredInput()
+        {
+            curtain.Visibility = Visibility.Hidden;
+            credInputs.Visibility = Visibility.Hidden;
+            credInputMessage.Visibility = Visibility.Collapsed;
+        }
+        private void Connect()
+        {
+            resultMessage.Visibility = Visibility.Hidden;
+            ActiveDirectory.IsConnected = ActiveDirectory.InitializeDomain();
+            if (ActiveDirectory.IsConnected)
+            {
+                hideCredInput();
+
+                ActiveDirectory.RefreshUsers();
+                BuildList();
+            }
+            else
+            {
+                showCredInput();
+            }
+        }
+
+        private void ADpassPasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+                saveCredLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+                saveCred();
+            }
+        }
+        private void saveCredLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        {
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            saveCredLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+            saveCred();
+        }
+        private void saveCredLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            saveCredLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void saveCredLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            saveCredLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void saveCred()
+        {
+            try
+            {
+                ActiveDirectory.DomainName = ADdomainTextBox.Text;
+                configs.DomainName = ADdomainTextBox.Text;
+                ActiveDirectory.AuthenticatingUsername = ADuserTextBox.Text;
+                configs.ADUsername = ADuserTextBox.Text;
+                ActiveDirectory.AuthenticatingPassword = ADpassPasswordBox.Password;
+                configs.ADPassword = ADpassPasswordBox.Password;
+            }
+            catch { }
+
+            ConfigActions.SaveConfig(configs);
+
+            Connect();
+            if (ActiveDirectory.IsConnected)
+            {
+                resultMessage.Content = "AD Connection Successful";
+                resultMessage.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                credInputMessage.Text = "Connection Failed";
+                credInputMessage.Visibility = Visibility.Visible;
+            }
+        }
 
         /// <summary>
         /// Clears and rebuilds the list
@@ -324,12 +424,17 @@ namespace Unified_Systems.User
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             refreshLabelButton.Style = defaultMouseDownLabelButtonStyle;
 
-            ActiveDirectory.RefreshUsers();
-            BuildList();
-
-            resultMessage.Visibility = Visibility.Hidden;
-            resultMessage.Content = "User List Updated";
-            resultMessage.Visibility = Visibility.Visible;
+            Connect();
+            if (ActiveDirectory.IsConnected)
+            {
+                resultMessage.Content = "User List Updated";
+                resultMessage.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                credInputMessage.Text = ActiveDirectory.ConnectionError;
+                credInputMessage.Visibility = Visibility.Visible;
+            }
         }
         private void refreshLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
@@ -423,6 +528,11 @@ namespace Unified_Systems.User
                     ActiveDirectory.RefreshUsers();
                     BuildList();
                 }
+                else
+                {
+                    resultMessage.Content = ActiveDirectory.ConnectionError;
+                    resultMessage.Visibility = Visibility.Visible;
+                }
                 disableLabelButton.IsEnabled = true;
             }
         }
@@ -457,6 +567,11 @@ namespace Unified_Systems.User
                 ActiveDirectory.RefreshUsers();
                 BuildList();
             }
+            else
+            {
+                resultMessage.Content = ActiveDirectory.ConnectionError;
+                resultMessage.Visibility = Visibility.Visible;
+            }
             disableLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
@@ -482,16 +597,6 @@ namespace Unified_Systems.User
             Style warningCancelLabelButtonStyle = FindResource("warningCancelLabelButtonStyle") as Style;
             confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
-        }
-
-        /// <summary>
-        /// Hide result message with mouse
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void resultMessage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            //resultMessage.Visibility = Visibility.Hidden;
         }
     }
 }

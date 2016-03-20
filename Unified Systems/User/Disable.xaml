@@ -46,6 +46,14 @@
             </Setter>
         </Style>
 
+        <Style x:Key="textBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="CaretBrush" Value="LightGray"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
         <Style x:Key="defaultLabelButtonStyle" TargetType="{x:Type Label}">
             <Setter Property="Margin" Value="10"/>
             <Setter Property="Height" Value="25"/>
@@ -259,9 +267,42 @@
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>
         <Label x:Name="disableLabelButton" Content="Disable User" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="5" MouseDown="disableLabelButton_MouseDown" MouseUp="disableLabelButton_MouseUp" MouseLeave="disableLabelButton_MouseLeave"/>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
+        <Grid x:Name="credInputs"  VerticalAlignment="Center" Width="250"  HorizontalAlignment="Center" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1"  Background="#FF303030" Margin="0,30,0,0"/>
+            <Label Grid.ColumnSpan="3" Margin="20,0" VerticalAlignment="Bottom" Content ="Active Directory" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
+                <TextBlock x:Name="credInputMessage" Text ="" Margin="0,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="#FFFF8080" Visibility="Collapsed"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="10,10,0,10">
+                        <Label Content ="Domain Name" Foreground="LightGray" BorderBrush="LightGray" Height="21" Margin="0,0,0,2"/>
+                        <Label Content ="Username" Foreground="LightGray" Height="21" Margin="0,0,0,2"/>
+                        <Label Content ="Password" Foreground="LightGray" Height="21" Margin="0,0,0,2"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="-10,10,10,10">
+                        <TextBox x:Name="ADdomainTextBox" Style="{StaticResource textBoxStyle}" Height="21" Margin="0,0,0,2"/>
+                        <TextBox x:Name="ADuserTextBox" Style="{StaticResource textBoxStyle}" Height="21" Margin="0,0,0,2"/>
+                        <PasswordBox x:Name="ADpassPasswordBox" Height="21" Margin="0,0,0,2" Padding="0" VerticalContentAlignment="Center" Background="#FF454545" Foreground="LightGray" CaretBrush="LightGray" KeyDown="ADpassPasswordBox_KeyDown"/>
+                        <Label x:Name="saveCredLabelButton" Content="Connect" Margin="10,10,10,0" Style="{StaticResource defaultLabelButtonStyle}" MouseDown="saveCredLabelButton_MouseDown" MouseUp="saveCredLabelButton_MouseUp" MouseLeave="saveCredLabelButton_MouseLeave"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
         <Label x:Name="confirmMessage" Style="{StaticResource WarningMessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden"/>
         <Label x:Name="confirmYesLabelButton" Style="{StaticResource warningConfirmLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmYesLabelButton_MouseDown" Visibility="Hidden"/>
         <Label x:Name="confirmNoLabelButton" Content="Cancel" Style="{StaticResource warningCancelLabelButtonStyle}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseDown="confirmNoLabelButton_MouseDown" Visibility="Hidden"/>
-        <Label x:Name="resultMessage" Style="{StaticResource MessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" MouseEnter="resultMessage_MouseEnter" Visibility="Hidden" IsHitTestVisible="False"/>
+        <Label x:Name="resultMessage" Style="{StaticResource MessageOverview}" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Hidden" IsHitTestVisible="False"/>
     </Grid>
 </Page>

@@ -83,52 +83,6 @@ namespace Unified_Systems
             fsDecrypted.Close();
         }
 
-        private static string SecretKey = "???1)\"\u001f4";
-
-        public static void SaveConfig(Configuration creds)
-        {
-            string configPath = @".\~onfig";
-            string encryptedPath = @".\config";
-
-            FileStream configFile = File.Create(configPath);
-            XmlSerializer formatter = new XmlSerializer(creds.GetType());
-
-            formatter.Serialize(configFile, creds);
-            configFile.Close();
-
-            // Encrypt the file.
-            EncryptDecrypt.EncryptFile(configPath,
-               encryptedPath,
-               SecretKey);
-
-            File.Delete(configPath);
-        }
-
-        public static Configuration LoadConfig()
-        {
-            string encryptedPath = @".\config";
-            string decryptedPath = @".\~onfig";
-
-            // Decrypt the file.
-            EncryptDecrypt.DecryptFile(encryptedPath,
-               decryptedPath,
-               SecretKey);
-
-            Configuration config = new Configuration();
-            FileStream configFile = new FileStream(decryptedPath, FileMode.Open);
-            XmlSerializer formatter = new XmlSerializer(config.GetType());
-            byte[] buffer = new byte[configFile.Length];
-
-            configFile.Read(buffer, 0, (int)configFile.Length);
-            configFile.Close();
-            File.Delete(decryptedPath);
-
-            MemoryStream stream = new MemoryStream(buffer);
-            config = (Configuration)formatter.Deserialize(stream);
-
-            return config;
-        }
-
         //internal static void Main()
         //{
         //    // Must be 64 bits, 8 bytes.

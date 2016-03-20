@@ -39,7 +39,7 @@ namespace Unified_Systems
 
             try
             {
-                configs = EncryptDecrypt.LoadConfig();
+                configs = ConfigActions.LoadConfig();
             }
             catch
             {
@@ -387,12 +387,6 @@ namespace Unified_Systems
         private User.User User_User = new User.User();
         private void User_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (ReferenceEquals(ActiveDirectory.Users, null) || !ActiveDirectory.IsConnected)
-            {
-                ActiveDirectory.IsConnected = ActiveDirectory.InitializeDomain();
-                if (ActiveDirectory.IsConnected) ActiveDirectory.RefreshUsers();
-            }
-
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
             _NavigationFrame.Navigate(User_User);
             ResetMenuColors();
