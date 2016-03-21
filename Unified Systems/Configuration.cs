@@ -18,11 +18,19 @@ namespace Unified_Systems
     
     public static class ConfigActions
     {
-        private static string SecretKey = "???1)\"\u001f4";
+        private static string SecretKey;
+
         public static void SaveConfig(Configuration config)
         {
-            string configPath = @".\~onfig";
-            string encryptedPath = @".\config";
+            string configPath = Path.GetTempPath() + @"\~onfig";
+            string encryptedPath = Path.GetTempPath() + @"\..\config.eusc";
+            string keyPath = Path.GetTempPath() + @"\..\config.eusk";
+
+            if (SecretKey == null)
+            {
+                SecretKey = EncryptDecrypt.GenerateKey();
+                File.WriteAllText(keyPath, SecretKey);
+            }
 
             FileStream configFile = File.Create(configPath);
             XmlSerializer formatter = new XmlSerializer(config.GetType());
@@ -39,8 +47,11 @@ namespace Unified_Systems
         }
         public static Configuration LoadConfig()
         {
-            string encryptedPath = @".\config";
-            string decryptedPath = @".\~onfig";
+            string encryptedPath = Path.GetTempPath() + @"\..\config.eusc";
+            string decryptedPath = Path.GetTempPath() + @"\~onfig";
+            string keyPath = Path.GetTempPath() + @"\..\config.eusk";
+
+            SecretKey = File.ReadAllText(keyPath);
 
             // Decrypt the file.
             EncryptDecrypt.DecryptFile(encryptedPath,

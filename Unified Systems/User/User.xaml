@@ -222,46 +222,46 @@
             <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1" Margin="0,30,0,0"/>
             <Label x:Name="infoLabel" Grid.ColumnSpan="3" Margin="20,0,0,0" VerticalAlignment="Bottom" Content ="User Information" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="1" Grid.Column="0" Margin="10,10,0,10">
-                <Label Content ="Username" Foreground="LightGray" Height="22"/>
-                <Label Content ="Email" Foreground="LightGray" Height="22"/>
-                <Label Content ="Title" Foreground="LightGray" Height="22"/>
-                <Label Content ="Department" Foreground="LightGray" Height="22"/>
-                <Label Content ="Company" Foreground="LightGray" Height="22"/>
-                <Label Content ="Created" Foreground="LightGray" Height="22"/>
-                <Label Content ="Expiry" Foreground="LightGray" Height="22"/>
-                <Label Content ="Last Logon Date" Foreground="LightGray" Height="22"/>
-                <Label Content ="Last Password Attempt" Foreground="LightGray" Height="22"/>
-                <Label Content ="Locked Out" Foreground="LightGray" Height="22"/>
-                <Label Content ="Lockout Time" Foreground="LightGray" Height="22"/>
+                <Label Content ="Username" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Email" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Title" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Department" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Company" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Created" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Expiry" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Last Logon Date" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Last Password Attempt" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Locked Out" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content ="Lockout Time" Foreground="LightGray" Height="21" Padding="5,0"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10">
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
-                <Label Content =":" Foreground="LightGray" Height="22"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label Content =":" Foreground="LightGray" Height="21" Padding="5,0"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,10,10,10">
-                <Label x:Name="Username" Foreground="LightGray" Height="22"/>
-                <Label x:Name="Email" Foreground="LightGray" Height="22"/>
-                <Label x:Name="Title" Foreground="LightGray" Height="22"/>
-                <Label x:Name="Department" Foreground="LightGray" Height="22"/>
-                <Label x:Name="Company" Foreground="LightGray" Height="22"/>
-                <Label x:Name="CreatedDate" Foreground="LightGray" Height="22"/>
-                <Label x:Name="ExpiryDate" Foreground="LightGray" Height="22"/>
-                <Label x:Name="LastLogonDate" Foreground="LightGray" Height="22"/>
-                <Label x:Name="LastBadPasswordAttempt" Foreground="LightGray" Height="22"/>
-                <Label x:Name="LockedOut" Foreground="LightGray" Height="22"/>
-                <Label x:Name="AccountLockoutTime" Foreground="LightGray" Height="22"/>
+                <Label x:Name="Username" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="Email" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="Title" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="Department" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="Company" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="CreatedDate" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="ExpiryDate" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="LastLogonDate" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="LastBadPasswordAttempt" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="LockedOut" Foreground="LightGray" Height="21" Padding="5,0"/>
+                <Label x:Name="AccountLockoutTime" Foreground="LightGray" Height="21" Padding="5,0"/>
             </StackPanel>
         </Grid>
-        <ListBox x:Name="groupList" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray"/>
+        <ListBox x:Name="groupList" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray" Padding="10"/>
         <TextBox x:Name="lookupText" Style="{StaticResource placeHolder}" Tag="Search for user..." Margin="10"  VerticalAlignment="Bottom" Grid.Row="3" Grid.ColumnSpan="2" Height="25" Background="#FF454545" Foreground="LightGray" KeyDown="lookupText_KeyDown" TextChanged="lookupText_TextChanged"/>
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>

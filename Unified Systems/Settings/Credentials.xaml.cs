@@ -131,12 +131,38 @@ namespace Unified_Systems.Settings
         {
             try
             {
-                ActiveDirectory.DomainName = ADdomainTextBox.Text;
-                configs.DomainName = ADdomainTextBox.Text;
-                ActiveDirectory.AuthenticatingUsername = ADuserTextBox.Text;
-                configs.ADUsername = ADuserTextBox.Text;
-                ActiveDirectory.AuthenticatingPassword = ADpassPasswordBox.Password;
-                configs.ADPassword = ADpassPasswordBox.Password;
+                if (String.IsNullOrEmpty(ADdomainTextBox.Text))
+                {
+                    ActiveDirectory.DomainName = null;
+                    configs.DomainName = null;
+                }
+                else
+                {
+                    ActiveDirectory.DomainName = ADdomainTextBox.Text;
+                    configs.DomainName = ADdomainTextBox.Text;
+                }
+
+                if (String.IsNullOrEmpty(ADuserTextBox.Text))
+                {
+                    ActiveDirectory.AuthenticatingUsername = null;
+                    configs.ADUsername = null;
+                }
+                else
+                {
+                    ActiveDirectory.AuthenticatingUsername = ADuserTextBox.Text;
+                    configs.ADUsername = ADuserTextBox.Text;
+                }
+
+                if (String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                {
+                    ActiveDirectory.AuthenticatingPassword = null;
+                    configs.ADPassword = null;
+                }
+                else
+                {
+                    ActiveDirectory.AuthenticatingPassword = ADpassPasswordBox.Password;
+                    configs.ADPassword = ADpassPasswordBox.Password;
+                }
             }
             catch
             {
