@@ -37,136 +37,25 @@ namespace Unified_Systems.User
         public Enable()
         {
             InitializeComponent();
-            BuildList();
-            lookupText.Focus();
         }
         private void Enable_Loaded(object sender, RoutedEventArgs e)
         {
-            if (ReferenceEquals(ActiveDirectory.Users, null) || !ActiveDirectory.IsConnected)
+            if (ReferenceEquals(ActiveDirectory.Users, null))
             {
-                Connect();
-                if (ActiveDirectory.IsConnected)
+                if (ActiveDirectory.Connect())
                 {
                     resultMessage.Content = "AD Connection Successful";
                     resultMessage.Visibility = Visibility.Visible;
                 }
-            }
-        }
-
-        Configuration configs = new Configuration();
-        private void showCredInput()
-        {
-            curtain.Visibility = Visibility.Visible;
-            credInputs.Visibility = Visibility.Visible;
-
-            ADdomainTextBox.Text = ActiveDirectory.DomainName;
-            ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
-            ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
-        }
-        private void hideCredInput()
-        {
-            curtain.Visibility = Visibility.Hidden;
-            credInputs.Visibility = Visibility.Hidden;
-            credInputMessage.Visibility = Visibility.Collapsed;
-        }
-        private void Connect()
-        {
-            resultMessage.Visibility = Visibility.Hidden;
-            ActiveDirectory.IsConnected = ActiveDirectory.InitializeDomain();
-            if (ActiveDirectory.IsConnected)
-            {
-                hideCredInput();
-
-                ActiveDirectory.RefreshUsers();
-                BuildList();
-            }
-            else
-            {
-                showCredInput();
-            }
-        }
-
-        private void ADpassPasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-                saveCredLabelButton.Style = defaultMouseDownLabelButtonStyle;
-
-                saveCred();
-            }
-        }
-        private void saveCredLabelButton_MouseDown(object sender, RoutedEventArgs e)
-        {
-            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            saveCredLabelButton.Style = defaultMouseDownLabelButtonStyle;
-
-            saveCred();
-        }
-        private void saveCredLabelButton_MouseUp(object sender, RoutedEventArgs e)
-        {
-            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            saveCredLabelButton.Style = defaultLabelButtonStyle;
-        }
-        private void saveCredLabelButton_MouseLeave(object sender, RoutedEventArgs e)
-        {
-            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            saveCredLabelButton.Style = defaultLabelButtonStyle;
-        }
-        private void saveCred()
-        {
-            try
-            {
-                if (String.IsNullOrEmpty(ADdomainTextBox.Text))
-                {
-                    ActiveDirectory.DomainName = null;
-                    configs.DomainName = null;
-                }
                 else
                 {
-                    ActiveDirectory.DomainName = ADdomainTextBox.Text;
-                    configs.DomainName = ADdomainTextBox.Text;
-                }
-
-                if (String.IsNullOrEmpty(ADuserTextBox.Text))
-                {
-                    ActiveDirectory.AuthenticatingUsername = null;
-                    configs.ADUsername = null;
-                }
-                else
-                {
-                    ActiveDirectory.AuthenticatingUsername = ADuserTextBox.Text;
-                    configs.ADUsername = ADuserTextBox.Text;
-                }
-
-                if (String.IsNullOrEmpty(ADpassPasswordBox.Password))
-                {
-                    ActiveDirectory.AuthenticatingPassword = null;
-                    configs.ADPassword = null;
-                }
-                else
-                {
-                    ActiveDirectory.AuthenticatingPassword = ADpassPasswordBox.Password;
-                    configs.ADPassword = ADpassPasswordBox.Password;
+                    ExitToLogin();
                 }
             }
-            catch { }
-
-            ConfigActions.SaveConfig(configs);
-
-            Connect();
-            if (ActiveDirectory.IsConnected)
-            {
-                resultMessage.Content = "AD Connection Successful";
-                resultMessage.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                credInputMessage.Text = "Connection Failed";
-                credInputMessage.Visibility = Visibility.Visible;
-            }
+            BuildList();
+            lookupText.Focus();
         }
-
+        
         /// <summary>
         /// Clears and rebuilds the list
         /// </summary>
@@ -453,16 +342,14 @@ namespace Unified_Systems.User
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             refreshLabelButton.Style = defaultMouseDownLabelButtonStyle;
 
-            Connect();
-            if (ActiveDirectory.IsConnected)
+            if (ActiveDirectory.Connect())
             {
                 resultMessage.Content = "User List Updated";
                 resultMessage.Visibility = Visibility.Visible;
             }
             else
             {
-                credInputMessage.Text = ActiveDirectory.ConnectionError;
-                credInputMessage.Visibility = Visibility.Visible;
+                ExitToLogin();
             }
         }
         private void refreshLabelButton_MouseUp(object sender, RoutedEventArgs e)
@@ -552,15 +439,20 @@ namespace Unified_Systems.User
             {
                 if (ActiveDirectory.SelectedUser.EnableUser())
                 {
-                    resultMessage.Content = "User Enable Successfully";
+                    resultMessage.Content = "User Enabled Successfully";
                     resultMessage.Visibility = Visibility.Visible;
                     ActiveDirectory.RefreshUsers();
                     BuildList();
                 }
-                else
+                else if (ActiveDirectory.Connect())
                 {
                     resultMessage.Content = ActiveDirectory.ConnectionError;
                     resultMessage.Visibility = Visibility.Visible;
+                    BuildList();
+                }
+                else
+                {
+                    ExitToLogin();
                 }
                 enableLabelButton.IsEnabled = true;
             }
@@ -591,15 +483,20 @@ namespace Unified_Systems.User
 
             if (ActiveDirectory.SelectedUser.EnableUser())
             {
-                resultMessage.Content = "User Enable Successfully";
+                resultMessage.Content = "User Enabled Successfully";
                 resultMessage.Visibility = Visibility.Visible;
                 ActiveDirectory.RefreshUsers();
                 BuildList();
             }
-            else
+            else if (ActiveDirectory.Connect())
             {
                 resultMessage.Content = ActiveDirectory.ConnectionError;
                 resultMessage.Visibility = Visibility.Visible;
+                BuildList();
+            }
+            else
+            {
+                ExitToLogin();
             }
             enableLabelButton.IsEnabled = true;
         }
@@ -626,6 +523,12 @@ namespace Unified_Systems.User
             Style warningCancelLabelButtonStyle = FindResource("warningCancelLabelButtonStyle") as Style;
             confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
+        }
+
+        public event EventHandler Disconnected;
+        private void ExitToLogin()
+        {
+            Disconnected(this, new EventArgs());
         }
     }
 }

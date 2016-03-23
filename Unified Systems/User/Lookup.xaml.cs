@@ -27,18 +27,18 @@ using System.DirectoryServices.AccountManagement;
 namespace Unified_Systems.User
 {
     /// <summary>
-    /// Interaction logic for Enable.xaml
+    /// Interaction logic for Lookup.xaml
     /// </summary>
-    public partial class Extend : Page
+    public partial class Lookup : Page
     {
         /// <summary>
         /// Primary function
         /// </summary>
-        public Extend()
+        public Lookup()
         {
             InitializeComponent();
         }
-        private void Extend_Loaded(object sender, RoutedEventArgs e)
+        private void Lookup_Loaded(object sender, RoutedEventArgs e)
         {
             if (ReferenceEquals(ActiveDirectory.Users, null))
             {
@@ -65,22 +65,18 @@ namespace Unified_Systems.User
 
             foreach (UserPrincipal User in ActiveDirectory.Users)
             {
-                if (User.IsAccountExpired())
-                {
-                    userList.Items.Add(User.SamAccountName);
-                }
+                userList.Items.Add(User.SamAccountName);
             }
 
-            extendLabelButton.IsEnabled = false;
+            saveLabelButton.IsEnabled = false;
             if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
             {
                 foreach (string user in userList.Items)
                 {
                     if (ActiveDirectory.SelectedUser.SamAccountName == user)
                     {
-                        extendLabelButton.IsEnabled = true;
+                        saveLabelButton.IsEnabled = true;
                         userList.SelectedItem = user;
-                        break;
                     }
                 }
             }
@@ -156,7 +152,7 @@ namespace Unified_Systems.User
                     groupList.Items.Add(Group.Name);
                 }
 
-                extendLabelButton.IsEnabled = true;
+                saveLabelButton.IsEnabled = true;
             }
             else
             {
@@ -173,13 +169,13 @@ namespace Unified_Systems.User
                 LockedOut.Content = String.Empty;
                 AccountLockoutTime.Content = String.Empty;
 
-                extendLabelButton.IsEnabled = false;
+                saveLabelButton.IsEnabled = false;
             }
         }
         private void ClearSelection()
         {
             userList.SelectedIndex = -1;
-            extendLabelButton.IsEnabled = false;
+            saveLabelButton.IsEnabled = false;
         }
 
         /* Search Functions */
@@ -210,16 +206,13 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.IsAccountExpired())
+                    if (User.Name.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        if (User.Name.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                        searchResult++;
+                        if (searchResult == searchCount)
                         {
-                            searchResult++;
-                            if (searchResult == searchCount)
-                            {
-                                userList.SelectedItem = User.SamAccountName;
-                                return;
-                            }
+                            userList.SelectedItem = User.SamAccountName;
+                            return;
                         }
                     }
                 }
@@ -237,57 +230,45 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.IsAccountExpired())
+                    if (!ReferenceEquals(User.EmailAddress, null))
                     {
-                        if (lookupText.Text.IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (User.EmailAddress.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            if (!ReferenceEquals(User.EmailAddress, null))
+                            searchResult++;
+                            if (searchResult == searchCount)
                             {
-                                if (User.EmailAddress.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
-                                {
-                                    searchResult++;
-                                    if (searchResult == searchCount)
-                                    {
-                                        userList.SelectedItem = User.SamAccountName;
-                                        return;
-                                    }
-                                }
+                                userList.SelectedItem = User.SamAccountName;
+                                return;
                             }
                         }
                     }
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.IsAccountExpired())
+                    if (!ReferenceEquals(User.GetTitle(), null))
                     {
-                        if (!ReferenceEquals(User.GetTitle(), null))
+                        if (User.GetTitle().IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            if (User.GetTitle().IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                            searchResult++;
+                            if (searchResult == searchCount)
                             {
-                                searchResult++;
-                                if (searchResult == searchCount)
-                                {
-                                    userList.SelectedItem = User.SamAccountName;
-                                    return;
-                                }
+                                userList.SelectedItem = User.SamAccountName;
+                                return;
                             }
                         }
                     }
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.IsAccountExpired())
+                    if (!ReferenceEquals(User.GetDepartment(), null))
                     {
-                        if (!ReferenceEquals(User.GetDepartment(), null))
+                        if (User.GetDepartment().IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            if (User.GetDepartment().IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                            searchResult++;
+                            if (searchResult == searchCount)
                             {
-                                searchResult++;
-                                if (searchResult == searchCount)
-                                {
-                                    userList.SelectedItem = User.SamAccountName;
-                                    return;
-                                }
+                                userList.SelectedItem = User.SamAccountName;
+                                return;
                             }
                         }
                     }
@@ -417,18 +398,18 @@ namespace Unified_Systems.User
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private bool confirmAction = false;
-        private void extendLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        private bool confirmAction = true;
+        private void saveLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            extendLabelButton.Style = defaultMouseDownLabelButtonStyle;
+            saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
             resultMessage.Visibility = Visibility.Hidden;
 
             if (confirmAction)
             {
                 curtain.Visibility = Visibility.Visible;
-                confirmMessage.Content = "Are you sure you want to extend " + ActiveDirectory.SelectedUser.SamAccountName + "?";
-                confirmYesLabelButton.Content = "Extend " + ActiveDirectory.SelectedUser.SamAccountName;
+                confirmMessage.Content = "Are you sure you want to save changes made to " + ActiveDirectory.SelectedUser.SamAccountName + "?";
+                confirmYesLabelButton.Content = "Save Changes to " + ActiveDirectory.SelectedUser.SamAccountName;
                 confirmMessage.Visibility = Visibility.Visible;
                 confirmYesLabelButton.Visibility = Visibility.Visible;
                 confirmYesLabelButton.IsEnabled = true;
@@ -437,9 +418,9 @@ namespace Unified_Systems.User
             }
             else
             {
-                if (ActiveDirectory.SelectedUser.ExtendUser(30))
+                if (ActiveDirectory.SelectedUser.SaveUser())
                 {
-                    resultMessage.Content = "User Extend Successfully";
+                    resultMessage.Content = "User Saved Successfully";
                     resultMessage.Visibility = Visibility.Visible;
                     ActiveDirectory.RefreshUsers();
                     BuildList();
@@ -454,18 +435,18 @@ namespace Unified_Systems.User
                 {
                     ExitToLogin();
                 }
-                extendLabelButton.IsEnabled = true;
+                saveLabelButton.IsEnabled = true;
             }
         }
-        private void extendLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        private void saveLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            extendLabelButton.Style = defaultLabelButtonStyle;
+            saveLabelButton.Style = defaultLabelButtonStyle;
         }
-        private void extendLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        private void saveLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            extendLabelButton.Style = defaultLabelButtonStyle;
+            saveLabelButton.Style = defaultLabelButtonStyle;
         }
         /// <summary>
         /// Warning and confirmation template if needed
@@ -481,9 +462,9 @@ namespace Unified_Systems.User
             confirmNoLabelButton.Visibility = Visibility.Hidden;
             confirmNoLabelButton.IsEnabled = false;
 
-            if (ActiveDirectory.SelectedUser.ExtendUser(30))
+            if (ActiveDirectory.SelectedUser.SaveUser())
             {
-                resultMessage.Content = "User Extended Successfully";
+                resultMessage.Content = "User Saved Successfully";
                 resultMessage.Visibility = Visibility.Visible;
                 ActiveDirectory.RefreshUsers();
                 BuildList();
@@ -498,7 +479,7 @@ namespace Unified_Systems.User
             {
                 ExitToLogin();
             }
-            extendLabelButton.IsEnabled = true;
+            saveLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {

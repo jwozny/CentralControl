@@ -175,7 +175,7 @@
                             <BeginStoryboard>
                                 <Storyboard>
                                     <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="194" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="218" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                     <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
@@ -185,6 +185,7 @@
                         </EventTrigger>
                     </StackPanel.Triggers>
                     <Label x:Name="User" Content="User" Style="{StaticResource MenuStyle}" MouseDown="User_MouseDown"/>
+                    <Label x:Name="UserLookup" Content="Lookup" Style="{StaticResource SubMenuStyle}" MouseDown="UserLookup_MouseDown"/>
                     <Label x:Name="UserCreate" Content="Create" Style="{StaticResource SubMenuStyle}" MouseDown="UserCreate_MouseDown"/>
                     <Label x:Name="UserReset" Content="Reset Password"  Style="{StaticResource SubMenuStyle}" MouseDown="UserReset_MouseDown"/>
                     <Label x:Name="UserUnlock" Content="Unlock"  Style="{StaticResource SubMenuStyle}" MouseDown="UserUnlock_MouseDown"/>
