@@ -106,10 +106,9 @@ namespace Unified_Systems.User
 
                 Username.Content = ActiveDirectory.SelectedUser.SamAccountName;
 
-                /*if (!ReferenceEquals(User.EmailAddress, null))
-                { Email.Content = User.EmailAddress; }
-                else { Email.Content = " "; }*/
-                Email.Content = ActiveDirectory.SelectedUser.EmailAddress;
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.EmailAddress, null))
+                { Email.Content = ActiveDirectory.SelectedUser.EmailAddress; }
+                else { Email.Content = " "; }
 
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetTitle(), null))
                 { Title.Content = ActiveDirectory.SelectedUser.GetTitle(); }
@@ -138,20 +137,20 @@ namespace Unified_Systems.User
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.LastBadPasswordAttempt, null))
                 { LastBadPasswordAttempt.Content = ActiveDirectory.SelectedUser.LastBadPasswordAttempt; }
                 else { LastBadPasswordAttempt.Content = " "; }
-
+                
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.IsAccountLockedOut(), null))
                 { LockedOut.Content = ActiveDirectory.SelectedUser.IsAccountLockedOut().ToString(); }
                 else { LockedOut.Content = " "; }
-
+                
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountLockoutTime, null))
                 { AccountLockoutTime.Content = ActiveDirectory.SelectedUser.AccountLockoutTime; }
                 else { AccountLockoutTime.Content = " "; }
 
-                foreach (var Group in ActiveDirectory.SelectedUser.GetGroups())
+                foreach (GroupPrincipal Group in ActiveDirectory.SelectedUser.GetGroups())
                 {
-                    groupList.Items.Add(Group.Name);
+                    groupList.Items.Add(Group);
                 }
-
+                
                 saveLabelButton.IsEnabled = true;
             }
             else

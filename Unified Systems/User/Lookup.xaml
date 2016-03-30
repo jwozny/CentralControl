@@ -261,7 +261,22 @@
                 <Label x:Name="AccountLockoutTime" Foreground="LightGray" Height="21" Padding="5,0"/>
             </StackPanel>
         </Grid>
-        <ListBox x:Name="groupList" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray" Padding="10"/>
+        <ListBox ItemsSource="{Binding DataSource}" Grid.IsSharedSizeScope="True" x:Name="groupList" Margin="10" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Background="{x:Null}" Foreground="LightGray" Padding="10,10,10,0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="380" SharedSizeGroup="Column1"/>
+                            <ColumnDefinition Width="50" SharedSizeGroup="Column3"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Name}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding IsSecurityGroup}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Label Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3" Margin="30,0,0,0" VerticalAlignment="Top" Content ="Group Membership" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
+        <Label Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Margin="360,0,0,0" VerticalAlignment="Top" Content ="Security Group" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
         <TextBox x:Name="lookupText" Style="{StaticResource placeHolder}" Tag="Search for user..." Margin="10"  VerticalAlignment="Bottom" Grid.Row="3" Grid.ColumnSpan="2" Height="25" Background="#FF454545" Foreground="LightGray" KeyDown="lookupText_KeyDown" TextChanged="lookupText_TextChanged"/>
         <Label x:Name="lookupLabelButton" Content="Lookup" Style="{StaticResource defaultLabelButtonStyle}"  Grid.Row="3" Grid.Column="2"  MouseDown="lookupLabelButton_MouseDown" MouseUp="lookupLabelButton_MouseUp" MouseLeave="lookupLabelButton_MouseLeave"/>
         <Label x:Name="refreshLabelButton" Content="Refresh Users" Style="{StaticResource defaultLabelButtonStyle}" Grid.Row="3" Grid.Column="3" MouseDown="refreshLabelButton_MouseDown" MouseUp="refreshLabelButton_MouseUp" MouseLeave="refreshLabelButton_MouseLeave"/>

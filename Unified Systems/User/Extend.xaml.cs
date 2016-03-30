@@ -151,9 +151,9 @@ namespace Unified_Systems.User
                 { AccountLockoutTime.Content = ActiveDirectory.SelectedUser.AccountLockoutTime; }
                 else { AccountLockoutTime.Content = " "; }
 
-                foreach (var Group in ActiveDirectory.SelectedUser.GetGroups())
+                foreach (GroupPrincipal Group in ActiveDirectory.SelectedUser.GetGroups())
                 {
-                    groupList.Items.Add(Group.Name);
+                    groupList.Items.Add(Group);
                 }
 
                 extendLabelButton.IsEnabled = true;
