@@ -84,6 +84,7 @@ namespace Unified_Systems
                 ConnectionError = E.Message.ToString();
                 return false;
             }
+            GetUserProperties_Initialize();
             return true;
         }
         public static bool Connect()
@@ -101,6 +102,13 @@ namespace Unified_Systems
         public static List<UserPrincipal> Users { get; set; }
 
         public static UserPrincipal SelectedUser;
+        public static UserPrincipal CurrentBackgroundUser;
+        public static string SelectedUser_Title;
+        public static string SelectedUser_Department;
+        public static string SelectedUser_Company;
+        public static string SelectedUser_CreatedDate;
+        public static bool SelectedUser_IsAccountLockedOut;
+        public static PrincipalSearchResult<Principal> SelectedUser_Groups;
 
         public static void RefreshUsers()
         {
@@ -286,37 +294,57 @@ namespace Unified_Systems
             }
             return true;
         }
-        
-        /* Background Worker - GetAllUsers */
+
+        /* Background Worker - GetUserProperties */
         /// <summary>
         /// Create background worker instance
         /// </summary>
-        public static BackgroundWorker GetAllUsers = new BackgroundWorker();
+        public static BackgroundWorker GetUserProperties = new BackgroundWorker();
         /// <summary>
         /// Initialize background worker with actions
         /// </summary>
-        public static void GetAllUsers_Initialize()
+        public static void GetUserProperties_Initialize()
         {
-            GetAllUsers.WorkerReportsProgress = true;
-            GetAllUsers.WorkerSupportsCancellation = true;
-            GetAllUsers.DoWork += GetAllUsers_DoWork;
-            GetAllUsers.ProgressChanged += GetAllUsers_ProgressChanged;
-            GetAllUsers.RunWorkerCompleted += GetAllUsers_Completed;
+            GetUserProperties.WorkerReportsProgress = true;
+            GetUserProperties.WorkerSupportsCancellation = true;
+            GetUserProperties.DoWork += GetUserProperties_DoWork;
+            GetUserProperties.ProgressChanged += GetUserProperties_ProgressChanged;
+            GetUserProperties.RunWorkerCompleted += GetUserProperties_Completed;
         }
         /// <summary>
         /// Define background worker actions
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void GetAllUsers_DoWork(object sender, DoWorkEventArgs e)
+        private static void GetUserProperties_DoWork(object sender, DoWorkEventArgs e)
         {
             // Work Started - Do this.
+            CurrentBackgroundUser = SelectedUser;
+
+            SelectedUser_Title = string.Empty;
+            SelectedUser_Department = string.Empty;
+            SelectedUser_Company = string.Empty;
+            SelectedUser_CreatedDate = string.Empty;
+            SelectedUser_IsAccountLockedOut = false;
+            SelectedUser_Groups = null;
+
+            SelectedUser_Title = CurrentBackgroundUser.GetTitle();
+            GetUserProperties.ReportProgress(15);
+            SelectedUser_Department = CurrentBackgroundUser.GetDepartment();
+            GetUserProperties.ReportProgress(30);
+            SelectedUser_Company = CurrentBackgroundUser.GetCompany();
+            GetUserProperties.ReportProgress(45);
+            SelectedUser_CreatedDate = CurrentBackgroundUser.GetCreatedDate();
+            GetUserProperties.ReportProgress(60);
+            SelectedUser_IsAccountLockedOut = CurrentBackgroundUser.IsAccountLockedOut();
+            GetUserProperties.ReportProgress(75);
+            SelectedUser_Groups = CurrentBackgroundUser.GetGroups();
         }
-        private static void GetAllUsers_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private static void GetUserProperties_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             // Do this when progress is reported.
         }
-        private static void GetAllUsers_Completed(object sender, RunWorkerCompletedEventArgs e)
+        private static void GetUserProperties_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
             // Work Completed - Do this.
         }

@@ -94,6 +94,8 @@ namespace Unified_Systems.User
         {
             userList.ScrollIntoView(userList.SelectedItem);
             groupList.Items.Clear();
+            ActiveDirectory.GetUserProperties.RunWorkerCompleted += GetUserProperties_Completed;
+            ActiveDirectory.GetUserProperties.ProgressChanged += GetUserProperties_ProgressChanged;
 
             if (userList.SelectedItem != null)
             {
@@ -102,6 +104,10 @@ namespace Unified_Systems.User
                     if (User.SamAccountName == userList.SelectedItem.ToString())
                     {
                         ActiveDirectory.SelectedUser = User;
+                        if (!ActiveDirectory.GetUserProperties.IsBusy)
+                        {
+                            ActiveDirectory.GetUserProperties.RunWorkerAsync();
+                        }
                     }
                 }
 
@@ -109,26 +115,17 @@ namespace Unified_Systems.User
 
                 Username.Content = ActiveDirectory.SelectedUser.SamAccountName;
 
-                /*if (!ReferenceEquals(User.EmailAddress, null))
-                { Email.Content = User.EmailAddress; }
-                else { Email.Content = " "; }*/
-                Email.Content = ActiveDirectory.SelectedUser.EmailAddress;
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.EmailAddress, null))
+                { Email.Content = ActiveDirectory.SelectedUser.EmailAddress; }
+                else { Email.Content = " "; }
 
-                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetTitle(), null))
-                { Title.Content = ActiveDirectory.SelectedUser.GetTitle(); }
-                else { Title.Content = " "; }
+                Title.Content = "Fetching...";
 
-                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetDepartment(), null))
-                { Department.Content = ActiveDirectory.SelectedUser.GetDepartment(); }
-                else { Department.Content = " "; }
+                Department.Content = "Fetching...";
 
-                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetCompany(), null))
-                { Company.Content = ActiveDirectory.SelectedUser.GetCompany(); }
-                else { Company.Content = " "; }
+                Company.Content = "Fetching...";
 
-                if (!ReferenceEquals(ActiveDirectory.SelectedUser.GetCreatedDate(), null))
-                { CreatedDate.Content = ActiveDirectory.SelectedUser.GetCreatedDate(); }
-                else { CreatedDate.Content = " "; }
+                CreatedDate.Content = "Fetching...";
 
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountExpirationDate, null))
                 { ExpiryDate.Content = ActiveDirectory.SelectedUser.AccountExpirationDate; }
@@ -142,18 +139,13 @@ namespace Unified_Systems.User
                 { LastBadPasswordAttempt.Content = ActiveDirectory.SelectedUser.LastBadPasswordAttempt; }
                 else { LastBadPasswordAttempt.Content = " "; }
 
-                if (!ReferenceEquals(ActiveDirectory.SelectedUser.IsAccountLockedOut(), null))
-                { LockedOut.Content = ActiveDirectory.SelectedUser.IsAccountLockedOut().ToString(); }
-                else { LockedOut.Content = " "; }
+                LockedOut.Content = "Fetching...";
 
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountLockoutTime, null))
                 { AccountLockoutTime.Content = ActiveDirectory.SelectedUser.AccountLockoutTime; }
                 else { AccountLockoutTime.Content = " "; }
 
-                foreach (GroupPrincipal Group in ActiveDirectory.SelectedUser.GetGroups())
-                {
-                    groupList.Items.Add(Group);
-                }
+                GroupsPlaceholder.Visibility = Visibility.Visible;
 
                 disableLabelButton.IsEnabled = true;
             }
@@ -173,6 +165,92 @@ namespace Unified_Systems.User
                 AccountLockoutTime.Content = String.Empty;
 
                 disableLabelButton.IsEnabled = false;
+            }
+        }
+        private void GetUserProperties_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // Do this when progress is reported.
+            if (userList.SelectedItem != null)
+            {
+                if (userList.SelectedItem.ToString() == ActiveDirectory.CurrentBackgroundUser.SamAccountName.ToString())
+                {
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Title, null))
+                    { Title.Content = ActiveDirectory.SelectedUser_Title; }
+                    else { Title.Content = "Fetching..."; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Department, null))
+                    { Department.Content = ActiveDirectory.SelectedUser_Department; }
+                    else { Department.Content = "Fetching..."; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Company, null))
+                    { Company.Content = ActiveDirectory.SelectedUser_Company; }
+                    else { Company.Content = "Fetching..."; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_CreatedDate, null))
+                    { CreatedDate.Content = ActiveDirectory.SelectedUser_CreatedDate; }
+                    else { CreatedDate.Content = "Fetching..."; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_IsAccountLockedOut, null))
+                    { LockedOut.Content = ActiveDirectory.SelectedUser_IsAccountLockedOut.ToString(); }
+                    else { LockedOut.Content = "Fetching..."; }
+                }
+            }
+        }
+        private void GetUserProperties_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // Work Completed - Do this.
+            ActiveDirectory.GetUserProperties.RunWorkerCompleted -= GetUserProperties_Completed;
+            ActiveDirectory.GetUserProperties.ProgressChanged -= GetUserProperties_ProgressChanged;
+
+            if (userList.SelectedItem != null)
+            {
+                if (userList.SelectedItem.ToString() == ActiveDirectory.CurrentBackgroundUser.SamAccountName.ToString())
+                {
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Title, null))
+                    { Title.Content = ActiveDirectory.SelectedUser_Title; }
+                    else { Title.Content = " "; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Department, null))
+                    { Department.Content = ActiveDirectory.SelectedUser_Department; }
+                    else { Department.Content = " "; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Company, null))
+                    { Company.Content = ActiveDirectory.SelectedUser_Company; }
+                    else { Company.Content = " "; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_CreatedDate, null))
+                    { CreatedDate.Content = ActiveDirectory.SelectedUser_CreatedDate; }
+                    else { CreatedDate.Content = " "; }
+
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_IsAccountLockedOut, null))
+                    { LockedOut.Content = ActiveDirectory.SelectedUser_IsAccountLockedOut.ToString(); }
+                    else { LockedOut.Content = " "; }
+
+                    groupList.Items.Clear();
+                    foreach (GroupPrincipal Group in ActiveDirectory.SelectedUser_Groups)
+                    {
+                        groupList.Items.Add(Group);
+                    }
+                    GroupsPlaceholder.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    ActiveDirectory.GetUserProperties.RunWorkerCompleted += GetUserProperties_Completed;
+                    ActiveDirectory.GetUserProperties.ProgressChanged += GetUserProperties_ProgressChanged;
+                    if (!ActiveDirectory.GetUserProperties.IsBusy)
+                    {
+                        ActiveDirectory.GetUserProperties.RunWorkerAsync();
+                    }
+                }
+            }
+            else
+            {
+                Title.Content = String.Empty;
+                Department.Content = String.Empty;
+                Company.Content = String.Empty;
+                CreatedDate.Content = String.Empty;
+                LockedOut.Content = String.Empty;
+                groupList.Items.Clear();
             }
         }
         private void ClearSelection()
