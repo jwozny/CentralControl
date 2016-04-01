@@ -577,6 +577,13 @@ namespace Unified_Systems
 
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_Disconnected);
         }
+        // Add:
+        // User - Grant Domain Admin
+        // User - Revoke Domain Admin
+        // User - Grant Local Admin
+        // User - Revoke Local Admin
+        // User - Grant VPN Access
+        // User - Revoke VPN Access
 
         //private Server.Server Server_ = new Server.Server();
         private void Server_MouseDown(object sender, MouseButtonEventArgs e)
@@ -794,7 +801,7 @@ namespace Unified_Systems
 
         private void UserLookup_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            //((User.Lookup)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
+            ((User.Lookup)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
         }
         private void UserCreate_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
@@ -810,11 +817,11 @@ namespace Unified_Systems
         }
         private void UserExtend_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            //((User.Extend)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
+            ((User.Extend)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
         }
         private void UserEnable_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            //((User.Enable)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
+            ((User.Enable)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
         }
         private void UserDisable_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {

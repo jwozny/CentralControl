@@ -54,9 +54,13 @@ namespace Unified_Systems
         {
             try
             {
-                if (!ReferenceEquals(DomainName, null) && !ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                if (!ReferenceEquals(DomainName, null) && !(ReferenceEquals(AuthenticatingUsername, null) ^ ReferenceEquals(AuthenticatingPassword, null)))
                 {
                     Domain = new PrincipalContext(ContextType.Domain, DomainName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!(ReferenceEquals(AuthenticatingUsername, null) ^ ReferenceEquals(AuthenticatingPassword, null)))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, System.DirectoryServices.ActiveDirectory.Domain.GetComputerDomain().ToString(), AuthenticatingUsername, AuthenticatingPassword);
                 }
                 else if (!ReferenceEquals(DomainName, null))
                 {
@@ -69,12 +73,12 @@ namespace Unified_Systems
                 Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
                 Users = new List<UserPrincipal>();
             }
-            catch (System.DirectoryServices.AccountManagement.PrincipalServerDownException E)
+            catch (COMException E)
             {
                 ConnectionError = E.Message.ToString();
                 return false;
             }
-            catch (System.DirectoryServices.DirectoryServicesCOMException E)
+            catch (PrincipalServerDownException E)
             {
                 ConnectionError = E.Message.ToString();
                 return false;

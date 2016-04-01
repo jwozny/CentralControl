@@ -150,6 +150,7 @@
         </Grid>
         <Grid Grid.Row="1" Grid.Column="0" Margin="0,2,0,0">
             <Border BorderBrush="#FF252525" BorderThickness="0,0,1,0" Background="#FF303030" Width="200" HorizontalAlignment="Left" Margin="0,-2,0,0"/>
+            <Label Content="Unified Systems v1.0" Grid.Row="3" Grid.Column="0" Margin="10,0,0,0"  HorizontalAlignment="Left" VerticalAlignment="Bottom" Foreground="#FF606060" FontSize="10" Padding="0"/>
             <StackPanel>
                 <StackPanel x:Name="Panel0" Height="28">
                     <StackPanel.Triggers>

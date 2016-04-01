@@ -45,13 +45,63 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
-        <Style x:Key="textBoxStyle" TargetType="{x:Type TextBox}">
+
+        <Style x:Key="defaultTextBoxStyle" TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="#FF454545"/>
             <Setter Property="Foreground" Value="LightGray"/>
             <Setter Property="CaretBrush" Value="LightGray"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="Height" Value="21"/>
+        </Style>
+        <Style x:Key="defaultPasswordBoxStyle" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="CaretBrush" Value="LightGray"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="21"/>
+        </Style>
+
+        <Style x:Key="errorTextBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="CaretBrush" Value="LightGray"/>
+            <Setter Property="BorderBrush" Value="#DDDD3333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="21"/>
+        </Style>
+        <Style x:Key="errorPasswordBoxStyle" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Background" Value="#FF454545"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="CaretBrush" Value="LightGray"/>
+            <Setter Property="BorderBrush" Value="#FFFF4040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="21"/>
+        </Style>
+        
+        <Style x:Key="defaultCheckBoxStyle" TargetType="{x:Type CheckBox}">
+            <Setter Property="Margin" Value="10,5,0,2"/>
+            <Setter Property="Height" Value="21"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+        </Style>
+
+        <Style x:Key="defaultLabelStyle" TargetType="{x:Type Label}">
+            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="Height" Value="21"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="LightGray"/>
         </Style>
 
         <Style x:Key="defaultLabelButtonStyle" TargetType="{x:Type Label}">
@@ -226,15 +276,19 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="10,10,0,10">
-                        <Label Content ="Domain Name" Foreground="LightGray" BorderBrush="LightGray" Height="21" Margin="0,0,0,2"/>
-                        <Label Content ="Username" Foreground="LightGray" Height="21" Margin="0,0,0,2"/>
-                        <Label Content ="Password" Foreground="LightGray" Height="21" Margin="0,0,0,2"/>
+                    <StackPanel Grid.Column="0" Margin="10,10,-110,10">
+                        <CheckBox x:Name="ADdomainCheckbox" Content="Use Local Domain" Style="{StaticResource defaultCheckBoxStyle}" IsChecked="False" Checked="ADdomainCheckbox_Checked" Unchecked="ADdomainCheckbox_Unchecked"/>
+                        <Label Content ="Domain Name" Style="{StaticResource defaultLabelStyle}"/>
+                        <CheckBox x:Name="ADcredentialsCheckbox" Content="Use Windows Authentication" Style="{StaticResource defaultCheckBoxStyle}" IsChecked="False" Checked="ADcredentialsCheckbox_Checked" Unchecked="ADcredentialsCheckbox_Unchecked"/>
+                        <Label Content ="Username" Style="{StaticResource defaultLabelStyle}"/>
+                        <Label Content ="Password" Style="{StaticResource defaultLabelStyle}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Margin="-10,10,10,10">
-                        <TextBox x:Name="ADdomainTextBox" Style="{StaticResource textBoxStyle}" Height="21" Margin="0,0,0,2"/>
-                        <TextBox x:Name="ADuserTextBox" Style="{StaticResource textBoxStyle}" Height="21" Margin="0,0,0,2"/>
-                        <PasswordBox x:Name="ADpassPasswordBox" Height="21" Margin="0,0,0,2" Padding="0" VerticalContentAlignment="Center" Background="#FF454545" Foreground="LightGray" CaretBrush="LightGray" KeyDown="ADpassPasswordBox_KeyDown"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="-10,10,10,10">
+                        <Label Style="{StaticResource defaultLabelStyle}" Margin="0,5,0,2" IsHitTestVisible="False"/>
+                        <TextBox x:Name="ADdomainTextBox" Style="{StaticResource defaultTextBoxStyle}"/>
+                        <Label Style="{StaticResource defaultLabelStyle}" Margin="0,5,0,2" IsHitTestVisible="False"/>
+                        <TextBox x:Name="ADuserTextBox" Style="{StaticResource defaultTextBoxStyle}"/>
+                        <PasswordBox x:Name="ADpassPasswordBox" Style="{StaticResource defaultPasswordBoxStyle}"/>
                         <Label x:Name="saveCredLabelButton" Content="Connect" Margin="10,10,10,0" Style="{StaticResource defaultLabelButtonStyle}" MouseDown="saveCredLabelButton_MouseDown" MouseUp="saveCredLabelButton_MouseUp" MouseLeave="saveCredLabelButton_MouseLeave"/>
                     </StackPanel>
                 </Grid>
