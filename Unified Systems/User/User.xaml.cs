@@ -55,7 +55,7 @@ namespace Unified_Systems.User
 
         private void PopulateCredentials()
         {
-            if (!String.IsNullOrEmpty(ActiveDirectory.DomainName))
+            if (!string.IsNullOrEmpty(ActiveDirectory.DomainName))
             {
                 ADdomainTextBox.Text = ActiveDirectory.DomainName;
                 ADdomainCheckbox.IsChecked = false;
@@ -65,7 +65,7 @@ namespace Unified_Systems.User
                 ADdomainCheckbox.IsChecked = true;
             }
 
-            if (!String.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !String.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
+            if (!string.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !string.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
             {
                 ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
                 ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
@@ -90,6 +90,29 @@ namespace Unified_Systems.User
             credInputMessage.Visibility = Visibility.Collapsed;
         }
 
+        private void ADdomainTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ADdomainTextBox.SelectAll();
+        }
+        private void ADuserTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ADuserTextBox.SelectAll();
+        }
+        private void ADpassPasswordBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ADpassPasswordBox.SelectAll();
+        }
+
+        private void ADdomainTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+                saveCredLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+                saveCred();
+            }
+        }
         private void ADpassPasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -100,6 +123,25 @@ namespace Unified_Systems.User
                 saveCred();
             }
         }
+
+        private void resetLabelButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+            resetLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+            PopulateCredentials();
+        }
+        private void resetLabelButton_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            resetLabelButton.Style = defaultLabelButtonStyle;
+        }
+        private void resetLabelButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
+            resetLabelButton.Style = defaultLabelButtonStyle;
+        }
+
         private void saveCredLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
@@ -129,7 +171,7 @@ namespace Unified_Systems.User
             {
                 if (ADdomainCheckbox.IsChecked == false)
                 {
-                    if (String.IsNullOrEmpty(ADdomainTextBox.Text))
+                    if (string.IsNullOrEmpty(ADdomainTextBox.Text))
                     {
                         ActiveDirectory.DomainName = null;
                         configs.DomainName = null;
@@ -149,14 +191,14 @@ namespace Unified_Systems.User
 
                 if (ADcredentialsCheckbox.IsChecked == false)
                 {
-                    if (String.IsNullOrEmpty(ADuserTextBox.Text) ^ String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                    if (string.IsNullOrEmpty(ADuserTextBox.Text) ^ string.IsNullOrEmpty(ADpassPasswordBox.Password))
                     {
-                        if (String.IsNullOrEmpty(ADuserTextBox.Text))
+                        if (string.IsNullOrEmpty(ADuserTextBox.Text))
                         {
                             Style errorTextBoxStyle = FindResource("errorTextBoxStyle") as Style;
                             ADuserTextBox.Style = errorTextBoxStyle;
                         }
-                        if (String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                        if (string.IsNullOrEmpty(ADpassPasswordBox.Password))
                         {
                             Style errorPasswordBoxStyle = FindResource("errorPasswordBoxStyle") as Style;
                             ADpassPasswordBox.Style = errorPasswordBoxStyle;
@@ -165,7 +207,7 @@ namespace Unified_Systems.User
                     }
                     else
                     {
-                        if (String.IsNullOrEmpty(ADuserTextBox.Text))
+                        if (string.IsNullOrEmpty(ADuserTextBox.Text))
                         {
                             ActiveDirectory.AuthenticatingUsername = null;
                             configs.ADUsername = null;
@@ -178,7 +220,7 @@ namespace Unified_Systems.User
                         Style defaultTextBoxStyle = FindResource("defaultTextBoxStyle") as Style;
                         ADuserTextBox.Style = defaultTextBoxStyle;
 
-                        if (String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                        if (string.IsNullOrEmpty(ADpassPasswordBox.Password))
                         {
                             ActiveDirectory.AuthenticatingPassword = null;
                             configs.ADPassword = null;
@@ -200,7 +242,7 @@ namespace Unified_Systems.User
 
                     ActiveDirectory.AuthenticatingPassword = null;
                     configs.ADPassword = null;
-                    ADpassPasswordBox.Password = String.Empty;
+                    ADpassPasswordBox.Password = string.Empty;
                 }
 
                 PopulateCredentials();
@@ -236,7 +278,15 @@ namespace Unified_Systems.User
         {
             ADdomainTextBox.IsEnabled = true;
 
-            ADdomainTextBox.Text = String.Empty;
+            if (!string.IsNullOrEmpty(ActiveDirectory.DomainName))
+            {
+                ADdomainTextBox.Text = ActiveDirectory.DomainName;
+            }
+            else
+            {
+                ADdomainTextBox.Text = string.Empty;
+            }
+            ADdomainTextBox.Focus();
         }
         private void ADcredentialsCheckbox_Checked(object sender, RoutedEventArgs e)
         {
@@ -244,15 +294,25 @@ namespace Unified_Systems.User
             ADpassPasswordBox.IsEnabled = false;
 
             ADuserTextBox.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            ADpassPasswordBox.Password = String.Empty;
+            ADpassPasswordBox.Password = string.Empty;
         }
         private void ADcredentialsCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             ADuserTextBox.IsEnabled = true;
             ADpassPasswordBox.IsEnabled = true;
 
-            ADuserTextBox.Text = String.Empty;
-            ADpassPasswordBox.Password = String.Empty;
+            if (!string.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !string.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
+            {
+                ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
+                ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
+            }
+            else
+            {
+                ADuserTextBox.Text = string.Empty;
+                ADpassPasswordBox.Password = string.Empty;
+            }
+
+            ADuserTextBox.Focus();
         }
 
         public event EventHandler ConnectionVerified;

@@ -38,7 +38,7 @@ namespace Unified_Systems.Settings
         }
         private void PopulateCredentials()
         {
-            if (!String.IsNullOrEmpty(ActiveDirectory.DomainName))
+            if (!string.IsNullOrEmpty(ActiveDirectory.DomainName))
             {
                 ADdomainTextBox.Text = ActiveDirectory.DomainName;
                 ADdomainCheckbox.IsChecked = false;
@@ -48,7 +48,7 @@ namespace Unified_Systems.Settings
                 ADdomainCheckbox.IsChecked = true;
             }
 
-            if (!String.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !String.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
+            if (!string.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !string.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
             {
                 ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
                 ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
@@ -60,13 +60,40 @@ namespace Unified_Systems.Settings
             }
         }
 
-        /* Primary Action */
-        /// <summary>
-        /// Saves any changes made to the user
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private bool confirmAction = false;
+        private void ADdomainTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ADdomainTextBox.SelectAll();
+        }
+        private void ADuserTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ADuserTextBox.SelectAll();
+        }
+        private void ADpassPasswordBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ADpassPasswordBox.SelectAll();
+        }
+
+        private void ADdomainTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+                saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+                saveSettings();
+            }
+        }
+        private void ADpassPasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
+                saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
+
+                saveSettings();
+            }
+        }
+        
         private void resetLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
@@ -84,6 +111,7 @@ namespace Unified_Systems.Settings
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
             resetLabelButton.Style = defaultLabelButtonStyle;
         }
+
         private void saveLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
@@ -94,26 +122,12 @@ namespace Unified_Systems.Settings
             FocusManager.SetFocusedElement(scope, null);
             Keyboard.ClearFocus();
 
-            if (confirmAction)
+            if (saveSettings())
             {
-                curtain.Visibility = Visibility.Visible;
-                confirmMessage.Content = "Are you sure you want to save changes?";
-                confirmYesLabelButton.Content = "Save Changes";
-                confirmMessage.Visibility = Visibility.Visible;
-                confirmYesLabelButton.Visibility = Visibility.Visible;
-                confirmYesLabelButton.IsEnabled = true;
-                confirmNoLabelButton.Visibility = Visibility.Visible;
-                confirmNoLabelButton.IsEnabled = true;
+                resultMessage.Content = "Saved Successfully";
+                resultMessage.Visibility = Visibility.Visible;
             }
-            else
-            {
-                if (saveSettings())
-                {
-                    resultMessage.Content = "Saved Successfully";
-                    resultMessage.Visibility = Visibility.Visible;
-                }
-                saveLabelButton.IsEnabled = true;
-            }
+            saveLabelButton.IsEnabled = true;
         }
         private void saveLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
@@ -125,58 +139,14 @@ namespace Unified_Systems.Settings
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
             saveLabelButton.Style = defaultLabelButtonStyle;
         }
-        /// <summary>
-        /// Warning and confirmation template if needed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void confirmYesLabelButton_MouseDown(object sender, RoutedEventArgs e)
-        {
-            curtain.Visibility = Visibility.Hidden;
-            confirmMessage.Visibility = Visibility.Hidden;
-            confirmYesLabelButton.Visibility = Visibility.Hidden;
-            confirmYesLabelButton.IsEnabled = false;
-            confirmNoLabelButton.Visibility = Visibility.Hidden;
-            confirmNoLabelButton.IsEnabled = false;
 
-            if (saveSettings())
-            {
-                resultMessage.Content = "Saved Successfully";
-                resultMessage.Visibility = Visibility.Visible;
-            }
-            saveLabelButton.IsEnabled = true;
-        }
-        private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
-        {
-            curtain.Visibility = Visibility.Hidden;
-            confirmMessage.Visibility = Visibility.Hidden;
-            confirmYesLabelButton.Visibility = Visibility.Hidden;
-            confirmYesLabelButton.IsEnabled = false;
-            confirmNoLabelButton.Visibility = Visibility.Hidden;
-            confirmNoLabelButton.IsEnabled = false;
-
-        }
-        private void confirmLabelButton_MouseUp(object sender, RoutedEventArgs e)
-        {
-            Style warningConfirmLabelButtonStyle = FindResource("warningConfirmLabelButtonStyle") as Style;
-            Style warningCancelLabelButtonStyle = FindResource("warningCancelLabelButtonStyle") as Style;
-            confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
-            confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
-        }
-        private void confirmLabelButton_MouseLeave(object sender, RoutedEventArgs e)
-        {
-            Style warningConfirmLabelButtonStyle = FindResource("warningConfirmLabelButtonStyle") as Style;
-            Style warningCancelLabelButtonStyle = FindResource("warningCancelLabelButtonStyle") as Style;
-            confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
-            confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
-        }
         private bool saveSettings()
         {
             try
             {
                 if (ADdomainCheckbox.IsChecked == false)
                 {
-                    if (String.IsNullOrEmpty(ADdomainTextBox.Text))
+                    if (string.IsNullOrEmpty(ADdomainTextBox.Text))
                     {
                         ActiveDirectory.DomainName = null;
                         configs.DomainName = null;
@@ -203,14 +173,14 @@ namespace Unified_Systems.Settings
 
                 if (ADcredentialsCheckbox.IsChecked == false)
                 {
-                    if (String.IsNullOrEmpty(ADuserTextBox.Text) ^ String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                    if (string.IsNullOrEmpty(ADuserTextBox.Text) ^ string.IsNullOrEmpty(ADpassPasswordBox.Password))
                     {
-                        if (String.IsNullOrEmpty(ADuserTextBox.Text))
+                        if (string.IsNullOrEmpty(ADuserTextBox.Text))
                         {
                             Style errorTextBoxStyle = FindResource("errorTextBoxStyle") as Style;
                             ADuserTextBox.Style = errorTextBoxStyle;
                         }
-                        if (String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                        if (string.IsNullOrEmpty(ADpassPasswordBox.Password))
                         {
                             Style errorPasswordBoxStyle = FindResource("errorPasswordBoxStyle") as Style;
                             ADpassPasswordBox.Style = errorPasswordBoxStyle;
@@ -219,7 +189,7 @@ namespace Unified_Systems.Settings
                     }
                     else
                     {
-                        if (String.IsNullOrEmpty(ADuserTextBox.Text))
+                        if (string.IsNullOrEmpty(ADuserTextBox.Text))
                         {
                             ActiveDirectory.AuthenticatingUsername = null;
                             configs.ADUsername = null;
@@ -232,7 +202,7 @@ namespace Unified_Systems.Settings
                         Style defaultTextBoxStyle = FindResource("defaultTextBoxStyle") as Style;
                         ADuserTextBox.Style = defaultTextBoxStyle;
 
-                        if (String.IsNullOrEmpty(ADpassPasswordBox.Password))
+                        if (string.IsNullOrEmpty(ADpassPasswordBox.Password))
                         {
                             ActiveDirectory.AuthenticatingPassword = null;
                             configs.ADPassword = null;
@@ -254,7 +224,7 @@ namespace Unified_Systems.Settings
 
                     ActiveDirectory.AuthenticatingPassword = null;
                     configs.ADPassword = null;
-                    ADpassPasswordBox.Password = String.Empty;
+                    ADpassPasswordBox.Password = string.Empty;
                 }
 
                 PopulateCredentials();
@@ -294,14 +264,15 @@ namespace Unified_Systems.Settings
         {
             ADdomainTextBox.IsEnabled = true;
 
-            if (!String.IsNullOrEmpty(ActiveDirectory.DomainName))
+            if (!string.IsNullOrEmpty(ActiveDirectory.DomainName))
             {
                 ADdomainTextBox.Text = ActiveDirectory.DomainName;
             }
             else
             {
-                ADdomainTextBox.Text = String.Empty;
+                ADdomainTextBox.Text = string.Empty;
             }
+            ADdomainTextBox.Focus();
         }
         private void ADcredentialsCheckbox_Checked(object sender, RoutedEventArgs e)
         {
@@ -309,23 +280,25 @@ namespace Unified_Systems.Settings
             ADpassPasswordBox.IsEnabled = false;
 
             ADuserTextBox.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            ADpassPasswordBox.Password = String.Empty;
+            ADpassPasswordBox.Password = string.Empty;
         }
         private void ADcredentialsCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             ADuserTextBox.IsEnabled = true;
             ADpassPasswordBox.IsEnabled = true;
 
-            if (!String.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !String.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
+            if (!string.IsNullOrEmpty(ActiveDirectory.AuthenticatingUsername) && !string.IsNullOrEmpty(ActiveDirectory.AuthenticatingPassword))
             {
                 ADuserTextBox.Text = ActiveDirectory.AuthenticatingUsername;
                 ADpassPasswordBox.Password = ActiveDirectory.AuthenticatingPassword;
             }
             else
             {
-                ADuserTextBox.Text = String.Empty;
-                ADpassPasswordBox.Password = String.Empty;
+                ADuserTextBox.Text = string.Empty;
+                ADpassPasswordBox.Password = string.Empty;
             }
+
+            ADuserTextBox.Focus();
         }
     }
 }

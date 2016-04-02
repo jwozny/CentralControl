@@ -153,17 +153,17 @@ namespace Unified_Systems.User
             else
             {
                 infoLabel.Content = "User Information";
-                Username.Content = String.Empty;
-                Email.Content = String.Empty;
-                Title.Content = String.Empty;
-                Department.Content = String.Empty;
-                Company.Content = String.Empty;
-                CreatedDate.Content = String.Empty;
-                ExpiryDate.Content = String.Empty;
-                LastLogonDate.Content = String.Empty;
-                LastBadPasswordAttempt.Content = String.Empty;
-                LockedOut.Content = String.Empty;
-                AccountLockoutTime.Content = String.Empty;
+                Username.Content = string.Empty;
+                Email.Content = string.Empty;
+                Title.Content = string.Empty;
+                Department.Content = string.Empty;
+                Company.Content = string.Empty;
+                CreatedDate.Content = string.Empty;
+                ExpiryDate.Content = string.Empty;
+                LastLogonDate.Content = string.Empty;
+                LastBadPasswordAttempt.Content = string.Empty;
+                LockedOut.Content = string.Empty;
+                AccountLockoutTime.Content = string.Empty;
 
                 extendLabelButton.IsEnabled = false;
             }
@@ -246,11 +246,11 @@ namespace Unified_Systems.User
             }
             else
             {
-                Title.Content = String.Empty;
-                Department.Content = String.Empty;
-                Company.Content = String.Empty;
-                CreatedDate.Content = String.Empty;
-                LockedOut.Content = String.Empty;
+                Title.Content = string.Empty;
+                Department.Content = string.Empty;
+                Company.Content = string.Empty;
+                CreatedDate.Content = string.Empty;
+                LockedOut.Content = string.Empty;
                 groupList.Items.Clear();
             }
         }
@@ -462,7 +462,7 @@ namespace Unified_Systems.User
             }
             else if (e.Key == Key.Escape)
             {
-                lookupText.Text = String.Empty;
+                lookupText.Text = string.Empty;
                 ClearSelection();
             }
         }

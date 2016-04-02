@@ -46,7 +46,7 @@ namespace Unified_Systems
             if (ReferenceEquals(stringItem, null)) return false;
             if (stringItem == null) return false;
             if (stringItem == "") return false;
-            if (stringItem == String.Empty) return false;
+            if (stringItem == string.Empty) return false;
             return true;
         }
 
@@ -84,6 +84,11 @@ namespace Unified_Systems
                 return false;
             }
             catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException E)
             {
                 ConnectionError = E.Message.ToString();
                 return false;
@@ -312,8 +317,6 @@ namespace Unified_Systems
             GetUserProperties.WorkerReportsProgress = true;
             GetUserProperties.WorkerSupportsCancellation = true;
             GetUserProperties.DoWork += GetUserProperties_DoWork;
-            GetUserProperties.ProgressChanged += GetUserProperties_ProgressChanged;
-            GetUserProperties.RunWorkerCompleted += GetUserProperties_Completed;
         }
         /// <summary>
         /// Define background worker actions
@@ -343,14 +346,6 @@ namespace Unified_Systems
             SelectedUser_IsAccountLockedOut = CurrentBackgroundUser.IsAccountLockedOut();
             GetUserProperties.ReportProgress(75);
             SelectedUser_Groups = CurrentBackgroundUser.GetGroups();
-        }
-        private static void GetUserProperties_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            // Do this when progress is reported.
-        }
-        private static void GetUserProperties_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            // Work Completed - Do this.
         }
     }
 }

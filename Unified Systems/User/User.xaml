@@ -65,6 +65,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
             <Setter Property="Height" Value="21"/>
         </Style>
 
@@ -76,6 +77,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
             <Setter Property="Height" Value="21"/>
         </Style>
         <Style x:Key="errorPasswordBoxStyle" TargetType="{x:Type PasswordBox}">
@@ -86,6 +88,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
             <Setter Property="Height" Value="21"/>
         </Style>
         
@@ -258,38 +261,39 @@
             <ColumnDefinition Width="130"/>
         </Grid.ColumnDefinitions>
         <Border x:Name="curtain" Margin="-10" Grid.RowSpan="4" Grid.ColumnSpan="6" Background="#DD303030" Visibility="Hidden"/>
-        <Grid x:Name="credInputs"  VerticalAlignment="Center" Width="250"  HorizontalAlignment="Center" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Visible">
+        <Grid x:Name="credInputs" VerticalAlignment="Center" Width="250" HorizontalAlignment="Center" Grid.RowSpan="4" Grid.ColumnSpan="6" Visibility="Visible">
             <Grid.RowDefinitions>
-                <RowDefinition Height="38"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Border Grid.RowSpan="2" Grid.ColumnSpan="3" BorderBrush="LightGray" BorderThickness="1"  Background="#FF303030" Margin="0,30,0,0"/>
-            <Label Grid.ColumnSpan="3" Margin="20,0" VerticalAlignment="Bottom" Content ="Active Directory" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
-            <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
-                <TextBlock x:Name="credInputMessage" Text ="" Margin="0,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="#FFFF8080" Visibility="Collapsed"/>
+            <Border Grid.RowSpan="2" Grid.ColumnSpan="2" BorderBrush="LightGray" BorderThickness="1"  Background="#FF303030" Margin="0,15,0,0"/>
+            <Label Grid.ColumnSpan="2" Margin="20,0" VerticalAlignment="Bottom" Content ="Active Directory" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="10">
+                <TextBlock x:Name="credInputMessage" Text ="" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="#FFFF8080" Visibility="Collapsed"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="10,10,-110,10">
+                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                         <CheckBox x:Name="ADdomainCheckbox" Content="Use Local Domain" Style="{StaticResource defaultCheckBoxStyle}" IsChecked="False" Checked="ADdomainCheckbox_Checked" Unchecked="ADdomainCheckbox_Unchecked"/>
                         <Label Content ="Domain Name" Style="{StaticResource defaultLabelStyle}"/>
                         <CheckBox x:Name="ADcredentialsCheckbox" Content="Use Windows Authentication" Style="{StaticResource defaultCheckBoxStyle}" IsChecked="False" Checked="ADcredentialsCheckbox_Checked" Unchecked="ADcredentialsCheckbox_Unchecked"/>
                         <Label Content ="Username" Style="{StaticResource defaultLabelStyle}"/>
                         <Label Content ="Password" Style="{StaticResource defaultLabelStyle}"/>
+                        <Label x:Name="resetLabelButton" Content="Reset" Margin="10,10,10,0" Style="{StaticResource defaultLabelButtonStyle}" HorizontalAlignment="Left" Width="90" MouseDown="resetLabelButton_MouseDown" MouseUp="resetLabelButton_MouseUp" MouseLeave="resetLabelButton_MouseLeave"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="-10,10,10,10">
+                    <StackPanel Grid.Row="1" Grid.Column="1">
                         <Label Style="{StaticResource defaultLabelStyle}" Margin="0,5,0,2" IsHitTestVisible="False"/>
-                        <TextBox x:Name="ADdomainTextBox" Style="{StaticResource defaultTextBoxStyle}"/>
+                        <TextBox x:Name="ADdomainTextBox" Style="{StaticResource defaultTextBoxStyle}" KeyDown="ADdomainTextBox_KeyDown" GotFocus="ADdomainTextBox_GotFocus"/>
                         <Label Style="{StaticResource defaultLabelStyle}" Margin="0,5,0,2" IsHitTestVisible="False"/>
-                        <TextBox x:Name="ADuserTextBox" Style="{StaticResource defaultTextBoxStyle}"/>
-                        <PasswordBox x:Name="ADpassPasswordBox" Style="{StaticResource defaultPasswordBoxStyle}"/>
-                        <Label x:Name="saveCredLabelButton" Content="Connect" Margin="10,10,10,0" Style="{StaticResource defaultLabelButtonStyle}" MouseDown="saveCredLabelButton_MouseDown" MouseUp="saveCredLabelButton_MouseUp" MouseLeave="saveCredLabelButton_MouseLeave"/>
+                        <TextBox x:Name="ADuserTextBox" Style="{StaticResource defaultTextBoxStyle}" GotFocus="ADuserTextBox_GotFocus"/>
+                        <PasswordBox x:Name="ADpassPasswordBox" Style="{StaticResource defaultPasswordBoxStyle}" KeyDown="ADpassPasswordBox_KeyDown" GotFocus="ADpassPasswordBox_GotFocus"/>
+                        <Label x:Name="saveCredLabelButton" Content="Connect" Margin="10,10,10,0" Style="{StaticResource defaultLabelButtonStyle}" HorizontalAlignment="Right" Width="90" MouseDown="saveCredLabelButton_MouseDown" MouseUp="saveCredLabelButton_MouseUp" MouseLeave="saveCredLabelButton_MouseLeave"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>
