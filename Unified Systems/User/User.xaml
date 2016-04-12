@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="800"
       FontFamily="Consolas" FontSize="12" 
-      Title="User" Loaded="User_Loaded">
+      Title="User" Loaded="User_Loaded" Unloaded="User_Unloaded">
     <Page.Resources>
         <DropShadowEffect x:Key="PrimaryGlow" ShadowDepth="0" Color="DeepSkyBlue" Opacity="1" BlurRadius="20"/>
         <Style x:Key="placeHolder" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -243,6 +243,14 @@
             <Setter Property="Foreground" Value="LightGray"/>
             <Setter Property="Background" Value="#FF101010"/>
         </Style>
+
+        <Style x:Key="defaultMessageStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Foreground" Value="#FFFF8080"/>
+        </Style>
         
     </Page.Resources>
     <Grid Margin="10" Background="#FF303030">
@@ -273,7 +281,7 @@
             <Border Grid.RowSpan="2" Grid.ColumnSpan="2" BorderBrush="LightGray" BorderThickness="1"  Background="#FF303030" Margin="0,15,0,0"/>
             <Label Grid.ColumnSpan="2" Margin="20,0" VerticalAlignment="Bottom" Content ="Active Directory" Padding="5,0" Foreground="LightGray" Background="#FF303030" FontSize="15" HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="10">
-                <TextBlock x:Name="credInputMessage" Text ="" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="#FFFF8080" Visibility="Collapsed"/>
+                <TextBlock x:Name="credInputMessage" Text ="" Style="{StaticResource defaultMessageStyle}" Visibility="Collapsed"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

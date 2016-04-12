@@ -41,13 +41,17 @@ namespace Unified_Systems.User
         }
         private void User_Loaded(object sender, RoutedEventArgs e)
         {
-            if (ActiveDirectory.Connect())
+            if (ActiveDirectory.IsConnected)
             {
                 Continue();
             }
             else
             {
-                credInputMessage.Text = ActiveDirectory.ConnectionError;
+                ActiveDirectory.Connect();
+                ActiveDirectory.ConnectAD.RunWorkerCompleted += ConnectAD_Completed;
+
+                credInputMessage.Foreground = Brushes.LightSkyBlue;
+                credInputMessage.Text = "Connecting...";
                 credInputMessage.Visibility = Visibility.Visible;
                 showCredInput();
             }
@@ -250,15 +254,9 @@ namespace Unified_Systems.User
             catch { }
             ConfigActions.SaveConfig(configs);
 
-            if (ActiveDirectory.Connect())
-            {
-                Continue();
-            }
-            else
-            {
-                credInputMessage.Text = ActiveDirectory.ConnectionError;
-                credInputMessage.Visibility = Visibility.Visible;
-            }
+            credInputMessage.Foreground = Brushes.LightSkyBlue;
+            credInputMessage.Text = "Connecting...";
+            ActiveDirectory.Connect();
         }
 
         private void ADdomainCheckbox_Checked(object sender, RoutedEventArgs e)
@@ -316,9 +314,28 @@ namespace Unified_Systems.User
         }
 
         public event EventHandler ConnectionVerified;
+        private void ConnectAD_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (ActiveDirectory.IsConnected)
+            {
+                Continue();
+            }
+            else
+            {
+                var converter = new System.Windows.Media.BrushConverter();
+                var brush = (Brush)converter.ConvertFromString("#FFFF8080");
+                credInputMessage.Foreground = brush;
+                credInputMessage.Text = ActiveDirectory.ConnectionError;
+                credInputMessage.Visibility = Visibility.Visible;
+            }
+        }
         private void Continue()
         {
             ConnectionVerified(this, new EventArgs());
+        }
+        private void User_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ActiveDirectory.ConnectAD.RunWorkerCompleted -= ConnectAD_Completed;
         }
     }
 }

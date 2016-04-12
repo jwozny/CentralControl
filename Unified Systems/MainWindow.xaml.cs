@@ -39,7 +39,7 @@ namespace Unified_Systems
 
             SourceInitialized += new EventHandler(MainWindow_SourceInitialized);
 
-            ActiveDirectory.Connect();
+            //ActiveDirectory.Connect();
             ShowHideOptions();
         }
 

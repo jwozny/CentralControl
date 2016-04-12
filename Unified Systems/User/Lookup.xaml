@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="800"
       FontFamily="Consolas" FontSize="12" 
-      Title="User" Loaded="Lookup_Loaded">
+      Title="User" Loaded="Lookup_Loaded" Unloaded="Lookup_Unloaded">
     <Page.Resources>
         <DropShadowEffect x:Key="PrimaryGlow" ShadowDepth="0" Color="DeepSkyBlue" Opacity="1" BlurRadius="20"/>
         <Style x:Key="placeHolder" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">

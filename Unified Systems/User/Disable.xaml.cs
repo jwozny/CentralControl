@@ -40,20 +40,16 @@ namespace Unified_Systems.User
         }
         private void Disable_Loaded(object sender, RoutedEventArgs e)
         {
-            if (ReferenceEquals(ActiveDirectory.Users, null))
+            ActiveDirectory.ConnectAD.RunWorkerCompleted += ConnectAD_Completed;
+            if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
             {
-                if (ActiveDirectory.Connect())
-                {
-                    resultMessage.Content = "AD Connection Successful";
-                    resultMessage.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    ExitToLogin();
-                }
+                BuildList();
+                lookupText.Focus();
             }
-            BuildList();
-            lookupText.Focus();
+            else
+            {
+                ExitToLogin();
+            }
         }
 
         /// <summary>
@@ -418,16 +414,10 @@ namespace Unified_Systems.User
 
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
             refreshLabelButton.Style = defaultMouseDownLabelButtonStyle;
-            
-            if (ActiveDirectory.Connect())
-            {
-                resultMessage.Content = "User List Updated";
-                resultMessage.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                ExitToLogin();
-            }
+
+            refreshLabelButton.IsEnabled = false;
+            ActiveDirectory.Connect();
+            refreshLabelButton.Content = "Refreshing...";
         }
         private void refreshLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
@@ -518,19 +508,14 @@ namespace Unified_Systems.User
                 {
                     resultMessage.Content = "User Disabled Successfully";
                     resultMessage.Visibility = Visibility.Visible;
-                    ActiveDirectory.RefreshUsers();
-                    BuildList();
-                }
-                else if (ActiveDirectory.Connect())
-                {
-                    resultMessage.Content = ActiveDirectory.ConnectionError;
-                    resultMessage.Visibility = Visibility.Visible;
-                    BuildList();
                 }
                 else
                 {
-                    ExitToLogin();
+                    resultMessage.Content = ActiveDirectory.ConnectionError;
+                    resultMessage.Visibility = Visibility.Visible;
                 }
+                refreshLabelButton.IsEnabled = false;
+                ActiveDirectory.Connect();
                 disableLabelButton.IsEnabled = true;
             }
         }
@@ -562,19 +547,14 @@ namespace Unified_Systems.User
             {
                 resultMessage.Content = "User Disabled Successfully";
                 resultMessage.Visibility = Visibility.Visible;
-                ActiveDirectory.RefreshUsers();
-                BuildList();
-            }
-            else if (ActiveDirectory.Connect())
-            {
-                resultMessage.Content = ActiveDirectory.ConnectionError;
-                resultMessage.Visibility = Visibility.Visible;
-                BuildList();
             }
             else
             {
-                ExitToLogin();
+                resultMessage.Content = ActiveDirectory.ConnectionError;
+                resultMessage.Visibility = Visibility.Visible;
             }
+            refreshLabelButton.IsEnabled = false;
+            ActiveDirectory.Connect();
             disableLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
@@ -606,6 +586,28 @@ namespace Unified_Systems.User
         private void ExitToLogin()
         {
             Disconnected(this, new EventArgs());
+        }
+        private void ConnectAD_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            refreshLabelButton.IsEnabled = true;
+            if (ActiveDirectory.IsConnected)
+            {
+                resultMessage.Content = "User List Updated";
+                resultMessage.Visibility = Visibility.Visible;
+
+                refreshLabelButton.Content = "Refresh Users";
+                
+                BuildList();
+                fullLookup();
+            }
+            else
+            {
+                ExitToLogin();
+            }
+        }
+        private void Disable_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ActiveDirectory.ConnectAD.RunWorkerCompleted -= ConnectAD_Completed;
         }
     }
 }

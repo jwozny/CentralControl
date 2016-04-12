@@ -96,11 +96,13 @@ namespace Unified_Systems
             GetUserProperties_Initialize();
             return true;
         }
-        public static bool Connect()
+        public static void Connect()
         {
-            IsConnected = InitializeDomain();
-            if (IsConnected) RefreshUsers();
-            return IsConnected;
+            ConnectAD_Initialize();
+            if (!ConnectAD.IsBusy)
+            {
+                ConnectAD.RunWorkerAsync();
+            }
         }
         public static bool IsConnected;
         public static string ConnectionError;
@@ -302,6 +304,32 @@ namespace Unified_Systems
                 return false;
             }
             return true;
+        }
+        
+        /* Background Worker - ConnectAD */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker ConnectAD = new BackgroundWorker();
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void ConnectAD_Initialize()
+        {
+            ConnectAD.WorkerReportsProgress = true;
+            ConnectAD.WorkerSupportsCancellation = true;
+            ConnectAD.DoWork += ConnectAD_DoWork;
+        }
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void ConnectAD_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Work Started - Do this.
+            IsConnected = InitializeDomain();
+            if (IsConnected) RefreshUsers();
         }
 
         /* Background Worker - GetUserProperties */
