@@ -395,6 +395,7 @@ namespace Unified_Systems
             
             if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
             {
+                UserLookup.Style = HighlightedSubMenuStyle;
                 if (!ActiveDirectory.GetUserProperties.IsBusy)
                 {
                     if (ActiveDirectory.SelectedUser_IsAccountLockedOut) UserUnlock.Style = HighlightedSubMenuStyle;
@@ -428,15 +429,14 @@ namespace Unified_Systems
                 UserCreate.Visibility = Visibility.Collapsed;
                 UserReset.IsEnabled = false;
                 UserReset.Visibility = Visibility.Collapsed;
-                UserUnlock.IsEnabled = false;
-                UserUnlock.Visibility = Visibility.Collapsed;
+                UserUnlock.IsEnabled = true;
                 UserExtend.IsEnabled = true;
                 UserEnable.IsEnabled = true;
                 UserDisable.IsEnabled = true;
                 UserTerminate.IsEnabled = false;
                 UserTerminate.Visibility = Visibility.Collapsed;
 
-                UserAnimation.To = 24 * 4 + 28 - 2;
+                UserAnimation.To = 24 * 5 + 28 - 2;
 
                 UserStoryboard.Begin();
             }
@@ -444,16 +444,12 @@ namespace Unified_Systems
             {
                 UserLookup.IsEnabled = false;
                 UserCreate.IsEnabled = false;
-                UserCreate.Visibility = Visibility.Collapsed;
                 UserReset.IsEnabled = false;
-                UserReset.Visibility = Visibility.Collapsed;
                 UserUnlock.IsEnabled = false;
-                UserUnlock.Visibility = Visibility.Collapsed;
                 UserExtend.IsEnabled = false;
                 UserEnable.IsEnabled = false;
                 UserDisable.IsEnabled = false;
                 UserTerminate.IsEnabled = false;
-                UserTerminate.Visibility = Visibility.Collapsed;
 
                 UserAnimation.To = 24 * 0 + 28 - 0;
             }
@@ -588,7 +584,7 @@ namespace Unified_Systems
             ResetMenuColors();
             User.Style = expandedMenuStyle;
 
-            //_NavigationFrame.Navigate(new User.Unlock());
+            _NavigationFrame.Navigate(new User.Unlock());
             ResetSubMenuColors();
             LoadedSubmenu = "User.Unlock";
             HighlightSubmenus();
@@ -679,7 +675,6 @@ namespace Unified_Systems
         // User - Revoke VPN Access
 
         //private Server.Server Server_ = new Server.Server();
-
         private void Server_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
@@ -919,7 +914,7 @@ namespace Unified_Systems
         }
         private void UserUnlock_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            //((User.Unlock)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+            ((User.Unlock)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
         }
         private void UserExtend_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
@@ -956,7 +951,7 @@ namespace Unified_Systems
         }
         private void UserUnlock_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            //((User.Unlock)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
+            ((User.Unlock)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
         }
         private void UserExtend_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {

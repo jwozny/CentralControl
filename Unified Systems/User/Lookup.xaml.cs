@@ -57,6 +57,12 @@ namespace Unified_Systems.User
         /// </summary>
         private void BuildList()
         {
+            string temp_selectedUser = "";
+            if ((userList.SelectedIndex != -1 || userList.SelectedIndex != 0) && !ReferenceEquals(userList.SelectedItem, null))
+            {
+                temp_selectedUser = userList.SelectedItem.ToString();
+            }
+
             userList.Items.Clear();
 
             foreach (UserPrincipal User in ActiveDirectory.Users)
@@ -73,6 +79,18 @@ namespace Unified_Systems.User
                     {
                         saveLabelButton.IsEnabled = true;
                         userList.SelectedItem = user;
+                    }
+                }
+            }
+            else if (!ReferenceEquals(temp_selectedUser, ""))
+            {
+                foreach (string user in userList.Items)
+                {
+                    if (temp_selectedUser == user.ToString())
+                    {
+                        saveLabelButton.IsEnabled = true;
+                        userList.SelectedItem = user;
+                        return;
                     }
                 }
             }
@@ -602,7 +620,7 @@ namespace Unified_Systems.User
                 refreshLabelButton.Content = "Refresh Users";
 
                 BuildList();
-                fullLookup();
+                HighlightSubmenus(this, new EventArgs());
             }
             else
             {

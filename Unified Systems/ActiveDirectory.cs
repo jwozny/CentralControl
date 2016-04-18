@@ -208,6 +208,38 @@ namespace Unified_Systems
             //return true;
             return false;
         }
+        public static bool UnlockUser(this UserPrincipal User)
+        {
+            try
+            {
+                DirectoryEntry usr;
+                if (!ReferenceEquals(DomainName, null) && !ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
+                }
+
+                usr.Properties["LockOutTime"].Value = 0; //unlock account
+
+                usr.CommitChanges(); //may not be needed but adding it anyways
+
+                usr.Close();
+            }
+            catch (System.DirectoryServices.DirectoryServicesCOMException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.Runtime.InteropServices.COMException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            return true;
+        }
         public static bool ExtendUser(this UserPrincipal User, int Days)
         {
             try

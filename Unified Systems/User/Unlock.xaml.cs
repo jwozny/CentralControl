@@ -29,16 +29,16 @@ namespace Unified_Systems.User
     /// <summary>
     /// Interaction logic for Enable.xaml
     /// </summary>
-    public partial class Enable : Page
+    public partial class Unlock : Page
     {
         /// <summary>
         /// Primary function
         /// </summary>
-        public Enable()
+        public Unlock()
         {
             InitializeComponent();
         }
-        private void Enable_Loaded(object sender, RoutedEventArgs e)
+        private void Unlock_Loaded(object sender, RoutedEventArgs e)
         {
             ActiveDirectory.ConnectAD.RunWorkerCompleted += ConnectAD_Completed;
             if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
@@ -67,20 +67,20 @@ namespace Unified_Systems.User
 
             foreach (UserPrincipal User in ActiveDirectory.Users)
             {
-                if (User.Enabled == false)
+                if (User.IsAccountLockedOut())
                 {
                     userList.Items.Add(User.SamAccountName);
                 }
             }
 
-            enableLabelButton.IsEnabled = false;
+            unlockLabelButton.IsEnabled = false;
             if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
             {
                 foreach (string user in userList.Items)
                 {
                     if (ActiveDirectory.SelectedUser.SamAccountName == user)
                     {
-                        enableLabelButton.IsEnabled = true;
+                        unlockLabelButton.IsEnabled = true;
                         userList.SelectedItem = user;
                     }
                 }
@@ -91,7 +91,7 @@ namespace Unified_Systems.User
                 {
                     if (temp_selectedUser == user.ToString())
                     {
-                        enableLabelButton.IsEnabled = true;
+                        unlockLabelButton.IsEnabled = true;
                         userList.SelectedItem = user;
                         return;
                     }
@@ -162,7 +162,7 @@ namespace Unified_Systems.User
 
                 GroupsPlaceholder.Visibility = Visibility.Visible;
 
-                enableLabelButton.IsEnabled = true;
+                unlockLabelButton.IsEnabled = true;
             }
             else
             {
@@ -185,7 +185,7 @@ namespace Unified_Systems.User
                 groupList.Items.Clear();
                 GroupsPlaceholder.Visibility = Visibility.Hidden;
 
-                enableLabelButton.IsEnabled = false;
+                unlockLabelButton.IsEnabled = false;
             }
         }
         private void GetUserProperties_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -283,7 +283,7 @@ namespace Unified_Systems.User
         private void ClearSelection()
         {
             userList.SelectedIndex = -1;
-            enableLabelButton.IsEnabled = false;
+            unlockLabelButton.IsEnabled = false;
         }
 
         /* Search Functions */
@@ -314,7 +314,7 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.Enabled == false)
+                    if (User.IsAccountLockedOut())
                     {
                         if (User.Name.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
@@ -341,7 +341,7 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.Enabled == false)
+                    if (User.IsAccountLockedOut())
                     {
                         if (lookupText.Text.IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
@@ -362,7 +362,7 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.Enabled == false)
+                    if (User.IsAccountLockedOut())
                     {
                         if (!ReferenceEquals(User.GetTitle(), null))
                         {
@@ -380,7 +380,7 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (User.Enabled == false)
+                    if (User.IsAccountLockedOut())
                     {
                         if (!ReferenceEquals(User.GetDepartment(), null))
                         {
@@ -524,17 +524,17 @@ namespace Unified_Systems.User
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private bool confirmAction = false;
-        private void enableLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        private void unlockLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            enableLabelButton.Style = defaultMouseDownLabelButtonStyle;
+            unlockLabelButton.Style = defaultMouseDownLabelButtonStyle;
             resultMessage.Visibility = Visibility.Hidden;
 
             if (confirmAction)
             {
                 curtain.Visibility = Visibility.Visible;
-                confirmMessage.Content = "Are you sure you want to enable " + ActiveDirectory.SelectedUser.SamAccountName + "?";
-                confirmYesLabelButton.Content = "Enable " + ActiveDirectory.SelectedUser.SamAccountName;
+                confirmMessage.Content = "Are you sure you want to Unlock " + ActiveDirectory.SelectedUser.SamAccountName + "?";
+                confirmYesLabelButton.Content = "Unlock " + ActiveDirectory.SelectedUser.SamAccountName;
                 confirmMessage.Visibility = Visibility.Visible;
                 confirmYesLabelButton.Visibility = Visibility.Visible;
                 confirmYesLabelButton.IsEnabled = true;
@@ -543,9 +543,9 @@ namespace Unified_Systems.User
             }
             else
             {
-                if (ActiveDirectory.SelectedUser.EnableUser())
+                if (ActiveDirectory.SelectedUser.UnlockUser())
                 {
-                    resultMessage.Content = "User Enabled Successfully";
+                    resultMessage.Content = "User Unlocked Successfully";
                     resultMessage.Visibility = Visibility.Visible;
                 }
                 else
@@ -555,18 +555,18 @@ namespace Unified_Systems.User
                 }
                 refreshLabelButton.IsEnabled = false;
                 ActiveDirectory.Connect();
-                enableLabelButton.IsEnabled = true;
+                unlockLabelButton.IsEnabled = true;
             }
         }
-        private void enableLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        private void unlockLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            enableLabelButton.Style = defaultLabelButtonStyle;
+            unlockLabelButton.Style = defaultLabelButtonStyle;
         }
-        private void enableLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        private void unlockLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            enableLabelButton.Style = defaultLabelButtonStyle;
+            unlockLabelButton.Style = defaultLabelButtonStyle;
         }
         /// <summary>
         /// Warning and confirmation template if needed
@@ -582,9 +582,9 @@ namespace Unified_Systems.User
             confirmNoLabelButton.Visibility = Visibility.Hidden;
             confirmNoLabelButton.IsEnabled = false;
 
-            if (ActiveDirectory.SelectedUser.EnableUser())
+            if (ActiveDirectory.SelectedUser.UnlockUser())
             {
-                resultMessage.Content = "User Enabled Successfully";
+                resultMessage.Content = "User Unlocked Successfully";
                 resultMessage.Visibility = Visibility.Visible;
             }
             else
@@ -594,7 +594,7 @@ namespace Unified_Systems.User
             }
             refreshLabelButton.IsEnabled = false;
             ActiveDirectory.Connect();
-            enableLabelButton.IsEnabled = true;
+            unlockLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
@@ -620,7 +620,7 @@ namespace Unified_Systems.User
             confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
         }
-        
+
         public event EventHandler HighlightSubmenus;
         public event EventHandler Disconnected;
         private void ExitToLogin()
@@ -645,7 +645,7 @@ namespace Unified_Systems.User
                 ExitToLogin();
             }
         }
-        private void Enable_Unloaded(object sender, RoutedEventArgs e)
+        private void Unlock_Unloaded(object sender, RoutedEventArgs e)
         {
             ActiveDirectory.ConnectAD.RunWorkerCompleted -= ConnectAD_Completed;
         }
