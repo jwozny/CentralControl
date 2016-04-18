@@ -208,7 +208,7 @@
             <ColumnDefinition Width="130"/>
         </Grid.ColumnDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="10,0,0,0" Content="Select User to Disable" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20" FontWeight="Bold" Foreground="LightGray"/>
-        <ListBox x:Name="userList" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="10,15,10,10" Foreground="LightGray" Background="#FF454545" SelectionChanged="listBox_SelectionChanged" MouseDown="userList_MouseDown"/>
+        <ListBox x:Name="userList" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="10,15,10,10" Foreground="LightGray" Background="#FF454545" SelectionChanged="userList_SelectionChanged" MouseDown="userList_MouseDown" KeyDown="userList_KeyDown"/>
         <Grid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Margin="10,-15,10,10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="38"/>

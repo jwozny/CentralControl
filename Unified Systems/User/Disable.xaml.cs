@@ -86,7 +86,7 @@ namespace Unified_Systems.User
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void userList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             userList.ScrollIntoView(userList.SelectedItem);
             groupList.Items.Clear();
@@ -106,6 +106,7 @@ namespace Unified_Systems.User
                         }
                     }
                 }
+                HighlightSubmenus(this, new EventArgs());
 
                 infoLabel.Content = ActiveDirectory.SelectedUser.Name;
 
@@ -147,6 +148,9 @@ namespace Unified_Systems.User
             }
             else
             {
+                ActiveDirectory.SelectedUser = null;
+                HighlightSubmenus(this, new EventArgs());
+
                 infoLabel.Content = "User Information";
                 Username.Content = string.Empty;
                 Email.Content = string.Empty;
@@ -159,6 +163,9 @@ namespace Unified_Systems.User
                 LastBadPasswordAttempt.Content = string.Empty;
                 LockedOut.Content = string.Empty;
                 AccountLockoutTime.Content = string.Empty;
+
+                groupList.Items.Clear();
+                GroupsPlaceholder.Visibility = Visibility.Hidden;
 
                 disableLabelButton.IsEnabled = false;
             }
@@ -187,7 +194,10 @@ namespace Unified_Systems.User
                     else { CreatedDate.Content = "Fetching..."; }
 
                     if (!ReferenceEquals(ActiveDirectory.SelectedUser_IsAccountLockedOut, null))
-                    { LockedOut.Content = ActiveDirectory.SelectedUser_IsAccountLockedOut.ToString(); }
+                    {
+                        LockedOut.Content = ActiveDirectory.SelectedUser_IsAccountLockedOut.ToString();
+                        HighlightSubmenus(this, new EventArgs());
+                    }
                     else { LockedOut.Content = "Fetching..."; }
                 }
             }
@@ -223,9 +233,12 @@ namespace Unified_Systems.User
                     else { LockedOut.Content = " "; }
 
                     groupList.Items.Clear();
-                    foreach (GroupPrincipal Group in ActiveDirectory.SelectedUser_Groups)
+                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_Groups, null))
                     {
-                        groupList.Items.Add(Group);
+                        foreach (GroupPrincipal Group in ActiveDirectory.SelectedUser_Groups)
+                        {
+                            groupList.Items.Add(Group);
+                        }
                     }
                     GroupsPlaceholder.Visibility = Visibility.Hidden;
                 }
@@ -477,6 +490,14 @@ namespace Unified_Systems.User
         {
             searchCount = 1;
         }
+        private void userList_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                lookupText.Text = string.Empty;
+                ClearSelection();
+            }
+        }
 
         /* Primary Action */
         /// <summary>
@@ -581,7 +602,8 @@ namespace Unified_Systems.User
             confirmYesLabelButton.Style = warningConfirmLabelButtonStyle;
             confirmNoLabelButton.Style = warningCancelLabelButtonStyle;
         }
-        
+
+        public event EventHandler HighlightSubmenus;
         public event EventHandler Disconnected;
         private void ExitToLogin()
         {

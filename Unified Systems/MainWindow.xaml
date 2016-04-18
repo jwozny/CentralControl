@@ -47,7 +47,17 @@
         <Style x:Key="SubMenuStyle" TargetType="Label">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Foreground" Value="DarkGray"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF2B2B2B"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="HighlightedSubMenuStyle" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="White"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#FF2B2B2B"/>
@@ -58,9 +68,10 @@
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="DeepSkyBlue"/>
+            <Setter Property="FontWeight" Value="Bold"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF303030"/>
+                    <Setter Property="Background" Value="#FF2B2B2B"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -148,39 +159,44 @@
                 </Button>
             </StackPanel>
         </Grid>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <DockPanel>
+                <Frame x:Name="_NavigationFrame" NavigationUIVisibility="Hidden"/>
+            </DockPanel>
+        </Grid>
         <Grid Grid.Row="1" Grid.Column="0" Margin="0,2,0,0">
             <Border BorderBrush="#FF252525" BorderThickness="0,0,1,0" Background="#FF303030" Width="200" HorizontalAlignment="Left" Margin="0,-2,0,0"/>
             <Label Content="Unified Systems v1.0" Grid.Row="3" Grid.Column="0" Margin="10,0,0,0"  HorizontalAlignment="Left" VerticalAlignment="Bottom" Foreground="#FF606060" FontSize="10" Padding="0"/>
             <StackPanel>
-                <StackPanel x:Name="Panel0" Height="28">
+                <StackPanel x:Name="DashboardPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation x:Name="DashboardAnimation" Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label x:Name="Dashboard" Content="Dashboard" Style="{StaticResource SelectedMenuStyle}" MouseDown="Dashboard_MouseDown"/>
+                    <Label x:Name="Dashboard" Content="Dashboard" Style="{StaticResource MenuStyle}" MouseDown="Dashboard_MouseDown"/>
                     <Label Content=" " Style="{StaticResource SubMenuStyle}"/>
                 </StackPanel>
-                <StackPanel x:Name="Panel1" Height="28">
+                <StackPanel x:Name="UserPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="218" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                <Storyboard x:Name="UserStoryboard">
+                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation x:Name="UserAnimation" Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
@@ -195,17 +211,17 @@
                     <Label x:Name="UserDisable" Content="Disable"  Style="{StaticResource SubMenuStyle}" MouseDown="UserDisable_MouseDown"/>
                     <Label x:Name="UserTerminate" Content="Terminate"  Style="{StaticResource SubMenuStyle}" MouseDown="UserTerminate_MouseDown"/>
                 </StackPanel>
-                <StackPanel x:Name="Panel2" Height="28">
+                <StackPanel x:Name="ServerPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="98" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation x:Name="ServerAnimation" Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
@@ -215,17 +231,17 @@
                     <Label x:Name="ServerRestart" Content="Restart"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerRestart_MouseDown"/>
                     <Label x:Name="ServerShutdown" Content="Shutdown"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerShutdown_MouseDown"/>
                 </StackPanel>
-                <StackPanel x:Name="Panel3" Height="28">
+                <StackPanel x:Name="StoragePanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="50" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation x:Name="StorageAnimation" Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
@@ -233,17 +249,17 @@
                     <Label x:Name="Storage" Content="Storage" Style="{StaticResource MenuStyle}" MouseDown="Storage_MouseDown"/>
                     <Label x:Name="StorageReport" Content="Get Report" Style="{StaticResource SubMenuStyle}" MouseDown="StorageReport_MouseDown"/>
                 </StackPanel>
-                <StackPanel x:Name="Panel4" Height="28">
+                <StackPanel x:Name="NetworkPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="122" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation x:Name="NetworkAnimation" Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
@@ -254,17 +270,17 @@
                     <Label x:Name="NetworkReload" Content="Reload"  Style="{StaticResource SubMenuStyle}" MouseDown="NetworkReload_MouseDown"/>
                     <Label x:Name="NetworkShutdown" Content="Shutdown"  Style="{StaticResource SubMenuStyle}" MouseDown="NetworkShutdown_MouseDown"/>
                 </StackPanel>
-                <StackPanel x:Name="Panel5" Height="28">
+                <StackPanel x:Name="SettingsPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Panel0" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel1" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel2" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel3" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel4" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="Panel5" Storyboard.TargetProperty="Height" To="74" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation x:Name="SettingsAnimation" Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
@@ -274,11 +290,6 @@
                     <Label x:Name="SettingsCredentials" Content="Credentials" Style="{StaticResource SubMenuStyle}" MouseDown="SettingsCredentials_MouseDown"/>
                 </StackPanel>
             </StackPanel>
-        </Grid>
-        <Grid Grid.Row="1" Grid.Column="1">
-            <DockPanel>
-                <Frame x:Name="_NavigationFrame" NavigationUIVisibility="Hidden"/>
-            </DockPanel>
         </Grid>
     </Grid>
 </Window>

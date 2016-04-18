@@ -344,7 +344,8 @@ namespace Unified_Systems
         }
 
         /* Menu Button Actions */
-        public void ResetMenuColors()
+        private string LoadedSubmenu;
+        private void ResetMenuColors()
         {
             RemoveAllHandlers();
             Style defaultMenuStyle = FindResource("MenuStyle") as Style;
@@ -358,9 +359,8 @@ namespace Unified_Systems
 
             //ResetSubMenuColors();
         }
-        public void ResetSubMenuColors()
+        private void ResetSubMenuColors()
         {
-            RemoveAllHandlers();
             Style defaultSubMenuStyle = FindResource("SubMenuStyle") as Style;
 
             UserLookup.Style = defaultSubMenuStyle;
@@ -386,52 +386,112 @@ namespace Unified_Systems
             SettingsGeneral.Style = defaultSubMenuStyle;
             SettingsCredentials.Style = defaultSubMenuStyle;
         }
+        private void HighlightSubmenus()
+        {
+            Style SelectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
+            Style HighlightedSubMenuStyle = FindResource("HighlightedSubMenuStyle") as Style;
+
+            ResetSubMenuColors();
+            
+            if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
+            {
+                if (!ActiveDirectory.GetUserProperties.IsBusy)
+                {
+                    if (ActiveDirectory.SelectedUser_IsAccountLockedOut) UserUnlock.Style = HighlightedSubMenuStyle;
+                }
+                if (ActiveDirectory.SelectedUser.IsAccountExpired()) UserExtend.Style = HighlightedSubMenuStyle;
+                if (!ActiveDirectory.SelectedUser.Enabled.Value) UserEnable.Style = HighlightedSubMenuStyle;
+                if (ActiveDirectory.SelectedUser.Enabled.Value) UserDisable.Style = HighlightedSubMenuStyle;
+            }
+
+            if (LoadedSubmenu == "User.Lookup") UserLookup.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Create") UserCreate.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Reset") UserReset.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Unlock") UserUnlock.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Extend") UserExtend.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Enable") UserEnable.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Disable") UserDisable.Style = SelectedSubMenuStyle;
+            if (LoadedSubmenu == "User.Terminate") UserTerminate.Style = SelectedSubMenuStyle;
+        }
         private void ShowHideOptions()
         {
             Dashboard.IsEnabled = false;
+            DashboardPanel.Height = 28;
+            DashboardAnimation.To = 24 * 0 + 28 - 0;
 
-            //User.IsEnabled = false;
+            User.IsEnabled = true;
+            UserPanel.Height = 28;
             if (ActiveDirectory.IsConnected)
             {
                 UserLookup.IsEnabled = true;
                 UserCreate.IsEnabled = false;
+                UserCreate.Visibility = Visibility.Collapsed;
                 UserReset.IsEnabled = false;
+                UserReset.Visibility = Visibility.Collapsed;
                 UserUnlock.IsEnabled = false;
+                UserUnlock.Visibility = Visibility.Collapsed;
                 UserExtend.IsEnabled = true;
                 UserEnable.IsEnabled = true;
                 UserDisable.IsEnabled = true;
                 UserTerminate.IsEnabled = false;
+                UserTerminate.Visibility = Visibility.Collapsed;
+
+                UserAnimation.To = 24 * 4 + 28 - 2;
+
+                UserStoryboard.Begin();
             }
             else
             {
                 UserLookup.IsEnabled = false;
                 UserCreate.IsEnabled = false;
+                UserCreate.Visibility = Visibility.Collapsed;
                 UserReset.IsEnabled = false;
+                UserReset.Visibility = Visibility.Collapsed;
                 UserUnlock.IsEnabled = false;
+                UserUnlock.Visibility = Visibility.Collapsed;
                 UserExtend.IsEnabled = false;
                 UserEnable.IsEnabled = false;
                 UserDisable.IsEnabled = false;
                 UserTerminate.IsEnabled = false;
+                UserTerminate.Visibility = Visibility.Collapsed;
+
+                UserAnimation.To = 24 * 0 + 28 - 0;
             }
 
             Server.IsEnabled = false;
+            ServerPanel.Height = 28;
             ServerService.IsEnabled = false;
+            ServerService.Visibility = Visibility.Collapsed;
             ServerShutdown.IsEnabled = false;
+            ServerShutdown.Visibility = Visibility.Collapsed;
             ServerRestart.IsEnabled = false;
+            ServerRestart.Visibility = Visibility.Collapsed;
+            ServerAnimation.To = 24 * 0 + 28 - 0;
 
             Storage.IsEnabled = false;
+            StoragePanel.Height = 28;
             StorageReport.IsEnabled = false;
+            StorageReport.Visibility = Visibility.Collapsed;
+            StorageAnimation.To = 24 * 0 + 28 - 0;
 
             Network.IsEnabled = false;
+            NetworkPanel.Height = 28;
             NetworkConnect.IsEnabled = false;
+            NetworkConnect.Visibility = Visibility.Collapsed;
             NetworkBackup.IsEnabled = false;
+            NetworkBackup.Visibility = Visibility.Collapsed;
             NetworkReload.IsEnabled = false;
+            NetworkReload.Visibility = Visibility.Collapsed;
             NetworkShutdown.IsEnabled = false;
+            NetworkShutdown.Visibility = Visibility.Collapsed;
+            NetworkAnimation.To = 24 * 0 + 28 - 0;
 
-            //Settings.IsEnabled = false;
+            Settings.IsEnabled = true;
+            SettingsPanel.Height = 28;
             SettingsGeneral.IsEnabled = false;
-            //SettingsCredentials.IsEnabled = false;
-
+            SettingsGeneral.Visibility = Visibility.Collapsed;
+            SettingsCredentials.IsEnabled = true;
+            SettingsAnimation.To = 24 * 1 + 28 - 2;
         }
 
         private void Dashboard_MouseDown(object sender, MouseButtonEventArgs e)
@@ -441,7 +501,7 @@ namespace Unified_Systems
 
             ResetMenuColors();
             Dashboard.Style = expandedMenuStyle;
-            if(false/*Add check here*/)
+            if (false/*Add check here*/)
             {
                 //_NavigationFrame.Navigate(new Dashboard.Dashboard());
                 ResetSubMenuColors();
@@ -462,6 +522,7 @@ namespace Unified_Systems
                 ResetSubMenuColors();
                 User.Style = selectedMenuStyle;
 
+                RemoveAllHandlers();
                 _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(User_Connected);
             }
         }
@@ -475,8 +536,12 @@ namespace Unified_Systems
 
             _NavigationFrame.Navigate(new User.Lookup());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Lookup";
+            HighlightSubmenus();
             UserLookup.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_Disconnected);
         }
         private void UserCreate_MouseDown(object sender, MouseButtonEventArgs e)
@@ -489,8 +554,12 @@ namespace Unified_Systems
 
             //_NavigationFrame.Navigate(new User.Create());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Create";
+            HighlightSubmenus();
             UserCreate.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_Disconnected);
         }
         private void UserReset_MouseDown(object sender, MouseButtonEventArgs e)
@@ -503,8 +572,12 @@ namespace Unified_Systems
 
             //_NavigationFrame.Navigate(new User.Reset());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Reset";
+            HighlightSubmenus();
             UserReset.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_Disconnected);
         }
         private void UserUnlock_MouseDown(object sender, MouseButtonEventArgs e)
@@ -517,8 +590,12 @@ namespace Unified_Systems
 
             //_NavigationFrame.Navigate(new User.Unlock());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Unlock";
+            HighlightSubmenus();
             UserUnlock.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_Disconnected);
         }
         private void UserExtend_MouseDown(object sender, MouseButtonEventArgs e)
@@ -531,8 +608,12 @@ namespace Unified_Systems
 
             _NavigationFrame.Navigate(new User.Extend());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Extend";
+            HighlightSubmenus();
             UserExtend.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_Disconnected);
         }
         private void UserEnable_MouseDown(object sender, MouseButtonEventArgs e)
@@ -545,8 +626,12 @@ namespace Unified_Systems
 
             _NavigationFrame.Navigate(new User.Enable());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Enable";
+            HighlightSubmenus();
             UserEnable.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_Disconnected);
         }
         private void UserDisable_MouseDown(object sender, MouseButtonEventArgs e)
@@ -559,8 +644,12 @@ namespace Unified_Systems
 
             _NavigationFrame.Navigate(new User.Disable());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Disable";
+            HighlightSubmenus();
             UserDisable.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_Disconnected);
         }
         private void UserTerminate_MouseDown(object sender, MouseButtonEventArgs e)
@@ -573,8 +662,12 @@ namespace Unified_Systems
 
             //_NavigationFrame.Navigate(new User.Terminate());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Terminate";
+            HighlightSubmenus();
             UserTerminate.Style = selectedSubMenuStyle;
 
+            RemoveAllHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_Disconnected);
         }
         // Add:
@@ -586,6 +679,7 @@ namespace Unified_Systems
         // User - Revoke VPN Access
 
         //private Server.Server Server_ = new Server.Server();
+
         private void Server_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
@@ -769,6 +863,14 @@ namespace Unified_Systems
         private void RemoveAllHandlers()
         {
             _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(User_Connected);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_HighlightSubmenus);
             _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_Disconnected);
             _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_Disconnected);
             _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_Disconnected);
@@ -796,7 +898,48 @@ namespace Unified_Systems
 
             _NavigationFrame.Navigate(new User.Lookup());
             ResetSubMenuColors();
+            LoadedSubmenu = "User.Lookup";
             UserLookup.Style = selectedSubMenuStyle;
+
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_HighlightSubmenus);
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_Disconnected);
+        }
+
+        private void UserLookup_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            ((User.Lookup)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserCreate_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            //((User.Create)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserReset_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            //((User.Reset)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserUnlock_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            //((User.Unlock)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserExtend_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            ((User.Extend)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserEnable_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            ((User.Enable)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserDisable_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            ((User.Disable)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void UserTerminate_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            //((User.Terminate)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+        }
+        private void User_HighlightSubmenus(object sender, EventArgs e)
+        {
+            HighlightSubmenus();
         }
 
         private void UserLookup_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
