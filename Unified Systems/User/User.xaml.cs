@@ -54,6 +54,7 @@ namespace Unified_Systems.User
                 credInputMessage.Text = "Connecting...";
                 credInputMessage.Visibility = Visibility.Visible;
                 showCredInput();
+                disableCredInput();
             }
         }
 
@@ -92,6 +93,14 @@ namespace Unified_Systems.User
             curtain.Visibility = Visibility.Hidden;
             credInputs.Visibility = Visibility.Hidden;
             credInputMessage.Visibility = Visibility.Collapsed;
+        }
+        private void disableCredInput()
+        {
+            credInputcurtain.Visibility = Visibility.Visible;
+        }
+        private void enableCredInput()
+        {
+            credInputcurtain.Visibility = Visibility.Hidden;
         }
 
         private void ADdomainTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -316,6 +325,7 @@ namespace Unified_Systems.User
         public event EventHandler ConnectionVerified;
         private void ConnectAD_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
+            enableCredInput();
             if (ActiveDirectory.IsConnected)
             {
                 Continue();

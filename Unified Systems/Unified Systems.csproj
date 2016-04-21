@@ -121,6 +121,9 @@
     <Compile Include="User\Lookup.xaml.cs">
       <DependentUpon>Lookup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="User\Reset.xaml.cs">
+      <DependentUpon>Reset.xaml</DependentUpon>
+    </Compile>
     <Compile Include="User\Unlock.xaml.cs">
       <DependentUpon>Unlock.xaml</DependentUpon>
     </Compile>
@@ -160,6 +163,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="User\Lookup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="User\Reset.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -552,9 +552,9 @@ namespace Unified_Systems.User
                 {
                     resultMessage.Content = ActiveDirectory.ConnectionError;
                     resultMessage.Visibility = Visibility.Visible;
+                    refreshLabelButton.IsEnabled = false;
+                    ActiveDirectory.Connect();
                 }
-                refreshLabelButton.IsEnabled = false;
-                ActiveDirectory.Connect();
                 enableLabelButton.IsEnabled = true;
             }
         }
@@ -591,9 +591,9 @@ namespace Unified_Systems.User
             {
                 resultMessage.Content = ActiveDirectory.ConnectionError;
                 resultMessage.Visibility = Visibility.Visible;
+                refreshLabelButton.IsEnabled = false;
+                ActiveDirectory.Connect();
             }
-            refreshLabelButton.IsEnabled = false;
-            ActiveDirectory.Connect();
             enableLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
@@ -632,9 +632,6 @@ namespace Unified_Systems.User
             refreshLabelButton.IsEnabled = true;
             if (ActiveDirectory.IsConnected)
             {
-                resultMessage.Content = "User List Updated";
-                resultMessage.Visibility = Visibility.Visible;
-
                 refreshLabelButton.Content = "Refresh Users";
 
                 BuildList();

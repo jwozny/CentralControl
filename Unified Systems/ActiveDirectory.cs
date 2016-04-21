@@ -208,6 +208,50 @@ namespace Unified_Systems
             //return true;
             return false;
         }
+        public static bool ResetUser(this UserPrincipal User, string newPassword)
+        {
+            try
+            {
+                DirectoryEntry usr;
+                if (!ReferenceEquals(DomainName, null) && !ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(DomainName, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName);
+                }
+                else
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
+                }
+
+                usr.Invoke("SetPassword", new object[] { newPassword });
+                usr.Properties["LockOutTime"].Value = 0; //unlock account
+
+                usr.Close();
+            }
+            catch(System.Reflection.TargetInvocationException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.DirectoryServices.DirectoryServicesCOMException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.Runtime.InteropServices.COMException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            return true;
+        }
         public static bool UnlockUser(this UserPrincipal User)
         {
             try
@@ -216,6 +260,14 @@ namespace Unified_Systems
                 if (!ReferenceEquals(DomainName, null) && !ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
                 {
                     usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(DomainName, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName);
                 }
                 else
                 {
@@ -250,10 +302,19 @@ namespace Unified_Systems
                 {
                     usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
                 }
+                else if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(DomainName, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName);
+                }
                 else
                 {
                     usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
                 }
+
                 DateTime expire = System.DateTime.Now.AddDays(Days);
                 usr.Properties["accountExpires"].Value = Convert.ToString((Int64)expire.ToFileTime());
 
@@ -281,10 +342,19 @@ namespace Unified_Systems
                 {
                     usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
                 }
+                else if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(DomainName, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName);
+                }
                 else
                 {
                     usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
                 }
+
                 int val = (int)usr.Properties["userAccountControl"].Value;
                 usr.Properties["userAccountControl"].Value = val & ~0x2;
                 //ADS_UF_ACCOUNTDISABLE
@@ -312,12 +382,21 @@ namespace Unified_Systems
                 DirectoryEntry usr;
                 if (!ReferenceEquals(DomainName, null) && !ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
                 {
-                    usr = new DirectoryEntry("LDAP://" + Domain.Name + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(AuthenticatingUsername, null) && !ReferenceEquals(AuthenticatingPassword, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName, AuthenticatingUsername, AuthenticatingPassword);
+                }
+                else if (!ReferenceEquals(DomainName, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName);
                 }
                 else
                 {
                     usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
                 }
+
                 int val = (int)usr.Properties["userAccountControl"].Value;
                 usr.Properties["userAccountControl"].Value = val | 0x2;
                 //ADS_UF_ACCOUNTDISABLE

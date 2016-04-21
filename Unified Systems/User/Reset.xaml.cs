@@ -27,18 +27,18 @@ using System.DirectoryServices.AccountManagement;
 namespace Unified_Systems.User
 {
     /// <summary>
-    /// Interaction logic for Lookup.xaml
+    /// Interaction logic for Reset.xaml
     /// </summary>
-    public partial class Lookup : Page
+    public partial class Reset : Page
     {
         /// <summary>
         /// Primary function
         /// </summary>
-        public Lookup()
+        public Reset()
         {
             InitializeComponent();
         }
-        private void Lookup_Loaded(object sender, RoutedEventArgs e)
+        private void Reset_Loaded(object sender, RoutedEventArgs e)
         {
             ActiveDirectory.ConnectAD.RunWorkerCompleted += ConnectAD_Completed;
             if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
@@ -70,14 +70,14 @@ namespace Unified_Systems.User
                 userList.Items.Add(User.SamAccountName);
             }
 
-            saveLabelButton.IsEnabled = false;
+            resetLabelButton.IsEnabled = false;
             if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
             {
                 foreach (string user in userList.Items)
                 {
                     if (ActiveDirectory.SelectedUser.SamAccountName == user)
                     {
-                        saveLabelButton.IsEnabled = true;
+                        resetLabelButton.IsEnabled = true;
                         userList.SelectedItem = user;
                     }
                 }
@@ -88,7 +88,7 @@ namespace Unified_Systems.User
                 {
                     if (temp_selectedUser == user.ToString())
                     {
-                        saveLabelButton.IsEnabled = true;
+                        resetLabelButton.IsEnabled = true;
                         userList.SelectedItem = user;
                         return;
                     }
@@ -132,7 +132,7 @@ namespace Unified_Systems.User
                 else { Email.Content = " "; }
 
                 Title.Content = "Fetching...";
-                
+
                 Department.Content = "Fetching...";
 
                 Company.Content = "Fetching...";
@@ -159,7 +159,7 @@ namespace Unified_Systems.User
 
                 GroupsPlaceholder.Visibility = Visibility.Visible;
 
-                saveLabelButton.IsEnabled = true;
+                resetLabelButton.IsEnabled = true;
             }
             else
             {
@@ -182,7 +182,7 @@ namespace Unified_Systems.User
                 groupList.Items.Clear();
                 GroupsPlaceholder.Visibility = Visibility.Hidden;
 
-                saveLabelButton.IsEnabled = false;
+                resetLabelButton.IsEnabled = false;
             }
         }
         private void GetUserProperties_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -280,7 +280,7 @@ namespace Unified_Systems.User
         private void ClearSelection()
         {
             userList.SelectedIndex = -1;
-            saveLabelButton.IsEnabled = false;
+            resetLabelButton.IsEnabled = false;
         }
 
         /* Search Functions */
@@ -335,15 +335,18 @@ namespace Unified_Systems.User
                 }
                 foreach (UserPrincipal User in ActiveDirectory.Users)
                 {
-                    if (!ReferenceEquals(User.EmailAddress, null))
+                    if (lookupText.Text.IndexOf("@", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        if (User.EmailAddress.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (!ReferenceEquals(User.EmailAddress, null))
                         {
-                            searchResult++;
-                            if (searchResult == searchCount)
+                            if (User.EmailAddress.IndexOf(lookupText.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                             {
-                                userList.SelectedItem = User.SamAccountName;
-                                return;
+                                searchResult++;
+                                if (searchResult == searchCount)
+                                {
+                                    userList.SelectedItem = User.SamAccountName;
+                                    return;
+                                }
                             }
                         }
                     }
@@ -506,28 +509,34 @@ namespace Unified_Systems.User
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private bool confirmAction = true;
-        private void saveLabelButton_MouseDown(object sender, RoutedEventArgs e)
+        private void resetLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             Style defaultMouseDownLabelButtonStyle = FindResource("defaultMouseDownLabelButtonStyle") as Style;
-            saveLabelButton.Style = defaultMouseDownLabelButtonStyle;
+            resetLabelButton.Style = defaultMouseDownLabelButtonStyle;
             resultMessage.Visibility = Visibility.Hidden;
+
+            newPassword.Text = "Asse2018";
 
             if (confirmAction)
             {
                 curtain.Visibility = Visibility.Visible;
-                confirmMessage.Content = "Are you sure you want to save changes made to " + ActiveDirectory.SelectedUser.SamAccountName + "?";
-                confirmYesLabelButton.Content = "Save Changes to " + ActiveDirectory.SelectedUser.SamAccountName;
+                confirmMessage.Content = "Enter a new password...";
                 confirmMessage.Visibility = Visibility.Visible;
+
+                passwordFields.Visibility = Visibility.Visible;
+
+                confirmYesLabelButton.Content = "Reset " + ActiveDirectory.SelectedUser.SamAccountName + "'s Password";
                 confirmYesLabelButton.Visibility = Visibility.Visible;
                 confirmYesLabelButton.IsEnabled = true;
+
                 confirmNoLabelButton.Visibility = Visibility.Visible;
                 confirmNoLabelButton.IsEnabled = true;
             }
             else
             {
-                if (ActiveDirectory.SelectedUser.SaveUser())
+                if (ActiveDirectory.SelectedUser.ResetUser("Asse2016"))
                 {
-                    resultMessage.Content = "User Saved Successfully";
+                    resultMessage.Content = "User Password Reset Successfully";
                     resultMessage.Visibility = Visibility.Visible;
                 }
                 else
@@ -537,18 +546,18 @@ namespace Unified_Systems.User
                     refreshLabelButton.IsEnabled = false;
                     ActiveDirectory.Connect();
                 }
-                saveLabelButton.IsEnabled = true;
+                resetLabelButton.IsEnabled = true;
             }
         }
-        private void saveLabelButton_MouseUp(object sender, RoutedEventArgs e)
+        private void resetLabelButton_MouseUp(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            saveLabelButton.Style = defaultLabelButtonStyle;
+            resetLabelButton.Style = defaultLabelButtonStyle;
         }
-        private void saveLabelButton_MouseLeave(object sender, RoutedEventArgs e)
+        private void resetLabelButton_MouseLeave(object sender, RoutedEventArgs e)
         {
             Style defaultLabelButtonStyle = FindResource("defaultLabelButtonStyle") as Style;
-            saveLabelButton.Style = defaultLabelButtonStyle;
+            resetLabelButton.Style = defaultLabelButtonStyle;
         }
         /// <summary>
         /// Warning and confirmation template if needed
@@ -559,14 +568,15 @@ namespace Unified_Systems.User
         {
             curtain.Visibility = Visibility.Hidden;
             confirmMessage.Visibility = Visibility.Hidden;
+            passwordFields.Visibility = Visibility.Hidden;
             confirmYesLabelButton.Visibility = Visibility.Hidden;
             confirmYesLabelButton.IsEnabled = false;
             confirmNoLabelButton.Visibility = Visibility.Hidden;
             confirmNoLabelButton.IsEnabled = false;
 
-            if (ActiveDirectory.SelectedUser.SaveUser())
+            if (ActiveDirectory.SelectedUser.ResetUser(newPassword.Text.ToString()))
             {
-                resultMessage.Content = "User Saved Successfully";
+                resultMessage.Content = "User Password Reset Successfully";
                 resultMessage.Visibility = Visibility.Visible;
             }
             else
@@ -576,12 +586,13 @@ namespace Unified_Systems.User
                 refreshLabelButton.IsEnabled = false;
                 ActiveDirectory.Connect();
             }
-            saveLabelButton.IsEnabled = true;
+            resetLabelButton.IsEnabled = true;
         }
         private void confirmNoLabelButton_MouseDown(object sender, RoutedEventArgs e)
         {
             curtain.Visibility = Visibility.Hidden;
             confirmMessage.Visibility = Visibility.Hidden;
+            passwordFields.Visibility = Visibility.Hidden;
             confirmYesLabelButton.Visibility = Visibility.Hidden;
             confirmYesLabelButton.IsEnabled = false;
             confirmNoLabelButton.Visibility = Visibility.Hidden;
@@ -624,7 +635,7 @@ namespace Unified_Systems.User
                 ExitToLogin();
             }
         }
-        private void Lookup_Unloaded(object sender, RoutedEventArgs e)
+        private void Reset_Unloaded(object sender, RoutedEventArgs e)
         {
             ActiveDirectory.ConnectAD.RunWorkerCompleted -= ConnectAD_Completed;
         }
