@@ -2,23 +2,87 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Central_Control"
         x:Class="Central_Control.MainWindow"
-        x:Name="UnifiedSystems"
+        x:Name="CentralControl"
         Title="Central_Control"
-        MinHeight="635" MinWidth="1000" 
-        Height="635" Width="1000" 
+        Height="630"
+        Width="1000"
+        MinHeight="520"
+        MinWidth="800"
+        Background="#FF202020"
+        BorderBrush="#FF181818"
+        BorderThickness="1"
         FontFamily="Consolas" 
-        Visibility="Visible" Activated="RestoreWindow" WindowStyle="None" 
-        ResizeMode="CanResizeWithGrip" AllowsTransparency="True"
-        SnapsToDevicePixels="True">
+        Visibility="Visible"
+        Activated="RestoreWindow"
+        WindowStyle="None" 
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
+        SnapsToDevicePixels="True"
+        SizeChanged="WindowSizeChanged"
+        MouseMove="MainWindow_MouseMove">
     <Window.Resources>
-        <DropShadowEffect x:Key="PrimaryGlow" ShadowDepth="0" Color="DeepSkyBlue" Opacity="1" BlurRadius="30"/>
-        <Style x:Key="MenuStyle" TargetType="Label">
+
+        <!--Button Styles-->
+        <Style x:Key="MenuButton"
+               TargetType="{x:Type Button}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Margin" Value="-1,0,0,-1"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="21"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Panel.ZIndex" Value="1"/>
+            <Setter Property="Foreground" Value="#FF808080"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border"
+                                BorderThickness="1"
+                                Background="#80404040"
+                                BorderBrush="#FF181818">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border"
+                                        Property="BorderBrush" Value="DeepSkyBlue" />
+                                <Setter Property="Foreground" Value="LightGray"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background" Value="#FF303030" />
+                                <Setter Property="Foreground" Value="LightGray"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Foreground" Value="#FF909090"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!--Menu Styles-->
+        <Style x:Key="MainMenuBorder"
+               TargetType="Border">
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="BorderBrush" Value="#FF181818"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        </Style>
+        <DropShadowEffect x:Key="PrimaryGlow"
+                          ShadowDepth="0"
+                          Color="DeepSkyBlue"
+                          Opacity="1"
+                          BlurRadius="30"/>
+        <Style x:Key="Menu"
+               TargetType="Label">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#FF252525"/>
-            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="BorderBrush" Value="#FF181818"/>
+            <Setter Property="Background" Value="#FF181818"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
@@ -26,270 +90,284 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="SelectedMenuStyle" TargetType="Label">
+        <Style x:Key="Menu_Selected"
+               TargetType="Label">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="DeepSkyBlue"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-            <Setter Property="Background" Value="#FF202020"/>
+            <Setter Property="Background" Value="#FF181818"/>
             <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
         </Style>
-        <Style x:Key="ExpandedMenuStyle" TargetType="Label">
+        <Style x:Key="Menu_Expanded"
+               TargetType="Label">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-            <Setter Property="Background" Value="#FF202020"/>
+            <Setter Property="Background" Value="#FF181818"/>
             <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
         </Style>
-        <Style x:Key="SubMenuStyle" TargetType="Label">
+
+        <!--Submenu Styles-->
+        <Style x:Key="Submenu"
+               TargetType="Label">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="DarkGray"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF2B2B2B"/>
+                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="HighlightedSubMenuStyle" TargetType="Label">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF2B2B2B"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="SelectedSubMenuStyle" TargetType="Label">
+        <Style x:Key="Submenu_Selected"
+               TargetType="Label">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="DeepSkyBlue"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        
+        <!--Titlebar Button Styles-->
+        <Style x:Key="TitlebarButton"
+               TargetType="Button">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Background" Value="#FF181818"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF2B2B2B"/>
+                    <Setter Property="Background" Value="#80808080"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF808080"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="TitlebarCloseButton"
+               TargetType="Button">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="Background" Value="#FF181818"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFE81123"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FFF1707A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </Window.Resources>
-    <Grid Background="#FF303030">
+    
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
+            <RowDefinition Height="25"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid x:Name="Titlebar" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF1B1B1B" MouseLeftButtonDown="Titlebar_MouseLeftButtonDown" MouseLeftButtonUp="Titlebar_MouseLeftButtonUp" MouseMove="Titlebar_MouseMove">
-            <!--<Image HorizontalAlignment="Left" VerticalAlignment="Center" Source="Toolbox.ico" Margin="10"/>-->
-            <Label Content="Central Control" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" Background="#FF1B1B1B" FontSize="14"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button x:Name="MinimizeButton" Content="-" Height="35"  Width="50" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" FontSize="25">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="Foreground" Value="LightGray"/>
-                            <Setter Property="Background" Value="#FF1B1B1B"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="#FF1B1B1B"/>
-                                    <Setter Property="Background" Value="DarkGray"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button x:Name="MaximizeButton" Content="□" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="MaximizeWindow" FontSize="25">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="Foreground" Value="LightGray"/>
-                            <Setter Property="Background" Value="#FF1B1B1B"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="#FF1B1B1B"/>
-                                    <Setter Property="Background" Value="DarkGray"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button x:Name="CloseButton" Content="×" Height="35" Width="50" KeyboardNavigation.IsTabStop="False" Click="CloseWindow" FontSize="25">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="Foreground" Value="LightGray"/>
-                            <Setter Property="Background" Value="#FF1B1B1B"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#FFE81123"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
-        </Grid>
-        <Grid Grid.Row="1" Grid.Column="1">
-            <DockPanel>
-                <Frame x:Name="_NavigationFrame" NavigationUIVisibility="Hidden"/>
-            </DockPanel>
-        </Grid>
-        <Grid Grid.Row="1" Grid.Column="0" Margin="0,2,0,0">
-            <Border BorderBrush="#FF252525" BorderThickness="0,0,1,0" Background="#FF303030" Width="200" HorizontalAlignment="Left" Margin="0,-2,0,0"/>
-            <Label Content="Central Control v1.0" Grid.Row="3" Grid.Column="0" Margin="10,0,0,0"  HorizontalAlignment="Left" VerticalAlignment="Bottom" Foreground="#FF606060" FontSize="10" Padding="0"/>
-            <StackPanel>
-                <StackPanel x:Name="DashboardPanel">
+        
+        <!--Main Menu-->
+        <Border x:Name="MainMenu"
+                Grid.Row="1"
+                Grid.Column="0"
+                HorizontalAlignment="Left"
+                Style="{StaticResource MainMenuBorder}"
+                Panel.ZIndex="1">
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                    <BeginStoryboard>
+                        <Storyboard x:Name="HideMenuStoryboard" >
+                            <DoubleAnimation Storyboard.TargetName="MainMenu"
+                                             Storyboard.TargetProperty="Width"
+                                             To="20"
+                                             Duration="0:0:0.30"
+                                             AccelerationRatio="0.8"
+                                             DecelerationRatio="0.2"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                    <BeginStoryboard>
+                        <Storyboard x:Name="ShowMenuStoryboard" >
+                            <DoubleAnimation Storyboard.TargetName="MainMenu"
+                                             Storyboard.TargetProperty="Width"
+                                             To="180"
+                                             Duration="0:0:0.15"
+                                             AccelerationRatio="0.8"
+                                             DecelerationRatio="0.2"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
+            <StackPanel x:Name="MainMenuPanel"
+                        Background="#DD222222"
+                        MouseEnter="MainMenuPanel_MouseEnter"
+                        MouseLeave="MainMenuPanel_MouseLeave">
+                <StackPanel x:Name="ADPanel"
+                            Panel.ZIndex="-1">
+                    <StackPanel.Triggers>
+                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard x:Name="ADStoryboard">
+                                    <DoubleAnimation x:Name="ADAnimation"
+                                                     Storyboard.TargetName="ADPanel"
+                                                     Storyboard.TargetProperty="Height"
+                                                     Duration="0:0:0.30"
+                                                     AccelerationRatio="0.6"
+                                                     DecelerationRatio="0.4"/>
+                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel"   
+                                                     Storyboard.TargetProperty="Height"
+                                                     To="26"
+                                                     Duration="0:0:0.30"
+                                                     AccelerationRatio="0.6"
+                                                     DecelerationRatio="0.4"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </StackPanel.Triggers>
+                    <Label x:Name="AD"
+                               Content="Active Directory"
+                               Style="{StaticResource Menu}"
+                               MouseDown="AD_MouseDown"/>
+                    <Label x:Name="AD_Users"
+                               Content="Users"
+                               Style="{StaticResource Submenu}"
+                               MouseDown="AD_Users_MouseDown"/>
+                </StackPanel>
+                <StackPanel x:Name="SettingsPanel"
+                            Panel.ZIndex="-2">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation x:Name="DashboardAnimation" Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
+                                    <DoubleAnimation Storyboard.TargetName="ADPanel"
+                                                     Storyboard.TargetProperty="Height"
+                                                     To="26"
+                                                     Duration="0:0:0.30"
+                                                     AccelerationRatio="0.6"
+                                                     DecelerationRatio="0.4"/>
+                                    <DoubleAnimation x:Name="SettingsAnimation"
+                                                     Storyboard.TargetName="SettingsPanel"
+                                                     Storyboard.TargetProperty="Height"
+                                                     Duration="0:0:0.30"
+                                                     AccelerationRatio="0.6"
+                                                     DecelerationRatio="0.4"/>
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
                     </StackPanel.Triggers>
-                    <Label x:Name="Dashboard" Content="Dashboard" Style="{StaticResource MenuStyle}" MouseDown="Dashboard_MouseDown"/>
-                    <Label Content=" " Style="{StaticResource SubMenuStyle}"/>
-                </StackPanel>
-                <StackPanel x:Name="UserPanel">
-                    <StackPanel.Triggers>
-                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
-                            <BeginStoryboard>
-                                <Storyboard x:Name="UserStoryboard">
-                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation x:Name="UserAnimation" Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </StackPanel.Triggers>
-                    <Label x:Name="User" Content="User" Style="{StaticResource MenuStyle}" MouseDown="User_MouseDown"/>
-                    <Label x:Name="UserLookup" Content="Lookup" Style="{StaticResource SubMenuStyle}" MouseDown="UserLookup_MouseDown"/>
-                    <Label x:Name="UserCreate" Content="Create" Style="{StaticResource SubMenuStyle}" MouseDown="UserCreate_MouseDown"/>
-                    <Label x:Name="UserReset" Content="Reset Password"  Style="{StaticResource SubMenuStyle}" MouseDown="UserReset_MouseDown"/>
-                    <Label x:Name="UserUnlock" Content="Unlock"  Style="{StaticResource SubMenuStyle}" MouseDown="UserUnlock_MouseDown"/>
-                    <Label x:Name="UserExtend" Content="Extend Expiration"  Style="{StaticResource SubMenuStyle}" MouseDown="UserExtend_MouseDown"/>
-                    <Label x:Name="UserEnable" Content="Enable"  Style="{StaticResource SubMenuStyle}" MouseDown="UserEnable_MouseDown"/>
-                    <Label x:Name="UserDisable" Content="Disable"  Style="{StaticResource SubMenuStyle}" MouseDown="UserDisable_MouseDown"/>
-                    <Label x:Name="UserTerminate" Content="Terminate"  Style="{StaticResource SubMenuStyle}" MouseDown="UserTerminate_MouseDown"/>
-                </StackPanel>
-                <StackPanel x:Name="ServerPanel">
-                    <StackPanel.Triggers>
-                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation x:Name="ServerAnimation" Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </StackPanel.Triggers>
-                    <Label x:Name="Server" Content="Server" Style="{StaticResource MenuStyle}" MouseDown="Server_MouseDown"/>
-                    <Label x:Name="ServerService" Content="Service Status"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerService_MouseDown"/>
-                    <Label x:Name="ServerRestart" Content="Restart"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerRestart_MouseDown"/>
-                    <Label x:Name="ServerShutdown" Content="Shutdown"  Style="{StaticResource SubMenuStyle}" MouseDown="ServerShutdown_MouseDown"/>
-                </StackPanel>
-                <StackPanel x:Name="StoragePanel">
-                    <StackPanel.Triggers>
-                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation x:Name="StorageAnimation" Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </StackPanel.Triggers>
-                    <Label x:Name="Storage" Content="Storage" Style="{StaticResource MenuStyle}" MouseDown="Storage_MouseDown"/>
-                    <Label x:Name="StorageReport" Content="Get Report" Style="{StaticResource SubMenuStyle}" MouseDown="StorageReport_MouseDown"/>
-                </StackPanel>
-                <StackPanel x:Name="NetworkPanel">
-                    <StackPanel.Triggers>
-                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation x:Name="NetworkAnimation" Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </StackPanel.Triggers>
-                    <Label x:Name="Network" Content="Network" Style="{StaticResource MenuStyle}" MouseDown="Network_MouseDown"/>
-                    <Label x:Name="NetworkConnect" Content="Connect" Style="{StaticResource SubMenuStyle}" MouseDown="NetworkConnect_MouseDown"/>
-                    <Label x:Name="NetworkBackup" Content="Backup" Style="{StaticResource SubMenuStyle}" MouseDown="NetworkBackup_MouseDown"/>
-                    <Label x:Name="NetworkReload" Content="Reload"  Style="{StaticResource SubMenuStyle}" MouseDown="NetworkReload_MouseDown"/>
-                    <Label x:Name="NetworkShutdown" Content="Shutdown"  Style="{StaticResource SubMenuStyle}" MouseDown="NetworkShutdown_MouseDown"/>
-                </StackPanel>
-                <StackPanel x:Name="SettingsPanel">
-                    <StackPanel.Triggers>
-                        <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="DashboardPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="UserPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="ServerPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="StoragePanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation Storyboard.TargetName="NetworkPanel" Storyboard.TargetProperty="Height" To="28" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                    <DoubleAnimation x:Name="SettingsAnimation" Storyboard.TargetName="SettingsPanel" Storyboard.TargetProperty="Height" Duration="0:0:0.30" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </StackPanel.Triggers>
-                    <Label x:Name="Settings" Content="Settings" Style="{StaticResource MenuStyle}" MouseDown="Settings_MouseDown"/>
-                    <Label x:Name="SettingsGeneral" Content="General" Style="{StaticResource SubMenuStyle}" MouseDown="SettingsGeneral_MouseDown"/>
-                    <Label x:Name="SettingsCredentials" Content="Credentials" Style="{StaticResource SubMenuStyle}" MouseDown="SettingsCredentials_MouseDown"/>
+                    <Label x:Name="Settings"
+                               Content="Settings"
+                               Style="{StaticResource Menu}"
+                               MouseDown="Settings_MouseDown"/>
+                    <Label x:Name="Settings_Credentials"
+                               Content="Credentials"
+                               Style="{StaticResource Submenu}"
+                               MouseDown="Settings_Credentials_MouseDown"/>
                 </StackPanel>
             </StackPanel>
+        </Border>
+        <Button x:Name="MenuShowButton"
+                Content="&gt;"
+                Style="{StaticResource MenuButton}"
+                Grid.Row="1"
+                Click="MenuShowButton_Click"
+                Visibility="Collapsed"/>
+        <Button x:Name="MenuHideButton"
+                Content="&lt;"
+                Style="{StaticResource MenuButton}"
+                Grid.Row="1"
+                Click="MenuHideButton_Click"
+                Visibility="Visible"/>
+
+        <!--Primary Frame-->
+        <DockPanel Grid.Row="1"
+                   Grid.Column="1">
+            <Frame x:Name="_NavigationFrame"
+                   NavigationUIVisibility="Hidden"/>
+        </DockPanel>
+
+        <!--Titlebar-->
+        <Grid x:Name="Titlebar"
+              Grid.Row="0"
+              Grid.ColumnSpan="2"
+              Background="#FF181818"
+              MouseLeftButtonDown="Titlebar_MouseLeftButtonDown"
+              MouseLeftButtonUp="Titlebar_MouseLeftButtonUp"
+              MouseMove="Titlebar_MouseMove"
+              Panel.ZIndex="1000">
+            <!--<Image HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Source="Toolbox.ico"
+                   Margin="10"/>-->
+            <Label Content="Central Control"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Foreground="Gray"
+                   Background="#FF1B1B1B"
+                   FontSize="14"/>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <Button x:Name="MinimizeWindowButton"
+                        Content="-"
+                        Click="MinimizeWindowButton_Click"
+                        FontSize="24"
+                        Style="{StaticResource TitlebarButton}"/>
+                <Button x:Name="MaximizeWindowButton"
+                        Content="□"
+                        Click="MaximizeWindowButton_Click"
+                        FontSize="18"
+                        Style="{StaticResource TitlebarButton}"/>
+                <Button x:Name="CloseWindowButton"
+                        Content="×"
+                        Click="CloseWindowButton_Click"
+                        FontSize="20"
+                        Style="{StaticResource TitlebarCloseButton}"/>
+            </StackPanel>
         </Grid>
+
+        <!--Version Footnote-->
+        <Label x:Name="VersionFootnote"
+               Grid.Row="1"
+               Grid.Column="1"
+               Margin="0,0,20,0"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Foreground="#FF606060"
+               FontSize="10"
+               Padding="0"
+               Panel.ZIndex="999"/>
+
     </Grid>
 </Window>

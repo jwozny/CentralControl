@@ -22,7 +22,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using Central_Control.User;
 using WinInterop = System.Windows.Interop;
 
 namespace Central_Control
@@ -32,248 +31,93 @@ namespace Central_Control
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// Interaction logic for MainWindow.xaml
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-            LoadConfig();
 
             SourceInitialized += new EventHandler(MainWindow_SourceInitialized);
 
-            //ActiveDirectory.Connect();
-            ShowHideOptions();
+            GlobalConfig.LoadFromDisk();            
+            InitializeMenu();
+
+            VersionFootnote.Content = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
-
-        private Configuration configs = new Configuration();
-        private void LoadConfig()
-        {
-            try
-            {
-                configs = ConfigActions.LoadConfig();
-            }
-            catch
-            {
-                File.Delete(System.IO.Path.GetTempPath() + @"\~onfig");
-            }
-
-            ActiveDirectory.DomainName = configs.DomainName;
-            ActiveDirectory.AuthenticatingUsername = configs.ADUsername;
-            ActiveDirectory.AuthenticatingPassword = configs.ADPassword;
-        }
-
+        /// <summary>
+        /// When the mainWindow is initialized, do this (window control hooks for custom titlebar)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MainWindow_SourceInitialized(object sender, EventArgs e)
         {
             System.IntPtr handle = (new WinInterop.WindowInteropHelper(this)).Handle;
-            WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(WindowProc));
+            WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(SnapAssist.WindowProc));
         }
-        private static void WmGetMinMaxInfo(System.IntPtr hwnd, System.IntPtr lParam)
-        {
-
-            MINMAXINFO mmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
-
-            // Adjust the maximized size and position to fit the work area of the correct monitor
-            int MONITOR_DEFAULTTONEAREST = 0x00000002;
-            System.IntPtr monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-
-            if (monitor != System.IntPtr.Zero)
-            {
-
-                MONITORINFO monitorInfo = new MONITORINFO();
-                GetMonitorInfo(monitor, monitorInfo);
-                RECT rcWorkArea = monitorInfo.rcWork;
-                RECT rcMonitorArea = monitorInfo.rcMonitor;
-                mmi.ptMaxPosition.x = Math.Abs(rcWorkArea.left - rcMonitorArea.left);
-                mmi.ptMaxPosition.y = Math.Abs(rcWorkArea.top - rcMonitorArea.top);
-                mmi.ptMaxSize.x = Math.Abs(rcWorkArea.right - rcWorkArea.left);
-                mmi.ptMaxSize.y = Math.Abs(rcWorkArea.bottom - rcWorkArea.top);
-            }
-
-            Marshal.StructureToPtr(mmi, lParam, true);
-        }
-        //public override void OnApplyTemplate()
-        //{
-        //    System.IntPtr handle = (new WinInterop.WindowInteropHelper(this)).Handle;
-        //    WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(WindowProc));
-        //}
-        private static System.IntPtr WindowProc(System.IntPtr hwnd, int msg, System.IntPtr wParam, System.IntPtr lParam, ref bool handled)
-        {
-            switch (msg)
-            {
-                case 0x0024:
-                    WmGetMinMaxInfo(hwnd, lParam);
-                    handled = false;
-                    break;
-            }
-
-            return (System.IntPtr)0;
-        }
+        
+        /* Window controls */
         /// <summary>
-        /// POINT aka POINTAPI
+        /// Minimize window
         /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINT
-        {
-            /// <summary>
-            /// x coordinate of point.
-            /// </summary>
-            public int x;
-            /// <summary>
-            /// y coordinate of point.
-            /// </summary>
-            public int y;
-
-            /// <summary>
-            /// Construct a point of coordinates (x,y).
-            /// </summary>
-            public POINT(int x, int y)
-            {
-                this.x = x;
-                this.y = y;
-            }
-        }
-        [StructLayout(LayoutKind.Sequential)]
-        public struct MINMAXINFO
-        {
-            public POINT ptReserved;
-            public POINT ptMaxSize;
-            public POINT ptMaxPosition;
-            public POINT ptMinTrackSize;
-            public POINT ptMaxTrackSize;
-        };
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        public class MONITORINFO
-        {
-            /// <summary>
-            /// </summary>            
-            public int cbSize = Marshal.SizeOf(typeof(MONITORINFO));
-
-            /// <summary>
-            /// </summary>            
-            public RECT rcMonitor = new RECT();
-
-            /// <summary>
-            /// </summary>            
-            public RECT rcWork = new RECT();
-
-            /// <summary>
-            /// </summary>            
-            public int dwFlags = 0;
-        }
-
-        /* Win32 */
-        /// <summary>
-        /// Gets monitor info
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential, Pack = 0)]
-        public struct RECT
-        {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
-            
-            public static readonly RECT Empty = new RECT();
-            
-            public int Width
-            {
-                get { return Math.Abs(right - left); }  // Abs needed for BIDI OS
-            }
-            public int Height
-            {
-                get { return bottom - top; }
-            }
-            
-            public RECT(int left, int top, int right, int bottom)
-            {
-                this.left = left;
-                this.top = top;
-                this.right = right;
-                this.bottom = bottom;
-            }
-            
-            public RECT(RECT rcSrc)
-            {
-                this.left = rcSrc.left;
-                this.top = rcSrc.top;
-                this.right = rcSrc.right;
-                this.bottom = rcSrc.bottom;
-            }
-            
-            public bool IsEmpty
-            {
-                get
-                {
-                    // BUGBUG : On Bidi OS (hebrew arabic) left > right
-                    return left >= right || top >= bottom;
-                }
-            }
-            /// <summary> Return a user friendly representation of this struct </summary>
-            public override string ToString()
-            {
-                if (this == RECT.Empty) { return "RECT {Empty}"; }
-                return "RECT { left : " + left + " / top : " + top + " / right : " + right + " / bottom : " + bottom + " }";
-            }
-
-            /// <summary> Determine if 2 RECT are equal (deep compare) </summary>
-            public override bool Equals(object obj)
-            {
-                if (!(obj is Rect)) { return false; }
-                return (this == (RECT)obj);
-            }
-
-            /// <summary>Return the HashCode for this struct (not garanteed to be unique)</summary>
-            public override int GetHashCode()
-            {
-                return left.GetHashCode() + top.GetHashCode() + right.GetHashCode() + bottom.GetHashCode();
-            }
-            
-            /// <summary> Determine if 2 RECT are equal (deep compare)</summary>
-            public static bool operator ==(RECT rect1, RECT rect2)
-            {
-                return (rect1.left == rect2.left && rect1.top == rect2.top && rect1.right == rect2.right && rect1.bottom == rect2.bottom);
-            }
-
-            /// <summary> Determine if 2 RECT are different(deep compare)</summary>
-            public static bool operator !=(RECT rect1, RECT rect2)
-            {
-                return !(rect1 == rect2);
-            }
-
-
-        }
-        [DllImport("user32")]
-        internal static extern bool GetMonitorInfo(IntPtr hMonitor, MONITORINFO lpmi);
-        [DllImport("User32")]
-        internal static extern IntPtr MonitorFromWindow(IntPtr handle, int flags);
-        /// <summary>
-        /// Confirms whether the cursor is on the current monitor
-        /// </summary>
-        /// This is to allow the mouse to drag the window down from maximized to normal
-        /// and keep the window on the same monitor if multiple monitors are involved.
-        /// <param name="lpPoint"></param>
-        /// <returns></returns>
-        [DllImport("user32")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetCursorPos(out POINT lpPoint);
-
-        /* Window Control Actions */
-        private bool mRestoreIfMove = false;
-        private void MinimizeWindow(object sender, RoutedEventArgs e)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MinimizeWindowButton_Click(object sender, RoutedEventArgs e)
         {
             //WindowStyle = WindowStyle.SingleBorderWindow;
             WindowState = WindowState.Minimized;
         }
-        private void RestoreWindow(object sender, EventArgs e)
-        {
-            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => WindowStyle = WindowStyle.None));
-        }
-        private void MaximizeWindow(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Switch the state of the window (maximize, normal)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MaximizeWindowButton_Click(object sender, RoutedEventArgs e)
         {
             SwitchState();
         }
-        private void CloseWindow(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Close the window and quit the application
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
+        /// <summary>
+        /// Was the window just resized?
+        /// </summary>
+        private bool Resized = false;
+        /// <summary>
+        /// When window size changes, resize specific controls to accomodate small sizes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (this.ActualWidth <= 900)
+            {
+                ToggleMainMenu("Instahide");
+                Resized = true;
+            }
+        }
+        /// <summary>
+        /// Run the main menu hide animation after resizing is complete
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainWindow_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (Resized)
+            {
+                HideMenuStoryboard.Begin();
+                Resized = false;
+            }
+        }
+        /// <summary>
+        /// Switch window state between Maximized and Normal
+        /// </summary>
         private void SwitchState()
         {
             if (ResizeMode == ResizeMode.CanResize || ResizeMode == ResizeMode.CanResizeWithGrip)
@@ -293,6 +137,24 @@ namespace Central_Control
                 }
             }
         }
+        /// <summary>
+        /// Is the mouse left button down?
+        /// </summary>
+        private bool mRestoreIfMove = false;
+        /// <summary>
+        /// Restore the window from minimize state without artifacts
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RestoreWindow(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => WindowStyle = WindowStyle.None));
+        }
+        /// <summary>
+        /// Mouse click action for the titlebar, double click switches state while single activates the drag function
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Titlebar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
@@ -313,10 +175,20 @@ namespace Central_Control
 
             DragMove();
         }
+        /// <summary>
+        /// Action when the titlebar is let go (stop moving or confirm snap)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Titlebar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             mRestoreIfMove = false;
         }
+        /// <summary>
+        /// While mouse is held down, move the window and use snap assist
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Titlebar_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (mRestoreIfMove)
@@ -331,8 +203,8 @@ namespace Central_Control
 
                 WindowState = WindowState.Normal;
 
-                POINT lMousePosition;
-                GetCursorPos(out lMousePosition);
+                SnapAssist.POINT lMousePosition;
+                SnapAssist.GetCursorPos(out lMousePosition);
 
                 //Left = lMousePosition.X - targetHorizontal;
                 //Top = lMousePosition.Y - targetVertical;
@@ -342,657 +214,339 @@ namespace Central_Control
                 try { DragMove(); } catch { }
             }
         }
-
-        /* Menu Button Actions */
-        private string LoadedSubmenu;
+        
+        /* Main Menu style functions */
+        /// <summary>
+        /// Reset all menu styles to their defaults
+        /// </summary>
         private void ResetMenuColors()
         {
-            RemoveAllHandlers();
-            Style defaultMenuStyle = FindResource("MenuStyle") as Style;
+            RemoveAll_ADHandlers();
+            Style Menu = FindResource("Menu") as Style;
 
-            Dashboard.Style = defaultMenuStyle;
-            User.Style = defaultMenuStyle;
-            Server.Style = defaultMenuStyle;
-            Storage.Style = defaultMenuStyle;
-            Network.Style = defaultMenuStyle;
-            Settings.Style = defaultMenuStyle;
+            // Reset AD menu style
+            AD.Style = Menu;
 
-            //ResetSubMenuColors();
+            // Reset Settings menu style
+            Settings.Style = Menu;
+
+            //ResetSubmenuColors();
         }
-        private void ResetSubMenuColors()
+        /// <summary>
+        /// Reset all Submenu styles to their defaults
+        /// </summary>
+        private void ResetSubmenuColors()
         {
-            Style defaultSubMenuStyle = FindResource("SubMenuStyle") as Style;
+            Style Submenu = FindResource("Submenu") as Style;
 
-            UserLookup.Style = defaultSubMenuStyle;
-            UserCreate.Style = defaultSubMenuStyle;
-            UserReset.Style = defaultSubMenuStyle;
-            UserUnlock.Style = defaultSubMenuStyle;
-            UserExtend.Style = defaultSubMenuStyle;
-            UserEnable.Style = defaultSubMenuStyle;
-            UserDisable.Style = defaultSubMenuStyle;
-            UserTerminate.Style = defaultSubMenuStyle;
+            // Reset AD Submenu styles
+            AD_Users.Style = Submenu;
 
-            ServerService.Style = defaultSubMenuStyle;
-            ServerShutdown.Style = defaultSubMenuStyle;
-            ServerRestart.Style = defaultSubMenuStyle;
-
-            StorageReport.Style = defaultSubMenuStyle;
-
-            NetworkConnect.Style = defaultSubMenuStyle;
-            NetworkBackup.Style = defaultSubMenuStyle;
-            NetworkReload.Style = defaultSubMenuStyle;
-            NetworkShutdown.Style = defaultSubMenuStyle;
-
-            SettingsGeneral.Style = defaultSubMenuStyle;
-            SettingsCredentials.Style = defaultSubMenuStyle;
+            // Reset Settings Submenu styles
+            Settings_Credentials.Style = Submenu;
         }
-        private void HighlightSubmenus()
+        /// <summary>
+        /// Initialize main menu and Submenu options
+        /// </summary>
+        private void InitializeMenu()
         {
-            Style SelectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style HighlightedSubMenuStyle = FindResource("HighlightedSubMenuStyle") as Style;
-
-            ResetSubMenuColors();
-            
-            if (!ReferenceEquals(ActiveDirectory.SelectedUser, null))
-            {
-                UserLookup.Style = HighlightedSubMenuStyle;
-                UserReset.Style = HighlightedSubMenuStyle;
-                if (!ActiveDirectory.GetUserProperties.IsBusy)
-                {
-                    if (ActiveDirectory.SelectedUser_IsAccountLockedOut) UserUnlock.Style = HighlightedSubMenuStyle;
-                }
-                if (ActiveDirectory.SelectedUser.IsAccountExpired()) UserExtend.Style = HighlightedSubMenuStyle;
-                if (!ActiveDirectory.SelectedUser.Enabled.Value) UserEnable.Style = HighlightedSubMenuStyle;
-                if (ActiveDirectory.SelectedUser.Enabled.Value) UserDisable.Style = HighlightedSubMenuStyle;
-            }
-
-            if (LoadedSubmenu == "User.Lookup") UserLookup.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Create") UserCreate.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Reset") UserReset.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Unlock") UserUnlock.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Extend") UserExtend.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Enable") UserEnable.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Disable") UserDisable.Style = SelectedSubMenuStyle;
-            if (LoadedSubmenu == "User.Terminate") UserTerminate.Style = SelectedSubMenuStyle;
-        }
-        private void ShowHideOptions()
-        {
-            Dashboard.IsEnabled = false;
-            DashboardPanel.Height = 28;
-            DashboardPanel.Visibility = Visibility.Collapsed;
-            DashboardAnimation.To = 24 * 0 + 28 - 0;
-
-            User.IsEnabled = true;
-            UserPanel.Height = 28;
+            // Set AD Submenu area height
+            AD.IsEnabled = true;
+            ADPanel.Height = 26;
             if (ActiveDirectory.IsConnected)
             {
-                UserLookup.IsEnabled = true;
-                UserCreate.IsEnabled = false;
-                UserCreate.Visibility = Visibility.Collapsed;
-                UserReset.IsEnabled = true;
-                UserUnlock.IsEnabled = true;
-                UserExtend.IsEnabled = true;
-                UserEnable.IsEnabled = true;
-                UserDisable.IsEnabled = true;
-                UserTerminate.IsEnabled = false;
-                UserTerminate.Visibility = Visibility.Collapsed;
+                AD_Users.IsEnabled = true;
 
-                UserAnimation.To = 24 * 6 + 28 - 2;
+                ADAnimation.To = 24 * 1 + 26;
 
-                UserStoryboard.Begin();
+                ADStoryboard.Begin();
             }
             else
             {
-                UserLookup.IsEnabled = false;
-                UserCreate.IsEnabled = false;
-                UserReset.IsEnabled = false;
-                UserUnlock.IsEnabled = false;
-                UserExtend.IsEnabled = false;
-                UserEnable.IsEnabled = false;
-                UserDisable.IsEnabled = false;
-                UserTerminate.IsEnabled = false;
+                AD_Users.IsEnabled = false;
 
-                UserAnimation.To = 24 * 0 + 28 - 0;
+                ADAnimation.To = 24 * 0 + 26;
             }
 
-            Server.IsEnabled = false;
-            ServerPanel.Height = 28;
-            ServerPanel.Visibility = Visibility.Collapsed;
-            ServerService.IsEnabled = false;
-            ServerService.Visibility = Visibility.Collapsed;
-            ServerShutdown.IsEnabled = false;
-            ServerShutdown.Visibility = Visibility.Collapsed;
-            ServerRestart.IsEnabled = false;
-            ServerRestart.Visibility = Visibility.Collapsed;
-            ServerAnimation.To = 24 * 0 + 28 - 0;
-
-            Storage.IsEnabled = false;
-            StoragePanel.Height = 28;
-            StoragePanel.Visibility = Visibility.Collapsed;
-            StorageReport.IsEnabled = false;
-            StorageReport.Visibility = Visibility.Collapsed;
-            StorageAnimation.To = 24 * 0 + 28 - 0;
-
-            Network.IsEnabled = false;
-            NetworkPanel.Height = 28;
-            NetworkPanel.Visibility = Visibility.Collapsed;
-            NetworkConnect.IsEnabled = false;
-            NetworkConnect.Visibility = Visibility.Collapsed;
-            NetworkBackup.IsEnabled = false;
-            NetworkBackup.Visibility = Visibility.Collapsed;
-            NetworkReload.IsEnabled = false;
-            NetworkReload.Visibility = Visibility.Collapsed;
-            NetworkShutdown.IsEnabled = false;
-            NetworkShutdown.Visibility = Visibility.Collapsed;
-            NetworkAnimation.To = 24 * 0 + 28 - 0;
-
+            // Set Settings Submenu area height
             Settings.IsEnabled = true;
-            SettingsPanel.Height = 28;
-            SettingsGeneral.IsEnabled = false;
-            SettingsGeneral.Visibility = Visibility.Collapsed;
-            SettingsCredentials.IsEnabled = true;
-            SettingsAnimation.To = 24 * 1 + 28 - 2;
+            SettingsPanel.Height = 26;
+            Settings_Credentials.IsEnabled = true;
+            SettingsAnimation.To = 24 * 1 + 26;
         }
 
-        private void Dashboard_MouseDown(object sender, MouseButtonEventArgs e)
+        /* Main Menu controls */
+        /// <summary>
+        /// Returns if the main menu hidden
+        /// </summary>
+        private bool MenuHidden = false;
+        /// <summary>
+        /// Toggle between showing the main menu and hiding it
+        /// </summary>
+        /// <param name="state">null,Show,Hide,InstaHide</param>
+        private void ToggleMainMenu(string state)
         {
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            Dashboard.Style = expandedMenuStyle;
-            if (false/*Add check here*/)
+            switch (state)
             {
-                //_NavigationFrame.Navigate(new Dashboard.Dashboard());
-                ResetSubMenuColors();
-                Dashboard.Style = selectedMenuStyle;
+                case "Show":
+                    ShowMenuStoryboard.Begin();
+                    MenuShowButton.Visibility = Visibility.Collapsed;
+                    MenuHideButton.Visibility = Visibility.Visible;
+                    MainMenu.SetValue(Grid.ColumnSpanProperty, 1);
+
+                    MenuHidden = false;
+                    break;
+                case "Hide":
+                    HideMenuStoryboard.Begin();
+                    MenuShowButton.Visibility = Visibility.Visible;
+                    MenuHideButton.Visibility = Visibility.Collapsed;
+                    MainMenu.SetValue(Grid.ColumnSpanProperty, 2);
+
+                    MenuHidden = true;
+                    break;
+                case "Instahide":
+                    MainMenu.SetValue(WidthProperty, 20.0);
+                    MenuShowButton.Visibility = Visibility.Visible;
+                    MenuHideButton.Visibility = Visibility.Collapsed;
+                    MainMenu.SetValue(Grid.ColumnSpanProperty, 2);
+
+                    MenuHidden = true;
+                    break;
+                default:
+                    if (MenuHidden)
+                    {
+                        ShowMenuStoryboard.Begin();
+                        MenuShowButton.Visibility = Visibility.Collapsed;
+                        MenuHideButton.Visibility = Visibility.Visible;
+                        MainMenu.SetValue(Grid.ColumnSpanProperty, 1);
+
+                        MenuHidden = false;
+                    }
+                    else
+                    {
+                        HideMenuStoryboard.Begin();
+                        MenuShowButton.Visibility = Visibility.Visible;
+                        MenuHideButton.Visibility = Visibility.Collapsed;
+                        MainMenu.SetValue(Grid.ColumnSpanProperty, 2);
+
+                        MenuHidden = true;
+                    }
+                    break;
             }
         }
-
-        private void User_MouseDown(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Show the main menu when clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuShowButton_Click(object sender, RoutedEventArgs e)
         {
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+            ToggleMainMenu(null);
+            MainMenu.SetValue(Grid.ColumnSpanProperty, 1);
+        }
+        /// <summary>
+        /// Hide the main menu when clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuHideButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMainMenu(null);
+            MainMenu.SetValue(Grid.ColumnSpanProperty, 2);
+        }
+        /// <summary>
+        /// Hide the menu after temporarily showing it
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainMenuPanel_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (MenuHidden)
+            {
+                ShowMenuStoryboard.Begin();
+            }
+        }
+        /// <summary>
+        /// Temporarily show the menu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainMenuPanel_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (MenuHidden)
+            {
+                HideMenuStoryboard.Begin();
+            }
+        }
+        /// <summary>
+        /// Page initialization for AD_Connect
+        /// </summary>
+        private AD.Connect AD_Connect_Page = new AD.Connect();
+        /// <summary>
+        /// Show the AD_Connect page if not connected to AD, otherwise expand the menu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Style Menu_Selected = FindResource("Menu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
 
             ResetMenuColors();
-            User.Style = expandedMenuStyle;
+            AD.Style = Menu_Expanded;
             if (!ActiveDirectory.IsConnected)
             {
-                _NavigationFrame.Navigate(new User.User());
-                ResetSubMenuColors();
-                User.Style = selectedMenuStyle;
+                _NavigationFrame.Navigate(AD_Connect_Page);
+                ResetSubmenuColors();
+                AD.Style = Menu_Selected;
 
-                RemoveAllHandlers();
-                _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(User_Connected);
+                RemoveAll_ADHandlers();
+                _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
             }
             else
             {
-                ActiveDirectory.Connect();
+                InitializeMenu();
             }
         }
-        private void UserLookup_MouseDown(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Page initialization for AD_Users
+        /// </summary>
+        private AD.Users AD_Users_Page = new AD.Users();
+        /// <summary>
+        /// Go to the AD_Users page and watch for AD disconnect event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Users_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
 
             ResetMenuColors();
-            User.Style = expandedMenuStyle;
+            AD.Style = Menu_Expanded;
 
-            _NavigationFrame.Navigate(new User.Lookup());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Lookup";
-            HighlightSubmenus();
-            UserLookup.Style = selectedSubMenuStyle;
+            _NavigationFrame.Navigate(AD_Users_Page);
+            ResetSubmenuColors();
+            AD_Users.Style = Submenu_Selected;
 
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_Disconnected);
+            RemoveAll_ADHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
         }
-        private void UserCreate_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            //_NavigationFrame.Navigate(new User.Create());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Create";
-            HighlightSubmenus();
-            UserCreate.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_Disconnected);
-        }
-        private void UserReset_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            _NavigationFrame.Navigate(new User.Reset());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Reset";
-            HighlightSubmenus();
-            UserReset.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_Disconnected);
-        }
-        private void UserUnlock_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            _NavigationFrame.Navigate(new User.Unlock());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Unlock";
-            HighlightSubmenus();
-            UserUnlock.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_Disconnected);
-        }
-        private void UserExtend_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            _NavigationFrame.Navigate(new User.Extend());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Extend";
-            HighlightSubmenus();
-            UserExtend.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_Disconnected);
-        }
-        private void UserEnable_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            _NavigationFrame.Navigate(new User.Enable());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Enable";
-            HighlightSubmenus();
-            UserEnable.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_Disconnected);
-        }
-        private void UserDisable_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            _NavigationFrame.Navigate(new User.Disable());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Disable";
-            HighlightSubmenus();
-            UserDisable.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_Disconnected);
-        }
-        private void UserTerminate_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            User.Style = expandedMenuStyle;
-
-            //_NavigationFrame.Navigate(new User.Terminate());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Terminate";
-            HighlightSubmenus();
-            UserTerminate.Style = selectedSubMenuStyle;
-
-            RemoveAllHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_Disconnected);
-        }
-        // Add:
-        // User - Grant Domain Admin
-        // User - Revoke Domain Admin
-        // User - Grant Local Admin
-        // User - Revoke Local Admin
-        // User - Grant VPN Access
-        // User - Revoke VPN Access
-
-        //private Server.Server Server_ = new Server.Server();
-        private void Server_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            Server.Style = expandedMenuStyle;
-            if (false/*Add check here*/)
-            {
-                //_NavigationFrame.Navigate(Server_);
-                ResetSubMenuColors();
-                Server.Style = selectedMenuStyle;
-            }
-        }
-        //private Server.Service Server_Service = new Server.Service();
-        private void ServerService_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Server.Service());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Server.Style = expandedMenuStyle;
-            ServerService.Style = selectedSubMenuStyle;
-        }
-        //private Server.Shutdown Server_Shutdown = new Server.Shutdown();
-        private void ServerShutdown_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Server.Shutdown());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Server.Style = expandedMenuStyle;
-            ServerShutdown.Style = selectedSubMenuStyle;
-        }
-        //private Server.Restart Server_Restart = new Server.Restart();
-        private void ServerRestart_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Server.Restart());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Server.Style = expandedMenuStyle;
-            ServerRestart.Style = selectedSubMenuStyle;
-        }
-
-        //private Storage.Storage Storage_ = new Storage.Storage();
-        private void Storage_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            Storage.Style = expandedMenuStyle;
-            if (false/*Add check here*/)
-            {
-                //_NavigationFrame.Navigate(Storage_Page);
-                ResetSubMenuColors();
-                Storage.Style = selectedMenuStyle;
-            }
-        }
-        //private Storage.Report Storage_Report = new Storage.Report();
-        private void StorageReport_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Storage.Report());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Storage.Style = expandedMenuStyle;
-            StorageReport.Style = selectedSubMenuStyle;
-        }
-
-        //private Network.Network Network_ = new Network.Network();
-        private void Network_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            Network.Style = expandedMenuStyle;
-            if (false/*Add check here*/)
-            {
-                //_NavigationFrame.Navigate(Network_);
-                ResetSubMenuColors();
-                Network.Style = selectedMenuStyle;
-            }
-        }
-        //private Network.Connect Network_Connect = new Network.Connect();
-        private void NetworkConnect_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Network.Connect());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Network.Style = expandedMenuStyle;
-            NetworkConnect.Style = selectedSubMenuStyle;
-        }
-        //private Network.Backup Network_Backup = new Network.Backup();
-        private void NetworkBackup_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Network.Backup());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Network.Style = expandedMenuStyle;
-            NetworkBackup.Style = selectedSubMenuStyle;
-        }
-        //private Network.Reload Network_Reload = new Network.Reload();
-        private void NetworkReload_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-            //_NavigationFrame.Navigate(new Network.Reload());
-            _NavigationFrame.Navigate(null);
-            ResetMenuColors();
-            Network.Style = expandedMenuStyle;
-            NetworkReload.Style = selectedSubMenuStyle;
-        }
-        //private Network.Shutdown Network_Shutdown = new Network.Shutdown();
-        private void NetworkShutdown_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            Network.Style = expandedMenuStyle;
-
-            //_NavigationFrame.Navigate(NetworkShutdown_Page);
-            ResetSubMenuColors();
-            NetworkShutdown.Style = selectedSubMenuStyle;
-        }
-
-        //private Settings.Settings Settings_ = new Settings.Settings();
+        /// <summary>
+        /// Expand the Settings menu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Settings_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+            Style Menu_Selected = FindResource("Menu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
 
             ResetMenuColors();
-            Settings.Style = expandedMenuStyle;
+            Settings.Style = Menu_Expanded;
             if (false/*Add check here*/)
             {
                 //_NavigationFrame.Navigate(Settings_Page);
-                ResetSubMenuColors();
-                Settings.Style = selectedMenuStyle;
+                ResetSubmenuColors();
+                Settings.Style = Menu_Selected;
             }
         }
-        //private Settings.General Settings_General = new Settings.General();
-        private void SettingsGeneral_MouseDown(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Page initialization for the Credentials page
+        /// </summary>
+        private Settings.Credentials Settings_Credentials_Page = new Settings.Credentials();
+        /// <summary>
+        /// Go to the Credentials page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Settings_Credentials_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
 
             ResetMenuColors();
-            Settings.Style = expandedMenuStyle;
+            Settings.Style = Menu_Expanded;
 
-            //_NavigationFrame.Navigate(Settings_General);
-            ResetSubMenuColors();
-            SettingsGeneral.Style = selectedSubMenuStyle;
-        }
-        private Settings.Credentials Settings_Credentials = new Settings.Credentials();
-        private void SettingsCredentials_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
-
-            ResetMenuColors();
-            Settings.Style = expandedMenuStyle;
-
-            _NavigationFrame.Navigate(Settings_Credentials);
-            ResetSubMenuColors();
-            SettingsCredentials.Style = selectedSubMenuStyle;
+            _NavigationFrame.Navigate(Settings_Credentials_Page);
+            ResetSubmenuColors();
+            Settings_Credentials.Style = Submenu_Selected;
         }
 
-        /* Menu Handlers */
-        private void RemoveAllHandlers()
+        /* AD Event Handlers */
+        /// <summary>
+        /// Remove all AD related event handlers when assigning a new handler
+        /// </summary>
+        private void RemoveAll_ADHandlers()
         {
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(User_Connected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserCreate_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserReset_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserUnlock_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserExtend_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserEnable_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserDisable_Disconnected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(UserTerminate_Disconnected);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
         }
 
-        private void User_Connected(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        /// <summary>
+        /// Watch for the ConnectionVerified event in the AD_Connect page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Connected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            ((User.User)e.Content).ConnectionVerified += new EventHandler(User_Connected);
+            ((AD.Connect)e.Content).ConnectionVerified += new EventHandler(AD_Connected);
         }
-        private void User_Connected(object sender, EventArgs e)
+        /// <summary>
+        /// Handler - Do this when the AD pages detect that AD is accessible
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Connected(object sender, EventArgs e)
         {
-            RemoveAllHandlers();
-            ShowHideOptions();
+            RemoveAll_ADHandlers();
+            InitializeMenu();
 
-            Style selectedSubMenuStyle = FindResource("SelectedSubMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
 
             ResetMenuColors();
-            User.Style = expandedMenuStyle;
+            AD.Style = Menu_Expanded;
 
-            _NavigationFrame.Navigate(new User.Lookup());
-            ResetSubMenuColors();
-            LoadedSubmenu = "User.Lookup";
-            UserLookup.Style = selectedSubMenuStyle;
-
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_HighlightSubmenus);
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(UserLookup_Disconnected);
+            _NavigationFrame.Navigate(AD_Users_Page);
+            ResetSubmenuColors();
+            AD_Users.Style = Submenu_Selected;
+            
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
         }
 
-        private void UserLookup_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        /// <summary>
+        /// Watch for the Disconnected event in the AD pages
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            ((User.Lookup)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
+            ((AD.Users)e.Content).Disconnected += new EventHandler(AD_Disconnected);
         }
-        private void UserCreate_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        /// <summary>
+        /// Handler - Do this when the AD pages detect that AD is no longer accessible
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Disconnected(object sender, EventArgs e)
         {
-            //((User.Create)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void UserReset_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Reset)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void UserUnlock_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Unlock)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void UserExtend_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Extend)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void UserEnable_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Enable)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void UserDisable_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Disable)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void UserTerminate_HighlightSubmenus(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            //((User.Terminate)e.Content).HighlightSubmenus += new EventHandler(User_HighlightSubmenus);
-        }
-        private void User_HighlightSubmenus(object sender, EventArgs e)
-        {
-            HighlightSubmenus();
-        }
+            RemoveAll_ADHandlers();
+            InitializeMenu();
 
-        private void UserLookup_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Lookup)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserCreate_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            //((User.Create)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserReset_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Reset)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserUnlock_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Unlock)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserExtend_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Extend)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserEnable_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Enable)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserDisable_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            ((User.Disable)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserTerminate_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
-        {
-            //((User.Terminate)e.Content).Disconnected += new EventHandler(UserSubmenu_ExitToLogin);
-        }
-        private void UserSubmenu_ExitToLogin(object sender, EventArgs e)
-        {
-            ShowHideOptions();
-
-            Style selectedMenuStyle = FindResource("SelectedMenuStyle") as Style;
-            Style expandedMenuStyle = FindResource("ExpandedMenuStyle") as Style;
+            Style Menu_Selected = FindResource("Menu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
 
             ResetMenuColors();
-            User.Style = expandedMenuStyle;
+            AD.Style = Menu_Expanded;
             if (!ActiveDirectory.IsConnected)
             {
-                _NavigationFrame.Navigate(new User.User());
-                ResetSubMenuColors();
-                User.Style = selectedMenuStyle;
+                _NavigationFrame.Navigate(AD_Connect_Page);
+                ResetSubmenuColors();
+                AD.Style = Menu_Selected;
 
-                _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(User_Connected);
+                _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
             }
         }
     }

@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -64,9 +64,10 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.DirectoryServices" />
@@ -100,39 +101,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ActiveDirectory.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="Dashboard.xaml.cs">
-      <DependentUpon>Dashboard.xaml</DependentUpon>
+    <Compile Include="inc\cs\SnapAssist.cs" />
+    <Compile Include="inc\cs\TextSearchFilter.cs" />
+    <Compile Include="Pages\AD\Connect.xaml.cs">
+      <DependentUpon>Connect.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EncryptDecrypt.cs" />
-    <Compile Include="Settings\Credentials.xaml.cs">
+    <Compile Include="inc\cs\ActiveDirectory.cs" />
+    <Compile Include="inc\cs\Configuration.cs" />
+    <Compile Include="inc\cs\EncryptDecrypt.cs" />
+    <Compile Include="Pages\Settings\Credentials.xaml.cs">
       <DependentUpon>Credentials.xaml</DependentUpon>
     </Compile>
-    <Compile Include="User\Disable.xaml.cs">
-      <DependentUpon>Disable.xaml</DependentUpon>
+    <Compile Include="Pages\AD\Users.xaml.cs">
+      <DependentUpon>Users.xaml</DependentUpon>
     </Compile>
-    <Compile Include="User\Enable.xaml.cs">
-      <DependentUpon>Enable.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="User\Extend.xaml.cs">
-      <DependentUpon>Extend.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="User\Lookup.xaml.cs">
-      <DependentUpon>Lookup.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="User\Reset.xaml.cs">
-      <DependentUpon>Reset.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="User\Unlock.xaml.cs">
-      <DependentUpon>Unlock.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="User\User.xaml.cs">
-      <DependentUpon>User.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Dashboard.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Pages\AD\Connect.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -146,35 +131,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Settings\Credentials.xaml">
+    <Page Include="Pages\Settings\Credentials.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="User\Disable.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="User\Enable.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="User\Extend.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="User\Lookup.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="User\Reset.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="User\Unlock.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="User\User.xaml">
+    <Page Include="Pages\AD\Users.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -203,13 +164,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="Central Control_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Toolbox.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -222,6 +179,15 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="inc\images\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="inc\images\search-md.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Toolbox.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
