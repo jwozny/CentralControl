@@ -50,14 +50,18 @@ namespace Central_Control.AD
             FocusManager.SetFocusedElement(scope, null);
             Keyboard.ClearFocus();
 
-            if (ActiveDirectory.IsConnected)
+            if (ActiveDirectory.IsConnected && !ActiveDirectory.Connector.IsBusy)
             {
                 Continue();
             }
-            else
+            else if (!ActiveDirectory.Connector.IsBusy)
             {
                 FormReset();
                 FormConnect();
+            }
+            else
+            {
+                ActiveDirectory.Connector.RunWorkerCompleted += Connector_Completed;
             }
         }
 
@@ -277,12 +281,10 @@ namespace Central_Control.AD
             EnableCurtain();
 
             ActiveDirectory.Connect();
-            ActiveDirectory.Connector.RunWorkerCompleted += Connector_Completed;
             ActiveDirectory.Connector.ProgressChanged += Connector_ProgressChanged;
+            ActiveDirectory.Connector.RunWorkerCompleted += Connector_Completed;
 
-            StatusMessage.Text = "Connecting...";
-            Style Message = FindResource("Message") as Style;
-            StatusMessage.Style = Message;
+            StatusProgress.Visibility = Visibility.Visible;
             StatusMessage.Visibility = Visibility.Visible;
 
         }
@@ -409,42 +411,71 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Connector_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            Style Message = FindResource("Message") as Style;
             Style Message_Success = FindResource("Message_Success") as Style;
+            Style Progress = FindResource("Progress") as Style;
+            Style Progress_Success = FindResource("Progress_Success") as Style;
+
+            StatusMessage.Text = e.UserState.ToString();
 
             // Do this when progress is reported.
-            if (e.ProgressPercentage == 5)
+            if (e.UserState.ToString() == "Connecting…")
             {
-                StatusMessage.Text = "Connecting...";
+                StatusProgress.IsIndeterminate = true;
+                StatusProgress.Style = Progress;
+
+                StatusMessage.Style = Message;
             }
-            if (e.ProgressPercentage == 10)
+            else
             {
-                StatusMessage.Text = "Finding Users...";
+                StatusProgress.IsIndeterminate = false;
+                StatusProgress.Style = Progress_Success;
+
                 StatusMessage.Style = Message_Success;
             }
-            if (e.ProgressPercentage == 20)
+
+            if (e.UserState.ToString() == "Finding Users")
             {
-                StatusMessage.Text = "Retrieving Users...";
-                StatusMessage.Style = Message_Success;
+                StatusProgress.IsIndeterminate = true;
+                StatusMessage.Text = "(1/6) " + e.UserState.ToString();
             }
-            if (e.ProgressPercentage == 30)
+
+            if (e.UserState.ToString() == "Retrieving User")
             {
-                StatusMessage.Text = "Retrieving User Properties...";
-                StatusMessage.Style = Message_Success;
+                StatusProgress.Maximum = ActiveDirectory.UserCount;
+                StatusProgress.Value = ActiveDirectory.Users.Count;
+
+                StatusMessage.Text = "(2/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
             }
-            if (e.ProgressPercentage == 50)
+
+            if (e.UserState.ToString() == "Retrieving User Properties")
             {
-                StatusMessage.Text = "Finding Groups...";
-                StatusMessage.Style = Message_Success;
+                StatusProgress.Maximum = ActiveDirectory.Users.Count;
+                StatusProgress.Value = ActiveDirectory.UserCount;
+
+                StatusMessage.Text = "(3/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
             }
-            if (e.ProgressPercentage == 60)
+
+            if (e.UserState.ToString() == "Finding Groups")
             {
-                StatusMessage.Text = "Retrieving Groups...";
-                StatusMessage.Style = Message_Success;
+                StatusProgress.IsIndeterminate = true;
+                StatusMessage.Text = "(4/6) " + e.UserState.ToString();
             }
-            if (e.ProgressPercentage == 75)
+
+            if (e.UserState.ToString() == "Retrieving Group")
             {
-                StatusMessage.Text = "Connected!";
-                StatusMessage.Style = Message_Success;
+                StatusProgress.Maximum = ActiveDirectory.GroupCount;
+                StatusProgress.Value = ActiveDirectory.Groups.Count;
+
+                StatusMessage.Text = "(5/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
+            }
+
+            if (e.UserState.ToString() == "Retrieving Group Members")
+            {
+                StatusProgress.Maximum = ActiveDirectory.Groups.Count;
+                StatusProgress.Value = ActiveDirectory.GroupCount;
+
+                StatusMessage.Text = "(6/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
             }
         }
         /// <summary>
@@ -468,9 +499,10 @@ namespace Central_Control.AD
                 Style TextBox_Error = FindResource("TextBox_Error") as Style;
                 Style PasswordBox_Error = FindResource("PasswordBox_Error") as Style;
 
+                StatusProgress.Visibility = Visibility.Hidden;
+                StatusMessage.Visibility = Visibility.Visible;
                 StatusMessage.Text = ActiveDirectory.ConnectionError.Replace("\r\n", String.Empty);
                 StatusMessage.Style = Message_Error;
-                StatusMessage.Visibility = Visibility.Visible;
                 
                 if (ActiveDirectory.ConnectionError == "The local computer is not joined to a domain or the domain cannot be contacted.")
                 {

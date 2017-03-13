@@ -21,15 +21,28 @@ namespace Central_Control
                 {
                     return true;
                 }
-                
+
                 var sb = new StringBuilder();
 
-                foreach (var propertyInfo in
-                    from p in typeof(ActiveDirectory.UserPrincipalEx).GetProperties()
-                    where Equals(p.PropertyType, typeof(String))
-                    select p)
+                if (obj.GetType().ToString() == "Central_Control.ActiveDirectory+UserPrincipalEx")
                 {
-                    sb.AppendLine(propertyInfo.GetValue(obj, null) + " ");
+                    foreach (var propertyInfo in
+                        from p in typeof(ActiveDirectory.UserPrincipalEx).GetProperties()
+                        where Equals(p.PropertyType, typeof(String))
+                        select p)
+                    {
+                        sb.AppendLine(propertyInfo.GetValue(obj, null) + " ");
+                    }
+                }
+                if (obj.GetType().ToString() == "Central_Control.ActiveDirectory+GroupPrincipalEx")
+                {
+                    foreach (var propertyInfo in
+                        from p in typeof(ActiveDirectory.GroupPrincipalEx).GetProperties()
+                        where Equals(p.PropertyType, typeof(String))
+                        select p)
+                    {
+                        sb.AppendLine(propertyInfo.GetValue(obj, null) + " ");
+                    }
                 }
 
                 string str = sb.ToString();

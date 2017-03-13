@@ -241,6 +241,7 @@ namespace Central_Control
 
             // Reset AD Submenu styles
             AD_Users.Style = Submenu;
+            AD_Groups.Style = Submenu;
 
             // Reset Settings Submenu styles
             Settings_Credentials.Style = Submenu;
@@ -253,17 +254,17 @@ namespace Central_Control
             // Set AD Submenu area height
             AD.IsEnabled = true;
             ADPanel.Height = 26;
-            if (ActiveDirectory.IsConnected)
+            if (ActiveDirectory.IsConnected && !ActiveDirectory.Connector.IsBusy)
             {
                 AD_Users.IsEnabled = true;
+                AD_Groups.IsEnabled = true;
 
-                ADAnimation.To = 24 * 1 + 26;
-
-                ADStoryboard.Begin();
+                ADAnimation.To = 24 * 2 + 26;
             }
             else
             {
                 AD_Users.IsEnabled = false;
+                AD_Groups.IsEnabled = false;
 
                 ADAnimation.To = 24 * 0 + 26;
             }
@@ -404,6 +405,12 @@ namespace Central_Control
                 RemoveAll_ADHandlers();
                 _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
             }
+            else if (ActiveDirectory.Connector.IsBusy)
+            {
+                _NavigationFrame.Navigate(AD_Connect_Page);
+                ResetSubmenuColors();
+                AD.Style = Menu_Selected;
+            }
             else
             {
                 InitializeMenu();
@@ -431,7 +438,31 @@ namespace Central_Control
             AD_Users.Style = Submenu_Selected;
 
             RemoveAll_ADHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Users);
+        }
+        /// <summary>
+        /// Page initialization for AD_Groups
+        /// </summary>
+        private AD.Groups AD_Groups_Page = new AD.Groups();
+        /// <summary>
+        /// Go to the AD_Groups page and watch for AD disconnect event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Groups_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
+            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+
+            ResetMenuColors();
+            AD.Style = Menu_Expanded;
+
+            _NavigationFrame.Navigate(AD_Groups_Page);
+            ResetSubmenuColors();
+            AD_Groups.Style = Submenu_Selected;
+
+            RemoveAll_ADHandlers();
+            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Groups);
         }
         /// <summary>
         /// Expand the Settings menu
@@ -481,7 +512,8 @@ namespace Central_Control
         private void RemoveAll_ADHandlers()
         {
             _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Users);
+            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Groups);
         }
 
         /// <summary>
@@ -512,18 +544,29 @@ namespace Central_Control
             _NavigationFrame.Navigate(AD_Users_Page);
             ResetSubmenuColors();
             AD_Users.Style = Submenu_Selected;
-            
+
+            ADStoryboard.Begin();
+
             _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
         }
 
         /// <summary>
-        /// Watch for the Disconnected event in the AD pages
+        /// Watch for the Disconnected event in the AD Users page
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AD_Disconnected(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        private void AD_Disconnected_Users(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
             ((AD.Users)e.Content).Disconnected += new EventHandler(AD_Disconnected);
+        }
+        /// <summary>
+        /// Watch for the Disconnected event in the AD Groups page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_Disconnected_Groups(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            ((AD.Groups)e.Content).Disconnected += new EventHandler(AD_Disconnected);
         }
         /// <summary>
         /// Handler - Do this when the AD pages detect that AD is no longer accessible

@@ -83,7 +83,6 @@ namespace Central_Control
                 ConnectionError = E.Message.ToString();
                 return false;
             }
-            GetUserProperties_Initialize();
             return true;
         }
         /// <summary>
@@ -91,7 +90,7 @@ namespace Central_Control
         /// </summary>
         public static void Connect()
         {
-            Connector_Initialize(null);
+            Connector_Initialize();
             if (!Connector.IsBusy)
             {
                 Connector.RunWorkerAsync();
@@ -106,7 +105,7 @@ namespace Central_Control
         /// </summary>
         public static string ConnectionError;
         
-        /* Background Worker - ConnectAD */
+        /* Background Worker - Connector */
         /// <summary>
         /// Create background worker instance
         /// </summary>
@@ -114,23 +113,12 @@ namespace Central_Control
         /// <summary>
         /// Initialize background worker with actions
         /// </summary>
-        public static void Connector_Initialize(string filter)
+        public static void Connector_Initialize()
         {
             Connector.WorkerReportsProgress = true;
             Connector.WorkerSupportsCancellation = true;
 
-            switch (filter)
-            {
-                case "Users":
-                    Connector.DoWork += Connector_DoWork_Users;
-                    break;
-                case "Groups":
-                    Connector.DoWork += Connector_DoWork_Groups;
-                    break;
-                default:
-                    Connector.DoWork += Connector_DoWork;
-                    break;
-            }
+            Connector.DoWork += Connector_DoWork;
         }
         /// <summary>
         /// Define background worker actions
@@ -140,36 +128,68 @@ namespace Central_Control
         private static void Connector_DoWork(object sender, DoWorkEventArgs e)
         {
             // Work Started - Do this.
-            Connector.ReportProgress(5);
+            Connector.ReportProgress(0, "Connecting...");
             IsConnected = EstablishConnection();
 
             if (IsConnected)
             {
-                RefreshUsers();
-                RefreshGroups();
+                RefreshUsers(Connector);
+                RefreshGroups(Connector);
             }
         }
+
+        /* Background Worker - Updater_Users */
         /// <summary>
-        /// Connector worker to only refresh users from AD
+        /// Create background worker instance
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void Connector_DoWork_Users(object sender, DoWorkEventArgs e)
+        public static BackgroundWorker Updater_Users = new BackgroundWorker();
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void Updater_Users_Initialize()
         {
-            // Work Started - Do this.
-            IsConnected = EstablishConnection();
-            if (IsConnected) RefreshUsers();
+            Updater_Users.WorkerReportsProgress = true;
+            Updater_Users.WorkerSupportsCancellation = true;
+
+            Updater_Users.DoWork += Updater_Users_DoWork;
         }
         /// <summary>
-        /// Connector worker to only refresh groups from AD
+        /// Updater worker to only refresh users from AD
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void Connector_DoWork_Groups(object sender, DoWorkEventArgs e)
+        private static void Updater_Users_DoWork(object sender, DoWorkEventArgs e)
         {
             // Work Started - Do this.
             IsConnected = EstablishConnection();
-            if (IsConnected) RefreshGroups();
+            if (IsConnected) RefreshUsers(Updater_Users);
+        }
+
+        /* Background Worker - Updater_Groups */
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker Updater_Groups = new BackgroundWorker();
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void Updater_Groups_Initialize()
+        {
+            Updater_Groups.WorkerReportsProgress = true;
+            Updater_Groups.WorkerSupportsCancellation = true;
+
+            Updater_Groups.DoWork += Updater_Groups_DoWork;
+        }
+        /// <summary>
+        /// Updater worker to only refresh groups from AD
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Updater_Groups_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Work Started - Do this.
+            IsConnected = EstablishConnection();
+            if (IsConnected) RefreshGroups(Updater_Groups);
         }
 
         /* Domain Properties */
@@ -182,91 +202,202 @@ namespace Central_Control
         /// </summary>
         private static PrincipalSearcher Searcher;
         /// <summary>
+        /// Temporary reference to the count of users found by the searcher
+        /// </summary>
+        public static int UserCount;
+        /// <summary>
+        /// Temporary reference to the count of groups found by the searcher
+        /// </summary>
+        public static int GroupCount;
+        /// <summary>
         /// List of AD users
         /// </summary>
         public static List<UserPrincipalEx> Users { get; set; } = new List<UserPrincipalEx>();
         /// <summary>
         /// List of AD groups
         /// </summary>
-        public static List<GroupPrincipal> Groups { get; set; }
+        public static List<GroupPrincipalEx> Groups { get; set; } = new List<GroupPrincipalEx>();
 
         /* Refresh Functions */
         /// <summary>
         /// Refresh everything from AD or a specific item
         /// </summary>
-        /// <param name="filter">null, "users", "groups"</param>
+        /// <param name="filter">null, "Users", "Groups"</param>
         public static void Refresh(string filter)
         {
-            Connector_Initialize(filter);
-            if (!Connector.IsBusy)
+            switch (filter)
             {
-                Connector.RunWorkerAsync();
+                case "Users":
+                    Updater_Users_Initialize();
+                    if (!Updater_Users.IsBusy)
+                    {
+                        Updater_Users.RunWorkerAsync();
+                    }
+                    break;
+                case "Groups":
+                    Updater_Groups_Initialize();
+                    if (!Updater_Groups.IsBusy)
+                    {
+                        Updater_Groups.RunWorkerAsync();
+                    }
+                    break;
+                default:
+                    Updater_Users_Initialize();
+                    if (!Updater_Users.IsBusy)
+                    {
+                        Updater_Users.RunWorkerAsync();
+                    }
+                    Updater_Groups_Initialize();
+                    if (!Updater_Groups.IsBusy)
+                    {
+                        Updater_Groups.RunWorkerAsync();
+                    }
+                    break;
             }
         }
         /// <summary>
         /// Clear the list of users and repopulate it from AD
         /// </summary>
-        private static void RefreshUsers()
+        private static void RefreshUsers(BackgroundWorker Worker)
         {
-            Connector.ReportProgress(10);
-
-            Searcher.Dispose();
-            Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
-                        
-            UserPrincipalEx Test = UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, "jwozny");
-            Users.Clear();
-
-            Connector.ReportProgress(20);
-
-            foreach (UserPrincipal User in Searcher.FindAll())
+            try
             {
-                if (User != null)
+                Worker.ReportProgress(0, "Finding Users");
+                Searcher.Dispose();
+                Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
+
+                Users.Clear();
+                UserCount = Searcher.FindAll().Count();
+
+                foreach (UserPrincipal User in Searcher.FindAll())
                 {
-                    Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, User.SamAccountName));
+                    if (User != null)
+                    {
+                        Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, User.SamAccountName));
+                    }
+                    Worker.ReportProgress(0, "Retrieving User");
+                }
+
+                Users.Sort((x, y) => x.Name.CompareTo(y.Name));
+
+                UserCount = 0;
+                foreach (UserPrincipalEx User in Users)
+                {
+                    var sb = new StringBuilder();
+
+                    foreach (var propertyInfo in
+                        from p in typeof(UserPrincipalEx).GetProperties()
+                        where Equals(p.PropertyType, typeof(String))
+                        select p)
+                    {
+                        sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
+                    }
+
+                    User.CreatedDate = User.GetProperty("whenCreated");
+
+                    if (!ReferenceEquals(User.AccountExpirationDate, null))
+                        if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) <= 0)
+                            User.Expiring = true;
+
+                    User.LockedOut = User.IsAccountLockedOut();
+
+                    User.Groups = User.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
+
+                    UserCount++;
+                    Worker.ReportProgress(0, "Retrieving User Properties");
                 }
             }
-
-            Users.Sort((x, y) => x.Name.CompareTo(y.Name));
-
-            Connector.ReportProgress(30);
-
-            foreach (UserPrincipalEx User in Users)
+            catch
             {
-                var sb = new StringBuilder();
-
-                foreach (var propertyInfo in
-                    from p in typeof(ActiveDirectory.UserPrincipalEx).GetProperties()
-                    where Equals(p.PropertyType, typeof(String))
-                    select p)
-                {
-                    sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
-                }
-
-                string str = sb.ToString();
+                IsConnected = EstablishConnection();
             }
         }
         /// <summary>
         /// Clear the list of groups and repopulate it from AD
         /// </summary>
-        private static void RefreshGroups()
+        private static void RefreshGroups(BackgroundWorker Worker)
         {
-            Connector.ReportProgress(50);
-            Searcher.Dispose();
-            Searcher = new PrincipalSearcher(new GroupPrincipal(Domain));
+            try
+            {
+                Worker.ReportProgress(0, "Finding Groups");
+                Searcher.Dispose();
+                Searcher = new PrincipalSearcher(new GroupPrincipal(Domain));
 
-            Connector.ReportProgress(60);
-            Groups = (from principal in Searcher.FindAll() select principal as GroupPrincipal).OrderBy(Groups => Groups.SamAccountName).ToList();
+                //Connector.ReportProgress(0, "Retrieving Groups...");
+                //Groups = (from principal in Searcher.FindAll() select principal as GroupPrincipal).OrderBy(Groups => Groups.SamAccountName).ToList();
+
+                Groups.Clear();
+                GroupCount = Searcher.FindAll().Count();
+
+                foreach (GroupPrincipal Group in Searcher.FindAll())
+                {
+                    if (Group != null)
+                    {
+                        Groups.Add(GroupPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, Group.SamAccountName));
+                    }
+                    Worker.ReportProgress(0, "Retrieving Group");
+                }
+
+                Groups.Sort((x, y) => x.Name.CompareTo(y.Name));
+
+                GroupCount = 0;
+                foreach (GroupPrincipalEx Group in Groups)
+                {
+                    List<Member> Members = new List<Member>(1);
+                    Members.Clear();
+
+                    DirectoryEntry thisGroup = Group.GetUnderlyingObject() as DirectoryEntry;
+                    PropertyValueCollection pvcMembers = thisGroup.Properties["Member"];
+                    foreach (object pvcMember in pvcMembers)
+                    {
+                        DirectoryEntry deMember;
+                        if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                        {
+                            deMember = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + pvcMember.ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                        }
+                        else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                        {
+                            deMember = new DirectoryEntry("LDAP://" + pvcMember.ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                        }
+                        else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                        {
+                            deMember = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + pvcMember.ToString());
+                        }
+                        else
+                        {
+                            deMember = new DirectoryEntry("LDAP://" + pvcMember.ToString());
+                        }
+
+                        Members.Add(new Member()
+                        {
+                            Name = deMember.Properties["Name"][0].ToString(),
+                            DistinguishedName = pvcMember.ToString(),
+                            SchemaClassName = deMember.SchemaClassName.ToUpperInvariant()
+                        });
+                    }
+
+                    Members.Sort((x, y) => x.Name.CompareTo(y.Name));
+                    Group.AllMembers = Members;
+
+                    var sb = new StringBuilder();
+
+                    foreach (var propertyInfo in
+                        from p in typeof(GroupPrincipalEx).GetProperties()
+                        where Equals(p.PropertyType, typeof(String))
+                        select p)
+                    {
+                        sb.AppendLine(propertyInfo.GetValue(Group, null) + " ");
+                    }
+
+                    GroupCount++;
+                    Worker.ReportProgress(0, "Retrieving Group Members");
+                }
+            }
+            catch
+            {
+                IsConnected = EstablishConnection();
+            }
         }
-        
-        /* Selected User Properties */
-        public static UserPrincipalEx SelectedUser;
-        public static UserPrincipalEx CurrentBackgroundUser;
-        public static string SelectedUser_CreatedDate;
-        public static bool SelectedUser_IsAccountLockedOut;
-        /// <summary>
-        /// List of groups that the selected user belongs to
-        /// </summary>
-        public static List<Principal> SelectedUser_Groups;
         /// <summary>
         /// Checks if a string exists, returns false if string/property doesn't exist, is null, or empty
         /// </summary>
@@ -281,7 +412,16 @@ namespace Central_Control
             return true;
         }
 
-        /* Functions for Extra Properties */
+        /* Selected User */
+        public static UserPrincipalEx SelectedUser;
+
+        /* Extended User Functions */
+        /// <summary>
+        /// Get additional properties not included in the User Principal object
+        /// </summary>
+        /// <param name="principal"></param>
+        /// <param name="property"></param>
+        /// <returns></returns>
         private static string GetProperty(this Principal principal, string property)
         {
             DirectoryEntry directoryEntry = principal.GetUnderlyingObject() as DirectoryEntry;
@@ -290,68 +430,6 @@ namespace Central_Control
             else
                 return string.Empty;
         }
-        public static string GetCreatedDate(this Principal principal)
-        {
-            return principal.GetProperty("whenCreated");
-        }
-        /// <summary>
-        /// Check if a user account is or will be expired in 8 days
-        /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
-        public static bool IsAccountExpired(this UserPrincipal User)
-        {
-            if (!ReferenceEquals(User.AccountExpirationDate, null))
-            {
-                if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) > 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /* Background Worker - GetUserProperties */
-        /// <summary>
-        /// Create background worker instance to pull extra user properties
-        /// </summary>
-        public static BackgroundWorker GetUserProperties = new BackgroundWorker();
-        /// <summary>
-        /// Initialize background worker with actions
-        /// </summary>
-        public static void GetUserProperties_Initialize()
-        {
-            GetUserProperties.WorkerReportsProgress = true;
-            GetUserProperties.WorkerSupportsCancellation = true;
-            GetUserProperties.DoWork += GetUserProperties_DoWork;
-        }
-        /// <summary>
-        /// Define background worker actions
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void GetUserProperties_DoWork(object sender, DoWorkEventArgs e)
-        {
-            // Work Started - Do this.
-            CurrentBackgroundUser = SelectedUser;
-            
-            SelectedUser_CreatedDate = string.Empty;
-            SelectedUser_IsAccountLockedOut = false;
-            SelectedUser_Groups = null;
-            
-            SelectedUser_CreatedDate = CurrentBackgroundUser.GetCreatedDate();
-            GetUserProperties.ReportProgress(60);
-            SelectedUser_IsAccountLockedOut = CurrentBackgroundUser.IsAccountLockedOut();
-            GetUserProperties.ReportProgress(75);
-            
-            SelectedUser_Groups = CurrentBackgroundUser.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
-        }
-
-        /* Action Functions */
         /// <summary>
         /// Template action on modifying an AD user
         /// </summary>
@@ -359,36 +437,39 @@ namespace Central_Control
         /// <returns></returns>
         public static bool SaveUser(this UserPrincipal User)
         {
-            //try
-            //{
-            //DirectoryEntry usr;
-            //if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
-            //{
-            //    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-            //}
-            //else
-            //{
-            //    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
-            //}
-            //    int val = (int)usr.Properties["userAccountControl"].Value;
-            //    usr.Properties["userAccountControl"].Value = val | 0x2;
-            //    //ADS_UF_ACCOUNTDISABLE
+            try
+            {
+                DirectoryEntry usr;
+                if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                {
+                    usr = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + User.DistinguishedName);
+                }
+                else
+                {
+                    usr = new DirectoryEntry("LDAP://" + User.DistinguishedName);
+                }
 
-            //    usr.CommitChanges();
-            //    usr.Close();
-            //}
-            //catch (System.DirectoryServices.DirectoryServicesCOMException E)
-            //{
-            //ConnectionError = E.Message.ToString();
-            //    return false;
-            //}
-            //catch (System.Runtime.InteropServices.COMException E)
-            //{
-            //    ConnectionError = E.Message.ToString();
-            //    return false;
-            //}
-            //return true;
-            return false;
+                int val = (int)usr.Properties["userAccountControl"].Value;
+                usr.Properties["userAccountControl"].Value = val | 0x2;
+                //ADS_UF_ACCOUNTDISABLE
+
+                usr.CommitChanges();
+                usr.Close();
+            }
+            catch (Exception E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            return true;
         }
         /// <summary>
         /// Refresh the user locally from the store
@@ -803,7 +884,58 @@ namespace Central_Control
             User.RefreshUser();
             return true;
         }
+        
+        /* Selected Group Properties */
+        public static GroupPrincipalEx SelectedGroup;
 
+        /* Group Extended Functions */
+        /// <summary>
+        /// Delete the selected groups from the store
+        /// </summary>
+        /// <param name="Group"></param>
+        /// <returns></returns>
+        public static bool DeleteGroup(this GroupPrincipal Group)
+        {
+            try
+            {
+                for (int i = 0; i < Groups.Count; i++)
+                {
+                    if (Groups[i].SamAccountName == Group.SamAccountName)
+                    {
+                        Groups.RemoveAt(i);
+                    }
+                }
+                Group.Delete();
+                SelectedGroup = null;
+            }
+            catch (Exception E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Remove the user from the selected group
+        /// </summary>
+        /// <param name="DistinguishedName">DistinguishedName</param>
+        /// <returns></returns>
+        public static bool RemoveMember(this GroupPrincipal Group, string DistinguishedName)
+        {
+            try
+            {
+                Group.Members.Remove(Domain, IdentityType.DistinguishedName, DistinguishedName);
+                Group.Save();
+            }
+            catch (Exception E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+
+            return true;
+        }
 
         [DirectoryRdnPrefix("CN")]
         [DirectoryObjectClass("user")]
@@ -867,6 +999,70 @@ namespace Central_Control
                     return (string)ExtensionGet("company")[0];
                 }
                 set { ExtensionSet("company", value); }
+            }
+
+            // Create the "CreatedDate" property.    
+            [DirectoryProperty("createddate")]
+            public string CreatedDate { get; set; }
+
+            // Create the "Expiring" property.    
+            [DirectoryProperty("expiring")]
+            public bool Expiring { get; set; } = false;
+
+            // Create the "LockedOut" property.    
+            [DirectoryProperty("lockedout")]
+            public bool LockedOut { get; set; } = false;
+
+            // Create the "Groups" property.    
+            [DirectoryProperty("groups")]
+            public List<Principal> Groups { get; set; } = new List<Principal>();
+        }
+
+        public class Member
+        {
+            public string Name { get; set; }
+            public string DistinguishedName { get; set; }
+            public string SchemaClassName { get; set; }
+        }
+
+        [DirectoryRdnPrefix("CN")]
+        [DirectoryObjectClass("group")]
+        public class GroupPrincipalEx : GroupPrincipal
+        {
+            // Inplement the constructor using the base class constructor. 
+            public GroupPrincipalEx(PrincipalContext context) : base(context) { }
+
+            // Implement the constructor with initialization parameters.    
+            public GroupPrincipalEx(PrincipalContext context, string samAccountName) : base(context, samAccountName) { }
+
+            // Implement the overloaded search method FindByIdentity.
+            public static new GroupPrincipalEx FindByIdentity(PrincipalContext context, string identityValue)
+            {
+                return (GroupPrincipalEx)FindByIdentityWithType(context, typeof(GroupPrincipalEx), identityValue);
+            }
+
+            // Implement the overloaded search method FindByIdentity. 
+            public static new GroupPrincipalEx FindByIdentity(PrincipalContext context, IdentityType identityType, string identityValue)
+            {
+                return (GroupPrincipalEx)FindByIdentityWithType(context, typeof(GroupPrincipalEx), identityType, identityValue);
+            }
+
+            // Create the "Members" property.    
+            [DirectoryProperty("allmembers")]
+            public List<Member> AllMembers { get; set; } = new List<Member>();
+            
+            // Create the "Email" property.    
+            [DirectoryProperty("email")]
+            public string Email
+            {
+                get
+                {
+                    if (ExtensionGet("email").Length != 1)
+                        return string.Empty;
+
+                    return (string)ExtensionGet("email")[0];
+                }
+                set { ExtensionSet("email", value); }
             }
         }
     }

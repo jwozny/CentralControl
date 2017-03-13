@@ -45,14 +45,16 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Users_Loaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.Connector.RunWorkerCompleted += Connector_Completed;
+            ActiveDirectory.Updater_Users.RunWorkerCompleted += Updater_Users_Completed;
+            UpdateUserButtons();
+
             if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
             {
                 UserList.ItemsSource = ActiveDirectory.Users;
                 SearchBox.Focus();
 
-                ICollectionView view = CollectionViewSource.GetDefaultView(ActiveDirectory.Users);
-                new TextSearchFilter(view, SearchBox);
+                ICollectionView UserView = CollectionViewSource.GetDefaultView(ActiveDirectory.Users);
+                new TextSearchFilter(UserView, SearchBox);
             }
             else
             {
@@ -99,9 +101,6 @@ namespace Central_Control.AD
         /// </summary>
         private void UpdateSelectedUser()
         {
-            ActiveDirectory.GetUserProperties.RunWorkerCompleted += GetUserProperties_Completed;
-            ActiveDirectory.GetUserProperties.ProgressChanged += GetUserProperties_ProgressChanged;
-
             if ((UserList.SelectedItem != null) && (UserList.SelectedIndex != -1))
             {
                 foreach (ActiveDirectory.UserPrincipalEx User in ActiveDirectory.Users)
@@ -109,10 +108,6 @@ namespace Central_Control.AD
                     if (User.Name == UserList.SelectedItem.ToString())
                     {
                         ActiveDirectory.SelectedUser = User;
-                        if (!ActiveDirectory.GetUserProperties.IsBusy)
-                        {
-                            ActiveDirectory.GetUserProperties.RunWorkerAsync();
-                        }
                     }
                 }
             }
@@ -126,6 +121,17 @@ namespace Central_Control.AD
         /// </summary>
         private void UpdateUserButtons()
         {
+            if (ActiveDirectory.Updater_Users.IsBusy)
+            {
+                RefreshButton.IsEnabled = false;
+                RefreshButton.Content = "Refreshing...";
+            }
+            else
+            {
+                RefreshButton.IsEnabled = true;
+                RefreshButton.Content = "Refresh Users";
+            }
+
             if (ActiveDirectory.SelectedUser != null)
             {
                 /* Account Buttons */
@@ -143,7 +149,7 @@ namespace Central_Control.AD
                     DisableUserButton.IsEnabled = true;
                 }
 
-                if (ActiveDirectory.SelectedUser.IsAccountExpired())
+                if (ActiveDirectory.SelectedUser.Expiring)
                 {
                     ExtendUserButton.Content = "Extend";
                     ExtendUserButton.IsEnabled = true;
@@ -158,16 +164,14 @@ namespace Central_Control.AD
                     ExtendUserButton.Content = "Remove Expiry";
                     ExtendUserButton.IsEnabled = true;
                 }
-                if (!ActiveDirectory.GetUserProperties.IsBusy)
+
+                if (ActiveDirectory.SelectedUser.LockedOut)
                 {
-                    if (ActiveDirectory.SelectedUser.IsAccountLockedOut())
-                    {
-                        UnlockUserButton.IsEnabled = true;
-                    }
-                    else
-                    {
-                        UnlockUserButton.IsEnabled = false;
-                    }
+                    UnlockUserButton.IsEnabled = true;
+                }
+                else
+                {
+                    UnlockUserButton.IsEnabled = false;
                 }
 
                 /* Password Buttons */
@@ -242,7 +246,10 @@ namespace Central_Control.AD
                 else
                     Company.Text = " ";
 
-                CreatedDate.Text = "Fetching...";
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.CreatedDate, null))
+                    CreatedDate.Text = ActiveDirectory.SelectedUser.CreatedDate;
+                else
+                    CreatedDate.Text = " ";
 
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountExpirationDate, null))
                     ExpiryDate.Text = ActiveDirectory.SelectedUser.AccountExpirationDate.ToString();
@@ -259,7 +266,10 @@ namespace Central_Control.AD
                 else
                     LastBadPasswordAttempt.Text = " ";
 
-                LockedOut.Text = "Fetching...";
+                if (!ReferenceEquals(ActiveDirectory.SelectedUser.LockedOut, null))
+                    LockedOut.Text = ActiveDirectory.SelectedUser.LockedOut.ToString();
+                else
+                    LockedOut.Text = " ";
 
                 if (!ReferenceEquals(ActiveDirectory.SelectedUser.AccountLockoutTime, null))
                     AccountLockoutTime.Text = ActiveDirectory.SelectedUser.AccountLockoutTime.ToString();
@@ -270,14 +280,12 @@ namespace Central_Control.AD
                     DistinguishedName.Text = ActiveDirectory.SelectedUser.DistinguishedName.ToString();
                 else
                     DistinguishedName.Text = " ";
-
-                GroupsPlaceholder.Visibility = Visibility.Visible;
+                
+                GroupList.ItemsSource = ActiveDirectory.SelectedUser.Groups;
             }
             else
             {
                 ClearInfoGrid();
-
-                GroupsPlaceholder.Visibility = Visibility.Hidden;
             }
 
         }
@@ -295,23 +303,6 @@ namespace Central_Control.AD
                 SearchBox.Text = string.Empty;
                 ClearSelection();
             }
-        }
-        /// <summary>
-        /// Do a search when text is entered, if the text is null then clear the selection
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            //if (SearchBox.Text != "")
-            //{
-            //    searchCount = 1;
-            //    fullLookup();
-            //}
-            //else
-            //{
-            //    ClearSelection();
-            //}
         }
         /// <summary>
         /// Displays more info on the selected item
@@ -362,6 +353,7 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void NewUserButton_Click(object sender, RoutedEventArgs e)
         {
+
         }
         /// <summary>
         /// Button action to import a user from an OSticket ticket
@@ -370,6 +362,7 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void ImportUserButton_Click(object sender, RoutedEventArgs e)
         {
+
         }
         /// <summary>
         /// Button action to delete the selected user
@@ -403,7 +396,7 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void ExtendUserButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ActiveDirectory.SelectedUser.IsAccountExpired())
+            if (ActiveDirectory.SelectedUser.Expiring)
             {
                 Report(ActiveDirectory.SelectedUser.AddExpiry(30), "Account Extended Successfully (30 Days)");
             }
@@ -617,90 +610,16 @@ namespace Central_Control.AD
 
         /* Event Handlers */
         /// <summary>
-        /// 
+        /// When the AD Updater_Users background worker is finished, notify the user or exit the page if disconnected
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void GetUserProperties_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void Updater_Users_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
-            // Do this when progress is reported.
-            if (UserList.SelectedItem != null)
-            {
-                if (UserList.SelectedItem.ToString() == ActiveDirectory.CurrentBackgroundUser.Name.ToString())
-                {
-                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_IsAccountLockedOut, null))
-                    {
-                        LockedOut.Text = ActiveDirectory.SelectedUser_IsAccountLockedOut.ToString();
-                        
-                        if (ActiveDirectory.SelectedUser_IsAccountLockedOut)
-                        {
-                            UnlockUserButton.IsEnabled = true;
-                        }
-                        else
-                        {
-                            UnlockUserButton.IsEnabled = false;
-                        }
-                    }
-                    else { LockedOut.Text = "Fetching..."; }
-                }
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GetUserProperties_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            // Work Completed - Do this.
-            ActiveDirectory.GetUserProperties.RunWorkerCompleted -= GetUserProperties_Completed;
-            ActiveDirectory.GetUserProperties.ProgressChanged -= GetUserProperties_ProgressChanged;
+            UpdateUserButtons();
 
-            if (UserList.SelectedItem != null)
-            {
-                if (UserList.SelectedItem.ToString() == ActiveDirectory.CurrentBackgroundUser.Name.ToString())
-                {
-                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_CreatedDate, null))
-                    { CreatedDate.Text = ActiveDirectory.SelectedUser_CreatedDate.ToString(); }
-                    else { CreatedDate.Text = " "; }
-
-                    if (!ReferenceEquals(ActiveDirectory.SelectedUser_IsAccountLockedOut, null))
-                    { LockedOut.Text = ActiveDirectory.SelectedUser_IsAccountLockedOut.ToString(); }
-                    else { LockedOut.Text = " "; }
-
-                    GroupList.ItemsSource = ActiveDirectory.SelectedUser_Groups;
-                    GroupsPlaceholder.Visibility = Visibility.Hidden;
-
-                    UpdateUserButtons();
-                }
-                else
-                {
-                    ActiveDirectory.GetUserProperties.RunWorkerCompleted += GetUserProperties_Completed;
-                    ActiveDirectory.GetUserProperties.ProgressChanged += GetUserProperties_ProgressChanged;
-                    if (!ActiveDirectory.GetUserProperties.IsBusy)
-                    {
-                        ActiveDirectory.GetUserProperties.RunWorkerAsync();
-                    }
-                }
-            }
-            else
-            {
-                CreatedDate.Text = string.Empty;
-                LockedOut.Text = string.Empty;
-            }
-        }
-        /// <summary>
-        /// When the AD connector background worker is finished, notify the user or exit the page if disconnected
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Connector_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            RefreshButton.IsEnabled = true;
             if (ActiveDirectory.IsConnected)
             {
-                RefreshButton.Content = "Refresh Users";
-
                 ResultMessage.Content = "User List Updated";
                 ResultMessage.Visibility = Visibility.Visible;
                 
@@ -732,7 +651,7 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Users_Unloaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.Connector.RunWorkerCompleted -= Connector_Completed;
+            ActiveDirectory.Updater_Users.RunWorkerCompleted -= Updater_Users_Completed;
         }
     }
 }

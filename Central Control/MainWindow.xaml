@@ -263,6 +263,10 @@
                                Content="Users"
                                Style="{StaticResource Submenu}"
                                MouseDown="AD_Users_MouseDown"/>
+                    <Label x:Name="AD_Groups"
+                               Content="Groups"
+                               Style="{StaticResource Submenu}"
+                               MouseDown="AD_Groups_MouseDown"/>
                 </StackPanel>
                 <StackPanel x:Name="SettingsPanel"
                             Panel.ZIndex="-2">

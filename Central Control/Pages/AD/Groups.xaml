@@ -1,4 +1,4 @@
-﻿<Page x:Class="Central_Control.AD.Users"
+﻿<Page x:Class="Central_Control.AD.Groups"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,9 +10,9 @@
       FontFamily="Consolas"
       FontSize="12"
       Foreground="LightGray"
-      Title="Users"
-      Loaded="Users_Loaded"
-      Unloaded="Users_Unloaded">
+      Title="Groups"
+      Loaded="Groups_Loaded"
+      Unloaded="Groups_Unloaded">
     <Page.Resources>
 
         <!--Input Styles-->
@@ -210,7 +210,7 @@
             </Grid.ColumnDefinitions>
 
             <!--Header-->
-            <Label Content="Active Directory Users"
+            <Label Content="Active Directory Groups"
                    Grid.ColumnSpan="100"
                    Margin="10,0,0,0"
                    HorizontalAlignment="Left"
@@ -230,17 +230,17 @@
                 <!--Searchbox-->
                 <TextBox x:Name="SearchBox"
                          Style="{StaticResource Searchbox}"
-                         Tag="Search for user..."
+                         Tag="Search for groups..."
                          KeyDown="SearchBox_KeyDown"/>
 
                 <!--List-->
-                <ListBox x:Name="UserList"
+                <ListBox x:Name="GroupList"
                          Grid.Row="1"
                          Foreground="LightGray"
                          Background="#FF303030"
                          BorderThickness="1,0,1,1"
-                         SelectionChanged="UserList_SelectionChanged"
-                         KeyDown="UserList_KeyDown"/>
+                         SelectionChanged="GroupList_SelectionChanged"
+                         KeyDown="GroupList_KeyDown"/>
 
             </Grid>
             
@@ -250,8 +250,8 @@
                         Grid.Column="1"
                         Margin="10"
                         Background="{x:Null}">
-                <TabItem x:Name="UserInfo"
-                         Header="User Information">
+                <TabItem x:Name="GroupInfo"
+                         Header="Groups Information">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="161"/>
@@ -263,31 +263,11 @@
                                     Margin="10,10,0,10">
                             <Label Content ="Name"/>
                             <Label Content ="Username"/>
-                            <Label Content ="Email"/>
-                            <Label Content ="Title"/>
-                            <Label Content ="Department"/>
-                            <Label Content ="Company"/>
-                            <Label Content ="Created"/>
-                            <Label Content ="Expiry"/>
-                            <Label Content ="Last Logon Date"/>
-                            <Label Content ="Last Password Attempt"/>
-                            <Label Content ="Locked Out"/>
-                            <Label Content ="Lockout Time"/>
                             <Label Content ="Distinguished Name"/>
                         </StackPanel>
                         <StackPanel Grid.Row="1"
                                     Grid.Column="1"
                                     Margin="0,10">
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
                             <Label Content =":"/>
                             <Label Content =":"/>
                             <Label Content =":"/>
@@ -299,32 +279,12 @@
                                      Style="{StaticResource SelectableLabel}"/>
                             <TextBox x:Name="Username"
                                      Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="Email"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="Title"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="Department"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="Company"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="CreatedDate"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="ExpiryDate"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="LastLogonDate"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="LastBadPasswordAttempt"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="LockedOut"
-                                     Style="{StaticResource SelectableLabel}"/>
-                            <TextBox x:Name="AccountLockoutTime"
-                                     Style="{StaticResource SelectableLabel}"/>
                             <TextBox x:Name="DistinguishedName"
                                      Style="{StaticResource SelectableLabel}"/>
                         </StackPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Group Membership">
+                <TabItem Header="Members">
                     <Grid Grid.IsSharedSizeScope="True"
                           Margin="5">
                         <Grid.RowDefinitions>
@@ -333,49 +293,44 @@
                         </Grid.RowDefinitions>
                         <Grid Margin="5,0,0,5">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition SharedSizeGroup="GroupName"
+                                <ColumnDefinition SharedSizeGroup="Name"
                                                   MinWidth="200"/>
-                                <ColumnDefinition SharedSizeGroup="Security"/>
+                                <ColumnDefinition SharedSizeGroup="Type"/>
                             </Grid.ColumnDefinitions>
                             <Border>
-                                <TextBlock Text="Group Name"
+                                <TextBlock Text="Name"
                                            FontWeight="Bold"/>
                             </Border>
                             <Border Grid.Column="1">
-                                <TextBlock Text="Security"
+                                <TextBlock Text="Type"
                                            FontWeight="Bold"/>
                             </Border>
                         </Grid>
-                        <ListBox x:Name="GroupList"
+                        <ListBox x:Name="MemberList"
                                  Grid.Row="1"
                                  ItemsSource="{Binding DataSource}"
                                  Background="{x:Null}"
                                  Foreground="LightGray"
-                                 BorderThickness="0">
+                                 BorderThickness="0"
+                                 SelectionChanged="MemberList_SelectionChanged">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup="GroupName"
+                                            <ColumnDefinition SharedSizeGroup="Name"
                                                               Width="auto"/>
-                                            <ColumnDefinition SharedSizeGroup="Security"
+                                            <ColumnDefinition SharedSizeGroup="Type"
                                                               Width="auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0"
                                                    Padding="0,0,10,0"
                                                    Text="{Binding Name}"/>
                                         <TextBlock Grid.Column="1"
-                                                   Text="{Binding IsSecurityGroup}"/>
+                                                   Text="{Binding SchemaClassName}"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <Label x:Name="GroupsPlaceholder"
-                               Content="Fetching Groups..."
-                               Grid.Row="1"
-                               Height="21"
-                               HorizontalAlignment="Center"
-                               Visibility="Hidden"/>
                     </Grid>
                 </TabItem>
             </TabControl>
@@ -387,63 +342,32 @@
                         VerticalAlignment="Top"
                         HorizontalAlignment="Center">
                 <Button x:Name="RefreshButton"
-                        Content="Refresh Users"
+                        Content="Refresh Groups"
                         Margin="10"
                         Click="RefreshButton_Click"/>
-                <Button x:Name="NewUserButton"
-                        Content="New User"
+                <Button x:Name="NewGroupButton"
+                        Content="New Group"
                         IsEnabled="false"
-                        Click="NewUserButton_Click"/>
-                <Button x:Name="ImportUserButton"
-                        Content="Import…"
+                        Click="NewGroupButton_Click"/>
+                <Button x:Name="DeleteGroupButton"
+                        Content="Delete Group"
                         IsEnabled="false"
-                        Click="ImportUserButton_Click"/>
-                <Button x:Name="DeleteUserButton"
-                        Content="Delete User"
-                        IsEnabled="false"
-                        Click="DeleteUserButton_Click"/>
+                        Click="DeleteGroupButton_Click"/>
             </StackPanel>
             <StackPanel Grid.Row="1"
                         Grid.Column="2"
                         VerticalAlignment="Bottom"
                         HorizontalAlignment="Center">
-                <Label Content="Account Controls"
+                <Label Content="Member Controls"
                        HorizontalAlignment="Center"/>
-                <Button x:Name="EnableUserButton"
-                    Content="Enable"
-                    IsEnabled="false"
-                    Click="EnableUserButton_Click"/>
-                <Button x:Name="ExtendUserButton"
-                    Content="Extend"
-                    IsEnabled="false"
-                    Click="ExtendUserButton_Click"/>
-                <Button x:Name="UnlockUserButton"
-                    Content="Unlock"
-                    IsEnabled="false"
-                    Click="UnlockUserButton_Click"/>
-                <Button x:Name="DisableUserButton"
-                    Content="Disable"
-                    IsEnabled="false"
-                    Click="DisableUserButton_Click"/>
-                <Label Content="Password Controls"
-                       HorizontalAlignment="Center"/>
-                <Button x:Name="ExpiryPasswordButton"
-                    Content="Set Expiry"
-                    IsEnabled="false"
-                    Click="ExpiryPasswordButton_Click"/>
-                <Button x:Name="RefreshPasswordButton"
-                    Content="Refresh"
-                    IsEnabled="false"
-                    Click="RefreshPasswordButton_Click"/>
-                <Button x:Name="ExpirePasswordButton"
-                    Content="Expire"
-                    IsEnabled="false"
-                    Click="ExpirePasswordButton_Click"/>
-                <Button x:Name="ResetPasswordButton"
-                    Content="Reset"
-                    IsEnabled="false"
-                    Click="ResetPasswordButton_Click"/>
-
+                <Button x:Name="AddMemberButton"
+                        Content="Add Member"
+                        IsEnabled="false"
+                        Click="AddMemberButton_Click"/>
+                <Button x:Name="RemoveMemberButton"
+                        Content="Remove Member"
+                        IsEnabled="false"
+                        Click="RemoveMemberButton_Click"/>
             </StackPanel>
         </Grid>
 
@@ -457,27 +381,6 @@
                 <TextBlock x:Name="WarningMessage"
                            TextWrapping="WrapWithOverflow"
                            Style="{StaticResource OverviewMessage_Warning}"/>
-
-                <StackPanel x:Name="PasswordInput"
-                            HorizontalAlignment="Center"
-                            Visibility="Collapsed">
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Bottom"
-                               Content="New Password:"
-                               Width="150"/>
-                        <PasswordBox x:Name="NewPassword"
-                                     Width="150"
-                                     Style="{StaticResource PasswordBox}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Bottom"
-                               Content="Confirm Password:"
-                               Width="150"/>
-                        <PasswordBox x:Name="NewPassword_Confirm"
-                                     Width="150"
-                                     Style="{StaticResource PasswordBox}"/>
-                    </StackPanel>
-                </StackPanel>
 
                 <!--Confirm Buttons-->
                 <StackPanel Orientation="Horizontal"

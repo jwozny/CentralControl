@@ -109,6 +109,9 @@
     <Compile Include="inc\cs\ActiveDirectory.cs" />
     <Compile Include="inc\cs\Configuration.cs" />
     <Compile Include="inc\cs\EncryptDecrypt.cs" />
+    <Compile Include="Pages\AD\Groups.xaml.cs">
+      <DependentUpon>Groups.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Settings\Credentials.xaml.cs">
       <DependentUpon>Credentials.xaml</DependentUpon>
     </Compile>
@@ -131,6 +134,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Pages\AD\Groups.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\Settings\Credentials.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
