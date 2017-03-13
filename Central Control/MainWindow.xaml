@@ -3,7 +3,7 @@
         xmlns:local="clr-namespace:Central_Control"
         x:Class="Central_Control.MainWindow"
         x:Name="CentralControl"
-        Title="Central_Control"
+        Title="Central Control"
         Height="630"
         Width="1000"
         MinHeight="520"

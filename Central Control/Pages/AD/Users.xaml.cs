@@ -546,6 +546,9 @@ namespace Central_Control.AD
                             return;
                         }
                     }
+
+                    NewPassword.Password = null;
+                    NewPassword_Confirm.Password = null;
                     break;
                 case "Disable":
                     Report(ActiveDirectory.SelectedUser.DisableUser(), "User Disabled Successfully");

@@ -10,7 +10,6 @@
       FontFamily="Consolas"
       FontSize="12"
       Foreground="LightGray"
-      Title="Groups"
       Loaded="Groups_Loaded"
       Unloaded="Groups_Unloaded">
     <Page.Resources>

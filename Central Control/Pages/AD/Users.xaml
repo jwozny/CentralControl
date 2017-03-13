@@ -10,7 +10,6 @@
       FontFamily="Consolas"
       FontSize="12"
       Foreground="LightGray"
-      Title="Users"
       Loaded="Users_Loaded"
       Unloaded="Users_Unloaded">
     <Page.Resources>
