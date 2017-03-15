@@ -8,192 +8,15 @@
       d:DesignHeight="600"
       d:DesignWidth="800"
       FontFamily="Consolas"
+      Background="{StaticResource ContentBackground}"
       FontSize="12"
-      Foreground="LightGray"
       Loaded="Users_Loaded"
       Unloaded="Users_Unloaded">
     <Page.Resources>
-
-        <!--Input Styles-->
-        <Style x:Key="Searchbox"
-               TargetType="{x:Type TextBox}"
-               BasedOn="{StaticResource {x:Type TextBox}}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TextBox}">
-                        <Grid>
-                            <TextBox Text="{Binding Path=Text,
-                                                    RelativeSource={RelativeSource TemplatedParent},
-                                                    Mode=TwoWay,
-                                                    UpdateSourceTrigger=PropertyChanged}"
-                                     x:Name="textSource" 
-                                     Background="Transparent" 
-                                     Foreground="LightGray"
-                                     CaretBrush="LightGray"
-                                     Padding="5,0,25,0"
-                                     VerticalContentAlignment="Center" 
-                                     Panel.ZIndex="2"/>
-                            <TextBox Text="{TemplateBinding Tag}"
-                                     Background="{TemplateBinding Background}"
-                                     Panel.ZIndex="1"
-                                     BorderThickness="0">
-                                <TextBox.Style>
-                                    <Style TargetType="{x:Type TextBox}">
-                                        <Setter Property="Foreground" Value="Transparent"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=Text, Source={x:Reference textSource}}" Value="">
-                                                <Setter Property="Foreground" Value="#55D3D3D3"/>
-                                                <Setter Property="Padding" Value="5,0"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBox.Style>
-                            </TextBox>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="PasswordBox"
-               TargetType="{x:Type PasswordBox}"
-               BasedOn="{StaticResource {x:Type PasswordBox}}">
-            <Setter Property="Margin" Value="5"/>
-        </Style>
-        <Style x:Key="PasswordBox_Error"
-               TargetType="{x:Type PasswordBox}"
-               BasedOn="{StaticResource {x:Type PasswordBox}}">
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="BorderBrush" Value="#FFFF4040"/>
-        </Style>
-        
         <Style TargetType="{x:Type Button}"
                BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Margin" Value="10,0,10,10"/>
         </Style>
-
-
-        <Style x:Key="WarningButton_Confirm"
-               TargetType="{x:Type Button}">
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Margin" Value="10"/>
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="200"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Name="border"
-                                BorderThickness="1"
-                                BorderBrush="#FF808080"
-                                Background="#FF454545">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border"
-                                        Property="Background" Value="DarkRed" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border"
-                                        Property="Background" Value="#FF303030" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="WarningButton_Cancel"
-               TargetType="{x:Type Button}">
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Margin" Value="10"/>
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="200"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Name="border"
-                                BorderThickness="1"
-                                BorderBrush="#FF808080"
-                                Background="#FF454545">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border"
-                                        Property="BorderBrush" Value="DeepSkyBlue" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border"
-                                        Property="Background" Value="#FF303030" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!--Label Styles-->
-        <Style TargetType="{x:Type Label}">
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="Height" Value="21"/>
-            <Setter Property="Padding" Value="5,0"/>
-        </Style>
-        <Style x:Key="SelectableLabel"
-               TargetType="{x:Type TextBox}">
-            <Setter Property="Height" Value="21"/>
-            <Setter Property="Padding" Value="5,0"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="BorderBrush" Value="{x:Null}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="IsTabStop" Value="False"/>
-            <Setter Property="IsReadOnly" Value="True" />
-        </Style>
-
-        <!--Overview Message Styles-->
-        <Style x:Key="OverviewMessage"
-               TargetType="{x:Type Label}">
-            <Setter Property="Height" Value="100"/>
-            <Setter Property="FontSize" Value="25"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="Background" Value="#CC101010"/>
-            <Style.Triggers>
-                <Trigger Property="Visibility" Value="Visible">
-                    <Trigger.EnterActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 Duration="00:00:01"
-                                                 BeginTime="00:00:00"
-                                                 From="0.0"
-                                                 To="1.0" />
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 Duration="00:00:01"
-                                                 BeginTime="00:00:02"
-                                                 From="1.0"
-                                                 To="0.0" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.EnterActions>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="OverviewMessage_Warning"
-               TargetType="{x:Type TextBlock}">
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="FontSize" Value="22"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="TextAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-        </Style>
-
     </Page.Resources>
     <Grid>
         <!--Main Content-->
@@ -210,12 +33,8 @@
 
             <!--Header-->
             <Label Content="Active Directory Users"
-                   Grid.ColumnSpan="100"
-                   Margin="10,0,0,0"
-                   HorizontalAlignment="Left"
-                   FontSize="20"
-                   FontWeight="Bold"
-                   Foreground="LightGray"/>
+                   Grid.ColumnSpan="2"
+                   Style="{StaticResource PageHeader}"/>
 
             <!--User List-->
             <Grid Grid.Row="1"
@@ -228,104 +47,123 @@
 
                 <!--Searchbox-->
                 <TextBox x:Name="SearchBox"
-                         Style="{StaticResource Searchbox}"
+                         Style="{StaticResource SearchBox}"
                          Tag="Search for user..."
                          KeyDown="SearchBox_KeyDown"/>
 
                 <!--List-->
                 <ListBox x:Name="UserList"
                          Grid.Row="1"
-                         Foreground="LightGray"
-                         Background="#FF303030"
                          BorderThickness="1,0,1,1"
                          SelectionChanged="UserList_SelectionChanged"
                          KeyDown="UserList_KeyDown"/>
 
             </Grid>
-            
+
             <!--Info Area-->
             <TabControl MinHeight="200"
                         Grid.Row="1"
                         Grid.Column="1"
-                        Margin="10"
-                        Background="{x:Null}">
+                        Margin="10">
                 <TabItem x:Name="UserInfo"
                          Header="User Information">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="161"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Row="1"
-                                    Grid.Column="0"
-                                    Margin="10,10,0,10">
-                            <Label Content ="Name"/>
-                            <Label Content ="Username"/>
-                            <Label Content ="Email"/>
-                            <Label Content ="Title"/>
-                            <Label Content ="Department"/>
-                            <Label Content ="Company"/>
-                            <Label Content ="Created"/>
-                            <Label Content ="Expiry"/>
-                            <Label Content ="Last Logon Date"/>
-                            <Label Content ="Last Password Attempt"/>
-                            <Label Content ="Locked Out"/>
-                            <Label Content ="Lockout Time"/>
-                            <Label Content ="Distinguished Name"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="1"
-                                    Grid.Column="1"
-                                    Margin="0,10">
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                            <Label Content =":"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="1"
-                                    Grid.Column="2"
-                                    Margin="0,10,10,10">
+                    <StackPanel Margin="10,10,5,10">
+                        <DockPanel>
+                            <Label Content="Name"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="Name"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Username"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="Username"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Email"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="Email"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Title"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="Title"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Department"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="Department"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Company"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="Company"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Created"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="CreatedDate"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Expiry"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="ExpiryDate"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Last Logon Date"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="LastLogonDate"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Last Logon Attempt"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="LastBadPasswordAttempt"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Locked Out"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="LockedOut"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Lockout Time"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="AccountLockoutTime"
                                      Style="{StaticResource SelectableLabel}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Content="Distinguished Name"
+                                   Style="{StaticResource InfoLabel}"/>
+                            <Label Content=":"/>
                             <TextBox x:Name="DistinguishedName"
                                      Style="{StaticResource SelectableLabel}"/>
-                        </StackPanel>
-                    </Grid>
+                        </DockPanel>
+                    </StackPanel>
                 </TabItem>
                 <TabItem Header="Group Membership">
                     <Grid Grid.IsSharedSizeScope="True"
-                          Margin="5">
+                          Margin="5,5,-2,-2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition/>
@@ -336,20 +174,15 @@
                                                   MinWidth="200"/>
                                 <ColumnDefinition SharedSizeGroup="Security"/>
                             </Grid.ColumnDefinitions>
-                            <Border>
-                                <TextBlock Text="Group Name"
-                                           FontWeight="Bold"/>
-                            </Border>
-                            <Border Grid.Column="1">
-                                <TextBlock Text="Security"
-                                           FontWeight="Bold"/>
-                            </Border>
+                            <TextBlock Text="Group Name"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="Security"
+                                       Grid.Column="1"
+                                       FontWeight="Bold"/>
                         </Grid>
                         <ListBox x:Name="GroupList"
                                  Grid.Row="1"
                                  ItemsSource="{Binding DataSource}"
-                                 Background="{x:Null}"
-                                 Foreground="LightGray"
                                  BorderThickness="0">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -369,12 +202,6 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <Label x:Name="GroupsPlaceholder"
-                               Content="Fetching Groups..."
-                               Grid.Row="1"
-                               Height="21"
-                               HorizontalAlignment="Center"
-                               Visibility="Hidden"/>
                     </Grid>
                 </TabItem>
             </TabControl>
@@ -409,49 +236,49 @@
                 <Label Content="Account Controls"
                        HorizontalAlignment="Center"/>
                 <Button x:Name="EnableUserButton"
-                    Content="Enable"
-                    IsEnabled="false"
-                    Click="EnableUserButton_Click"/>
+                        Content="Enable"
+                        IsEnabled="false"
+                        Click="EnableUserButton_Click"/>
                 <Button x:Name="ExtendUserButton"
-                    Content="Extend"
-                    IsEnabled="false"
-                    Click="ExtendUserButton_Click"/>
+                        Content="Extend"
+                        IsEnabled="false"
+                        Click="ExtendUserButton_Click"/>
                 <Button x:Name="UnlockUserButton"
-                    Content="Unlock"
-                    IsEnabled="false"
-                    Click="UnlockUserButton_Click"/>
+                        Content="Unlock"
+                        IsEnabled="false"
+                        Click="UnlockUserButton_Click"/>
                 <Button x:Name="DisableUserButton"
-                    Content="Disable"
-                    IsEnabled="false"
-                    Click="DisableUserButton_Click"/>
+                        Content="Disable"
+                        IsEnabled="false"
+                        Click="DisableUserButton_Click"/>
                 <Label Content="Password Controls"
                        HorizontalAlignment="Center"/>
                 <Button x:Name="ExpiryPasswordButton"
-                    Content="Set Expiry"
-                    IsEnabled="false"
-                    Click="ExpiryPasswordButton_Click"/>
+                        Content="Set Expiry"
+                        IsEnabled="false"
+                        Click="ExpiryPasswordButton_Click"/>
                 <Button x:Name="RefreshPasswordButton"
-                    Content="Refresh"
-                    IsEnabled="false"
-                    Click="RefreshPasswordButton_Click"/>
+                        Content="Refresh"
+                        IsEnabled="false"
+                        Click="RefreshPasswordButton_Click"/>
                 <Button x:Name="ExpirePasswordButton"
-                    Content="Expire"
-                    IsEnabled="false"
-                    Click="ExpirePasswordButton_Click"/>
+                        Content="Expire"
+                        IsEnabled="false"
+                        Click="ExpirePasswordButton_Click"/>
                 <Button x:Name="ResetPasswordButton"
-                    Content="Reset"
-                    IsEnabled="false"
-                    Click="ResetPasswordButton_Click"/>
+                        Content="Reset"
+                        IsEnabled="false"
+                        Click="ResetPasswordButton_Click"/>
 
             </StackPanel>
         </Grid>
 
         <!--Warning/Confirmation Message-->
         <Border x:Name="Warning"
-                Background="#DD303030"
+                Background="{StaticResource ContentBackground_Trans}"
                 Visibility="Hidden">
             <StackPanel VerticalAlignment="Center"
-                        Background="#FF101010">
+                        Background="{StaticResource ContentBackground_Black}">
                 <!--Confirm Message-->
                 <TextBlock x:Name="WarningMessage"
                            TextWrapping="WrapWithOverflow"
@@ -460,37 +287,30 @@
                 <StackPanel x:Name="PasswordInput"
                             HorizontalAlignment="Center"
                             Visibility="Collapsed">
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Bottom"
-                               Content="New Password:"
-                               Width="150"/>
+                    <DockPanel>
+                        <Label Content="New Password:"/>
                         <PasswordBox x:Name="NewPassword"
-                                     Width="150"
-                                     Style="{StaticResource PasswordBox}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Bottom"
-                               Content="Confirm Password:"
-                               Width="150"/>
+                                     HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <Label Content="Confirm Password:"/>
                         <PasswordBox x:Name="NewPassword_Confirm"
-                                     Width="150"
-                                     Style="{StaticResource PasswordBox}"/>
-                    </StackPanel>
+                                     HorizontalAlignment="Right"/>
+                    </DockPanel>
                 </StackPanel>
 
-                <!--Confirm Buttons-->
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
+                <!--Warning Buttons-->
+                <DockPanel HorizontalAlignment="Center">
                     <Button x:Name="ConfirmButton"
-                            Grid.Column="0"
+                            Content="Confirm"
                             Style="{StaticResource WarningButton_Confirm}"
                             Click="ConfirmButton_Click"/>
                     <Button x:Name="CancelButton"
-                            Grid.Column="1"
                             Content="Cancel"
+                            HorizontalAlignment="Right"
                             Style="{StaticResource WarningButton_Cancel}"
                             Click="CancelButton_Click"/>
-                </StackPanel>
+                </DockPanel>
             </StackPanel>
         </Border>
 

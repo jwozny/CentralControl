@@ -133,8 +133,14 @@ namespace Central_Control
 
             if (IsConnected)
             {
-                RefreshUsers(Connector);
-                RefreshGroups(Connector);
+                if (!Connector.CancellationPending) RefreshUsers(Connector);
+                if (!Connector.CancellationPending) RefreshGroups(Connector);
+            }
+            
+            if (Connector.CancellationPending)
+            {
+                IsConnected = false;
+                ConnectionError = "Connection Canceled";
             }
         }
 
@@ -262,12 +268,17 @@ namespace Central_Control
         {
             try
             {
-                Worker.ReportProgress(0, "Finding Users");
                 Searcher.Dispose();
                 Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
 
+                Worker.ReportProgress(0, "Finding Users");
+                if (Worker.CancellationPending) return;
+
                 Users.Clear();
                 UserCount = Searcher.FindAll().Count();
+
+                Worker.ReportProgress(0, "Retrieving User");
+                if (Worker.CancellationPending) return;
 
                 foreach (UserPrincipal User in Searcher.FindAll())
                 {
@@ -276,6 +287,7 @@ namespace Central_Control
                         Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, User.SamAccountName));
                     }
                     Worker.ReportProgress(0, "Retrieving User");
+                    if (Worker.CancellationPending) return;
                 }
 
                 Users.Sort((x, y) => x.Name.CompareTo(y.Name));
@@ -305,6 +317,7 @@ namespace Central_Control
 
                     UserCount++;
                     Worker.ReportProgress(0, "Retrieving User Properties");
+                    if (Worker.CancellationPending) return;
                 }
             }
             catch
@@ -319,15 +332,17 @@ namespace Central_Control
         {
             try
             {
-                Worker.ReportProgress(0, "Finding Groups");
                 Searcher.Dispose();
                 Searcher = new PrincipalSearcher(new GroupPrincipal(Domain));
 
-                //Connector.ReportProgress(0, "Retrieving Groups...");
-                //Groups = (from principal in Searcher.FindAll() select principal as GroupPrincipal).OrderBy(Groups => Groups.SamAccountName).ToList();
+                Worker.ReportProgress(0, "Finding Groups");
+                if (Worker.CancellationPending) return;
 
                 Groups.Clear();
                 GroupCount = Searcher.FindAll().Count();
+
+                Worker.ReportProgress(0, "Retrieving Group");
+                if (Worker.CancellationPending) return;
 
                 foreach (GroupPrincipal Group in Searcher.FindAll())
                 {
@@ -336,6 +351,7 @@ namespace Central_Control
                         Groups.Add(GroupPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, Group.SamAccountName));
                     }
                     Worker.ReportProgress(0, "Retrieving Group");
+                    if (Worker.CancellationPending) return;
                 }
 
                 Groups.Sort((x, y) => x.Name.CompareTo(y.Name));
@@ -391,6 +407,7 @@ namespace Central_Control
 
                     GroupCount++;
                     Worker.ReportProgress(0, "Retrieving Group Members");
+                    if (Worker.CancellationPending) return;
                 }
             }
             catch

@@ -8,8 +8,8 @@
         Width="1000"
         MinHeight="520"
         MinWidth="800"
-        Background="#FF202020"
-        BorderBrush="#FF181818"
+        Background="{StaticResource WindowBackground}"
+        BorderBrush="{StaticResource WindowBorder}"
         BorderThickness="1"
         FontFamily="Consolas" 
         Visibility="Visible"
@@ -20,172 +20,6 @@
         SnapsToDevicePixels="True"
         SizeChanged="WindowSizeChanged"
         MouseMove="MainWindow_MouseMove">
-    <Window.Resources>
-
-        <!--Button Styles-->
-        <Style x:Key="MenuButton"
-               TargetType="{x:Type Button}">
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Margin" Value="-1,0,0,-1"/>
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="21"/>
-            <Setter Property="VerticalAlignment" Value="Bottom"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
-            <Setter Property="Panel.ZIndex" Value="1"/>
-            <Setter Property="Foreground" Value="#FF808080"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Name="border"
-                                BorderThickness="1"
-                                Background="#80404040"
-                                BorderBrush="#FF181818">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border"
-                                        Property="BorderBrush" Value="DeepSkyBlue" />
-                                <Setter Property="Foreground" Value="LightGray"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border"
-                                        Property="Background" Value="#FF303030" />
-                                <Setter Property="Foreground" Value="LightGray"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="True">
-                                <Setter Property="Foreground" Value="#FF909090"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!--Menu Styles-->
-        <Style x:Key="MainMenuBorder"
-               TargetType="Border">
-            <Setter Property="Width" Value="180"/>
-            <Setter Property="BorderBrush" Value="#FF181818"/>
-            <Setter Property="BorderThickness" Value="0,0,1,0"/>
-        </Style>
-        <DropShadowEffect x:Key="PrimaryGlow"
-                          ShadowDepth="0"
-                          Color="DeepSkyBlue"
-                          Opacity="1"
-                          BlurRadius="30"/>
-        <Style x:Key="Menu"
-               TargetType="Label">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#FF181818"/>
-            <Setter Property="Background" Value="#FF181818"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-                    <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="Menu_Selected"
-               TargetType="Label">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="DeepSkyBlue"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-            <Setter Property="Background" Value="#FF181818"/>
-            <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-        </Style>
-        <Style x:Key="Menu_Expanded"
-               TargetType="Label">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
-            <Setter Property="Background" Value="#FF181818"/>
-            <Setter Property="Effect" Value="{StaticResource PrimaryGlow}"/>
-        </Style>
-
-        <!--Submenu Styles-->
-        <Style x:Key="Submenu"
-               TargetType="Label">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="DarkGray"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="Submenu_Selected"
-               TargetType="Label">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="DeepSkyBlue"/>
-        </Style>
-        
-        <!--Titlebar Button Styles-->
-        <Style x:Key="TitlebarButton"
-               TargetType="Button">
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="45"/>
-            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="Background" Value="#FF181818"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#80808080"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#FF808080"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="TitlebarCloseButton"
-               TargetType="Button">
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="45"/>
-            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
-            <Setter Property="Foreground" Value="LightGray"/>
-            <Setter Property="Background" Value="#FF181818"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFE81123"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#FFF1707A"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-    </Window.Resources>
-    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -230,7 +64,7 @@
                 </EventTrigger>
             </Border.Triggers>
             <StackPanel x:Name="MainMenuPanel"
-                        Background="#DD222222"
+                        Background="{StaticResource ContentBackground_Trans}"
                         MouseEnter="MainMenuPanel_MouseEnter"
                         MouseLeave="MainMenuPanel_MouseLeave">
                 <StackPanel x:Name="ADPanel"
@@ -325,7 +159,7 @@
         <Grid x:Name="Titlebar"
               Grid.Row="0"
               Grid.ColumnSpan="2"
-              Background="#FF181818"
+              Background="{StaticResource ContentBackground_Dark}"
               MouseLeftButtonDown="Titlebar_MouseLeftButtonDown"
               MouseLeftButtonUp="Titlebar_MouseLeftButtonUp"
               MouseMove="Titlebar_MouseMove"
@@ -337,8 +171,7 @@
             <Label Content="Central Control"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
-                   Foreground="Gray"
-                   Background="#FF1B1B1B"
+                   Foreground="{StaticResource Disabled_Foreground}"
                    FontSize="14"/>
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"
@@ -368,7 +201,7 @@
                Margin="0,0,20,0"
                HorizontalAlignment="Right"
                VerticalAlignment="Bottom"
-               Foreground="#FF606060"
+               Foreground="{StaticResource Disabled_Foreground}"
                FontSize="10"
                Padding="0"
                Panel.ZIndex="999"/>

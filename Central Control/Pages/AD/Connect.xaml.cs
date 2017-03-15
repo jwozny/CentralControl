@@ -71,6 +71,8 @@ namespace Central_Control.AD
         private void EnableCurtain()
         {
             Curtain.Visibility = Visibility.Visible;
+            ConnectButton.IsEnabled = false;
+            ResetButton.Content = "Cancel";
         }
         /// <summary>
         /// Hide the curtain over the form controls
@@ -78,6 +80,8 @@ namespace Central_Control.AD
         private void DisableCurtain()
         {
             Curtain.Visibility = Visibility.Hidden;
+            ConnectButton.IsEnabled = true;
+            ResetButton.Content = "Reset";
         }
 
         /// <summary>
@@ -151,6 +155,8 @@ namespace Central_Control.AD
         {
             ResetButton.IsEnabled = false;
 
+            ActiveDirectory.Connector.CancelAsync();
+
             var scope = FocusManager.GetFocusScope(this);
             FocusManager.SetFocusedElement(scope, null);
             Keyboard.ClearFocus();
@@ -188,8 +194,6 @@ namespace Central_Control.AD
 
             FormSave();
             FormConnect();
-
-            ConnectButton.IsEnabled = true;
         }
 
         /// <summary>
@@ -294,6 +298,7 @@ namespace Central_Control.AD
         private void FormReset()
         {
             StatusMessage.Visibility = Visibility.Collapsed;
+            StatusProgress.Visibility = Visibility.Collapsed;
 
             Style TextBox = FindResource("TextBox") as Style;
             Style PasswordBox = FindResource("PasswordBox") as Style;
