@@ -33,7 +33,9 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="250"
+                                      MinWidth="200"
+                                      MaxWidth="{Binding ElementName=MainContent, Path=ActualWidth, Converter={StaticResource MathConverter}, ConverterParameter=@VALUE*0.4}"/>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -72,6 +74,12 @@
 
                 </Grid>
 
+                <GridSplitter Grid.Column="0"
+                              Grid.Row="1"
+                              Background="Transparent"
+                              Margin="-2.5,10"
+                              Width="5"/>
+                
                 <!--Info Area-->
                 <TabControl MinHeight="200"
                             Grid.Row="1"

@@ -1090,5 +1090,7 @@
                BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Width" Value="200"/>
         </Style>
+
+        <local:MathConverter x:Key="MathConverter"/>
     </Application.Resources>
 </Application>

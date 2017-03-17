@@ -101,6 +101,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="inc\cs\MathConverter.cs" />
     <Compile Include="inc\cs\SnapAssist.cs" />
     <Compile Include="inc\cs\TextSearchFilter.cs" />
     <Compile Include="Pages\AD\Connect.xaml.cs">
