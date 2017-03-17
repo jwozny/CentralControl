@@ -118,7 +118,12 @@ namespace Central_Control
             Connector.WorkerReportsProgress = true;
             Connector.WorkerSupportsCancellation = true;
 
-            Connector.DoWork += Connector_DoWork;
+            Connector.DoWork -= Connector_DoWork;
+
+            if (!Connector.IsBusy)
+            {
+                Connector.DoWork += Connector_DoWork;
+            }
         }
         /// <summary>
         /// Define background worker actions
