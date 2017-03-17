@@ -7,8 +7,8 @@
       mc:Ignorable="d"
       d:DesignHeight="600"
       d:DesignWidth="800"
-      FontFamily="Consolas"
       Background="{StaticResource ContentBackground}"
+      FontFamily="Consolas"
       FontSize="12"
       Loaded="Users_Loaded"
       Unloaded="Users_Unloaded">
@@ -285,13 +285,6 @@
                 </StackPanel>
             </Grid>
         </Border>
-
-
-                    <DockPanel>
-                    </DockPanel>
-                    <DockPanel>
-                    </DockPanel>
-                </StackPanel>
 
         <!--Warning/Confirmation Message-->
         <Grid x:Name="WarningBox"
