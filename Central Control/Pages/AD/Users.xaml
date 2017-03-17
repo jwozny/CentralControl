@@ -286,46 +286,13 @@
             </Grid>
         </Border>
 
-        <!--Warning/Confirmation Message-->
-        <Border x:Name="Warning"
-                Background="{StaticResource ContentBackground_Trans}"
-                Visibility="Hidden">
-            <StackPanel VerticalAlignment="Center"
-                        Background="{StaticResource ContentBackground_Black}">
-                <!--Confirm Message-->
-                <TextBlock x:Name="WarningMessage"
-                           TextWrapping="WrapWithOverflow"
-                           Style="{StaticResource OverviewMessage_Warning}"/>
 
-                <StackPanel x:Name="PasswordInput"
-                            HorizontalAlignment="Center"
-                            Visibility="Collapsed">
                     <DockPanel>
-                        <Label Content="New Password:"/>
-                        <PasswordBox x:Name="NewPassword"
-                                     HorizontalAlignment="Right"/>
                     </DockPanel>
                     <DockPanel>
-                        <Label Content="Confirm Password:"/>
-                        <PasswordBox x:Name="NewPassword_Confirm"
-                                     HorizontalAlignment="Right"/>
                     </DockPanel>
                 </StackPanel>
 
-                <!--Warning Buttons-->
-                <DockPanel HorizontalAlignment="Center">
-                    <Button x:Name="ConfirmButton"
-                            Content="Confirm"
-                            Style="{StaticResource WarningButton_Confirm}"
-                            Click="ConfirmButton_Click"/>
-                    <Button x:Name="CancelButton"
-                            Content="Cancel"
-                            HorizontalAlignment="Right"
-                            Style="{StaticResource WarningButton_Cancel}"
-                            Click="CancelButton_Click"/>
-                </DockPanel>
-            </StackPanel>
-        </Border>
         <!--Warning/Confirmation Message-->
         <Grid x:Name="WarningBox"
               Background="{StaticResource ContentBackground_MaxTrans}"
