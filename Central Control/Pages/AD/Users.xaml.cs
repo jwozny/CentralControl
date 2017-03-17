@@ -31,15 +31,14 @@ namespace Central_Control.AD
     /// </summary>
     public partial class Users : Page
     {
-        /// <summary>
-        /// Primary function
-        /// </summary>
         public Users()
         {
             InitializeComponent();
         }
+
+        #region Page Events
         /// <summary>
-        /// 
+        /// Do this when the page loades
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -63,8 +62,42 @@ namespace Central_Control.AD
                 ExitAD();
             }
         }
+        /// <summary>
+        /// When the AD Updater_Users background worker is finished, notify the user or exit the page if disconnected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Updater_Users_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            UpdateUserButtons();
 
-        /* Functions */
+            if (ActiveDirectory.IsConnected)
+            {
+                ResultMessage.Text = "User List Updated";
+                ResultBox.Visibility = Visibility.Visible;
+
+                string tmp = SearchBox.Text;
+                SearchBox.Text = " ";
+                SearchBox.Text = null;
+                SearchBox.Text = tmp;
+            }
+            else
+            {
+                ExitAD();
+            }
+        }
+        /// <summary>
+        /// Remove event handler watchers when the page is unloaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Users_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ActiveDirectory.Updater_Users.RunWorkerCompleted -= Updater_Users_Completed;
+        }
+        #endregion Page Events
+
+        #region Common Functions
         /// <summary>
         /// 
         /// </summary>
@@ -308,8 +341,49 @@ namespace Central_Control.AD
                 MainContent.IsEnabled = true;
             }
         }
+        /// <summary>
+        /// Action to perform when the confirm button is clicked
+        /// </summary>
+        private string Action;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Result"></param>
+        /// <param name="SuccessMessage"></param>
+        /// <returns></returns>
+        private bool Report(bool Result, string SuccessMessage)
+        {
+            ResultBox.Visibility = Visibility.Hidden;
 
-        /* Control Actions */
+            if (Result)
+            {
+                ResultMessage.Text = SuccessMessage;
+                ResultBox.Visibility = Visibility.Visible;
+
+                if (Action == "ReallyDelete")
+                {
+                    ClearSelection();
+                }
+
+                UpdateSelectedUser();
+                UpdateUserButtons();
+
+                return true;
+            }
+            else
+            {
+                ResultMessage.Text = ActiveDirectory.ConnectionError;
+                ResultBox.Visibility = Visibility.Visible;
+
+                RefreshButton.IsEnabled = false;
+                ActiveDirectory.Connect();
+
+                return false;
+            }
+        }
+        #endregion Common Functions
+
+        #region Control Actions
         /// <summary>
         /// Pressing Enter in searchbox invokes fullLookup
         /// </summary>
@@ -349,6 +423,8 @@ namespace Central_Control.AD
                 ClearSelection();
             }
         }
+
+        #region User Buttons
         /// <summary>
         /// User refresh button action
         /// </summary>
@@ -363,8 +439,6 @@ namespace Central_Control.AD
 
             ActiveDirectory.Refresh("Users");
         }
-
-        /* User Button Actions */
         /// <summary>
         /// Button action to create a new user
         /// </summary>
@@ -456,8 +530,9 @@ namespace Central_Control.AD
 
             Action = "Disable";
         }
+        #endregion User Buttons
 
-        /* Password Button Actions */
+        #region Password Buttons
         /// <summary>
         /// Button action to refresh the selected user's password
         /// </summary>
@@ -511,12 +586,10 @@ namespace Central_Control.AD
 
             Action = "Reset";
         }
+        #endregion Password Buttons
 
-        /* Confirm Message and Actions */
-        /// <summary>
-        /// Action to perform when the confirm button is clicked
-        /// </summary>
-        private string Action;
+
+        #region Warning Message
         /// <summary>
         /// Confirm the action and continue
         /// </summary>
@@ -604,62 +677,10 @@ namespace Central_Control.AD
 
             Action = null;
         }
-        private bool Report(bool Result, string SuccessMessage)
-        {
-            ResultBox.Visibility = Visibility.Hidden;
+        #endregion Warning Message
+        #endregion Control Actions
 
-            if (Result)
-            {
-                ResultMessage.Text = SuccessMessage;
-                ResultBox.Visibility = Visibility.Visible;
-
-                if(Action == "ReallyDelete")
-                {
-                    ClearSelection();
-                }
-
-                UpdateSelectedUser();
-                UpdateUserButtons();
-
-                return true;
-            }
-            else
-            {
-                ResultMessage.Text = ActiveDirectory.ConnectionError;
-                ResultBox.Visibility = Visibility.Visible;
-
-                RefreshButton.IsEnabled = false;
-                ActiveDirectory.Connect();
-
-                return false;
-            }
-        }
-
-        /* Event Handlers */
-        /// <summary>
-        /// When the AD Updater_Users background worker is finished, notify the user or exit the page if disconnected
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Updater_Users_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            UpdateUserButtons();
-
-            if (ActiveDirectory.IsConnected)
-            {
-                ResultMessage.Text = "User List Updated";
-                ResultBox.Visibility = Visibility.Visible;
-                
-                string tmp = SearchBox.Text;
-                SearchBox.Text = " ";
-                SearchBox.Text = null;
-                SearchBox.Text = tmp;
-            }
-            else
-            {
-                ExitAD();
-            }
-        }
+        #region Event Handlers and Triggers
         /// <summary>
         /// Event handler when AD is no longer connected
         /// </summary>
@@ -671,14 +692,6 @@ namespace Central_Control.AD
         {
             Disconnected(this, new EventArgs());
         }
-        /// <summary>
-        /// Remove event handler watchers when the page is unloaded
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Users_Unloaded(object sender, RoutedEventArgs e)
-        {
-            ActiveDirectory.Updater_Users.RunWorkerCompleted -= Updater_Users_Completed;
-        }
+        #endregion Event Handlers and Triggers
     }
 }

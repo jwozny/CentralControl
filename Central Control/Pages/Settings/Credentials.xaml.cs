@@ -26,13 +26,12 @@ namespace Central_Control.Settings
     /// </summary>
     public partial class Credentials : Page
     {
-        /// <summary>
-        /// Primary function
-        /// </summary>
         public Credentials()
         {
             InitializeComponent();
         }
+
+        #region Page Events
         /// <summary>
         /// Event handler when the page finishes loading
         /// </summary>
@@ -42,157 +41,9 @@ namespace Central_Control.Settings
         {
             LoadSettings();
         }
+        #endregion Page Events
 
-        /* Select all current text when textbox gets focus */
-        /// <summary>
-        /// Select all text in the AD Domain box when getting focus
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_DomainTextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            AD_DomainTextBox.SelectAll();
-        }
-        /// <summary>
-        /// Select all text in the AD Username box when getting focus
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_UsernameTextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            AD_UsernameTextBox.SelectAll();
-        }
-        /// <summary>
-        /// Select all text in the AD password box when getting focus
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_PasswordBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            AD_PasswordBox.SelectAll();
-        }
-
-        /* Checkbox actions*/
-        /// <summary>
-        /// Disable the domain box and assign null to the global config
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_LocalDomainCheckbox_Checked(object sender, RoutedEventArgs e)
-        {
-            AD_DomainTextBox.IsEnabled = false;
-            GlobalConfig.Settings.AD_UseLocalDomain = true;
-
-            try
-            {
-                AD_DomainTextBox.Text = Domain.GetComputerDomain().ToString();
-            }
-            catch
-            {
-                AD_DomainTextBox.Text = null;
-            }
-        }
-        /// <summary>
-        /// Enable the domain box and populate it if the info is in the global config
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_LocalDomainCheckbox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            AD_DomainTextBox.IsEnabled = true;
-            GlobalConfig.Settings.AD_UseLocalDomain = false;
-
-            if (!string.IsNullOrEmpty(GlobalConfig.Settings.AD_Domain))
-            {
-                AD_DomainTextBox.Text = GlobalConfig.Settings.AD_Domain;
-            }
-            else
-            {
-                AD_DomainTextBox.Text = string.Empty;
-            }
-            AD_DomainTextBox.Focus();
-        }
-        /// <summary>
-        /// Disable the username and password boxes and assign null to the global config
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_LocalAuthCheckbox_Checked(object sender, RoutedEventArgs e)
-        {
-            AD_UsernameTextBox.IsEnabled = false;
-            AD_PasswordBox.IsEnabled = false;
-            GlobalConfig.Settings.AD_UseLocalAuth = true;
-
-            AD_UsernameTextBox.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            AD_PasswordBox.Password = string.Empty;
-        }
-        /// <summary>
-        /// Enable the username and password boxes and populate them if the info is in the global config
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AD_LocalAuthCheckbox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            AD_UsernameTextBox.IsEnabled = true;
-            AD_PasswordBox.IsEnabled = true;
-            GlobalConfig.Settings.AD_UseLocalAuth = false;
-
-            if (!string.IsNullOrEmpty(GlobalConfig.Settings.AD_Username) && !string.IsNullOrEmpty(GlobalConfig.Settings.AD_Password))
-            {
-                AD_UsernameTextBox.Text = GlobalConfig.Settings.AD_Username;
-                AD_PasswordBox.Password = GlobalConfig.Settings.AD_Password;
-            }
-            else
-            {
-                AD_UsernameTextBox.Text = string.Empty;
-                AD_PasswordBox.Password = string.Empty;
-            }
-
-            AD_UsernameTextBox.Focus();
-        }
-
-        /* Button actions*/
-        /// <summary>
-        /// Button action to reset settings and repopulate from configuration
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ResetButton_Click(object sender, RoutedEventArgs e)
-        {
-            ResetButton.IsEnabled = false;
-
-            var scope = FocusManager.GetFocusScope(this);
-            FocusManager.SetFocusedElement(scope, null);
-            Keyboard.ClearFocus();
-
-            LoadSettings();
-
-            ResetButton.IsEnabled = true;
-        }
-        /// <summary>
-        /// Button action to save settings
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            SaveButton.IsEnabled = false;
-            ResultBox.Visibility = Visibility.Hidden;
-
-            var scope = FocusManager.GetFocusScope(this);
-            FocusManager.SetFocusedElement(scope, null);
-            Keyboard.ClearFocus();
-
-            if (SaveSettings())
-            {
-                ResultMessage.Text = "Saved Successfully";
-                ResultBox.Visibility = Visibility.Visible;
-            }
-
-            SaveButton.IsEnabled = true;
-        }
-
-        /* Settings functions */
+        #region Settings Functions
         /// <summary>
         /// Get credentials from configuration and display in the page (passwords don't display)
         /// </summary>
@@ -328,5 +179,160 @@ namespace Central_Control.Settings
             GlobalConfig.SaveToDisk();
             return true;
         }
+        #endregion Settings Functions
+
+        #region Control Actions
+
+        #region Active Directory Form
+        /// <summary>
+        /// Select all text in the AD Domain box when getting focus
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_DomainTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            AD_DomainTextBox.SelectAll();
+        }
+        /// <summary>
+        /// Select all text in the AD Username box when getting focus
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_UsernameTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            AD_UsernameTextBox.SelectAll();
+        }
+        /// <summary>
+        /// Select all text in the AD password box when getting focus
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_PasswordBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            AD_PasswordBox.SelectAll();
+        }
+        /// <summary>
+        /// Disable the domain box and assign null to the global config
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_LocalDomainCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            AD_DomainTextBox.IsEnabled = false;
+            GlobalConfig.Settings.AD_UseLocalDomain = true;
+
+            try
+            {
+                AD_DomainTextBox.Text = Domain.GetComputerDomain().ToString();
+            }
+            catch
+            {
+                AD_DomainTextBox.Text = null;
+            }
+        }
+        /// <summary>
+        /// Enable the domain box and populate it if the info is in the global config
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_LocalDomainCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AD_DomainTextBox.IsEnabled = true;
+            GlobalConfig.Settings.AD_UseLocalDomain = false;
+
+            if (!string.IsNullOrEmpty(GlobalConfig.Settings.AD_Domain))
+            {
+                AD_DomainTextBox.Text = GlobalConfig.Settings.AD_Domain;
+            }
+            else
+            {
+                AD_DomainTextBox.Text = string.Empty;
+            }
+            AD_DomainTextBox.Focus();
+        }
+        /// <summary>
+        /// Disable the username and password boxes and assign null to the global config
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_LocalAuthCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            AD_UsernameTextBox.IsEnabled = false;
+            AD_PasswordBox.IsEnabled = false;
+            GlobalConfig.Settings.AD_UseLocalAuth = true;
+
+            AD_UsernameTextBox.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            AD_PasswordBox.Password = string.Empty;
+        }
+        /// <summary>
+        /// Enable the username and password boxes and populate them if the info is in the global config
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AD_LocalAuthCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AD_UsernameTextBox.IsEnabled = true;
+            AD_PasswordBox.IsEnabled = true;
+            GlobalConfig.Settings.AD_UseLocalAuth = false;
+
+            if (!string.IsNullOrEmpty(GlobalConfig.Settings.AD_Username) && !string.IsNullOrEmpty(GlobalConfig.Settings.AD_Password))
+            {
+                AD_UsernameTextBox.Text = GlobalConfig.Settings.AD_Username;
+                AD_PasswordBox.Password = GlobalConfig.Settings.AD_Password;
+            }
+            else
+            {
+                AD_UsernameTextBox.Text = string.Empty;
+                AD_PasswordBox.Password = string.Empty;
+            }
+
+            AD_UsernameTextBox.Focus();
+        }
+        #endregion Active Directory
+
+        #region Buttons
+        /// <summary>
+        /// Button action to reset settings and repopulate from configuration
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetButton.IsEnabled = false;
+
+            var scope = FocusManager.GetFocusScope(this);
+            FocusManager.SetFocusedElement(scope, null);
+            Keyboard.ClearFocus();
+
+            LoadSettings();
+
+            ResetButton.IsEnabled = true;
+        }
+        /// <summary>
+        /// Button action to save settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveButton.IsEnabled = false;
+            ResultBox.Visibility = Visibility.Hidden;
+
+            var scope = FocusManager.GetFocusScope(this);
+            FocusManager.SetFocusedElement(scope, null);
+            Keyboard.ClearFocus();
+
+            if (SaveSettings())
+            {
+                ResultMessage.Text = "Saved Successfully";
+                ResultBox.Visibility = Visibility.Visible;
+            }
+
+            SaveButton.IsEnabled = true;
+        }
+        #endregion Buttons
+
+        #endregion Control Actions
+
     }
 }

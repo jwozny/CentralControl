@@ -36,7 +36,7 @@ namespace Central_Control
     /// </summary>
     public static class ActiveDirectory
     {
-        /* Connection Functions */
+        #region Connection Function and Status
         /// <summary>
         /// Connect to AD using current or provided credentials
         /// </summary>
@@ -104,8 +104,11 @@ namespace Central_Control
         /// Error returned from AD connector
         /// </summary>
         public static string ConnectionError;
-        
-        /* Background Worker - Connector */
+        #endregion Connection Function and Status
+
+        #region Background Workers
+
+        #region Background Worker - Connector
         /// <summary>
         /// Create background worker instance
         /// </summary>
@@ -148,8 +151,9 @@ namespace Central_Control
                 ConnectionError = "Connection Canceled";
             }
         }
+        #endregion Background Worker - Connector
 
-        /* Background Worker - Updater_Users */
+        #region Background Worker - Updater_Users
         /// <summary>
         /// Create background worker instance
         /// </summary>
@@ -175,8 +179,9 @@ namespace Central_Control
             IsConnected = EstablishConnection();
             if (IsConnected) RefreshUsers(Updater_Users);
         }
+        #endregion Background Worker - Updater_Users
 
-        /* Background Worker - Updater_Groups */
+        #region Background Worker - Updater_Groups
         /// <summary>
         /// Create background worker instance
         /// </summary>
@@ -202,12 +207,15 @@ namespace Central_Control
             IsConnected = EstablishConnection();
             if (IsConnected) RefreshGroups(Updater_Groups);
         }
+        #endregion Background Worker - Updater_Groups
 
-        /* Domain Properties */
+        #endregion Background Workers
+
+        #region Domain Properties
         /// <summary>
         /// Current domain
         /// </summary>
-        private static PrincipalContext Domain;
+        public static PrincipalContext Domain;
         /// <summary>
         /// Domain searcher
         /// </summary>
@@ -224,12 +232,15 @@ namespace Central_Control
         /// List of AD users
         /// </summary>
         public static List<UserPrincipalEx> Users { get; set; } = new List<UserPrincipalEx>();
+        public static UserPrincipalEx SelectedUser;
         /// <summary>
         /// List of AD groups
         /// </summary>
         public static List<GroupPrincipalEx> Groups { get; set; } = new List<GroupPrincipalEx>();
+        public static GroupPrincipalEx SelectedGroup;
+        #endregion Domain Properties
 
-        /* Refresh Functions */
+        #region Refresh Functions
         /// <summary>
         /// Refresh everything from AD or a specific item
         /// </summary>
@@ -420,24 +431,9 @@ namespace Central_Control
                 IsConnected = EstablishConnection();
             }
         }
-        /// <summary>
-        /// Checks if a string exists, returns false if string/property doesn't exist, is null, or empty
-        /// </summary>
-        /// <param name="stringItem"></param>
-        /// <returns></returns>
-        public static bool Exists(this string stringItem)
-        {
-            if (ReferenceEquals(stringItem, null)) return false;
-            if (stringItem == null) return false;
-            if (stringItem == "") return false;
-            if (stringItem == string.Empty) return false;
-            return true;
-        }
+        #endregion Refresh Functions
 
-        /* Selected User */
-        public static UserPrincipalEx SelectedUser;
-
-        /* Extended User Functions */
+        #region Extended User Functions
         /// <summary>
         /// Get additional properties not included in the User Principal object
         /// </summary>
@@ -770,7 +766,6 @@ namespace Central_Control
             User.RefreshUser();
             return true;
         }
-
         /// <summary>
         /// Set so that the user's password expires
         /// </summary>
@@ -906,10 +901,9 @@ namespace Central_Control
             User.RefreshUser();
             return true;
         }
-        
-        /* Selected Group Properties */
-        public static GroupPrincipalEx SelectedGroup;
+        #endregion Extended User Functions
 
+        #region Extended Group Functions
         /* Group Extended Functions */
         /// <summary>
         /// Delete the selected groups from the store
@@ -958,7 +952,11 @@ namespace Central_Control
 
             return true;
         }
+        #endregion Extended Group Functions
 
+        #region Custom Classes
+
+        #region UserPrincipalEx
         [DirectoryRdnPrefix("CN")]
         [DirectoryObjectClass("user")]
         public class UserPrincipalEx : UserPrincipal
@@ -1039,14 +1037,9 @@ namespace Central_Control
             [DirectoryProperty("groups")]
             public List<Principal> Groups { get; set; } = new List<Principal>();
         }
+        #endregion UserPrincipalEx
 
-        public class Member
-        {
-            public string Name { get; set; }
-            public string DistinguishedName { get; set; }
-            public string SchemaClassName { get; set; }
-        }
-
+        #region GroupPrincipalEx
         [DirectoryRdnPrefix("CN")]
         [DirectoryObjectClass("group")]
         public class GroupPrincipalEx : GroupPrincipal
@@ -1087,5 +1080,18 @@ namespace Central_Control
                 set { ExtensionSet("email", value); }
             }
         }
+        #endregion GroupPrincipalEx
+
+        /// <summary>
+        /// Custom member class for GroupPrincipalEx
+        /// </summary>
+        public class Member
+        {
+            public string Name { get; set; }
+            public string DistinguishedName { get; set; }
+            public string SchemaClassName { get; set; }
+        }
+
+        #endregion Custom Classes
     }
 }

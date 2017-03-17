@@ -31,9 +31,6 @@ namespace Central_Control
     /// </summary>
     public partial class MainWindow : Window
     {
-        /// <summary>
-        /// Interaction logic for MainWindow.xaml
-        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -45,6 +42,7 @@ namespace Central_Control
 
             VersionFootnote.Content = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
+
         /// <summary>
         /// When the mainWindow is initialized, do this (window control hooks for custom titlebar)
         /// </summary>
@@ -55,8 +53,8 @@ namespace Central_Control
             System.IntPtr handle = (new WinInterop.WindowInteropHelper(this)).Handle;
             WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(SnapAssist.WindowProc));
         }
-        
-        /* Window controls */
+
+        #region Window Controls
         /// <summary>
         /// Minimize window
         /// </summary>
@@ -214,10 +212,11 @@ namespace Central_Control
                 try { DragMove(); } catch { }
             }
         }
+        #endregion Window Controls
 
-        /* Main Menu style functions */
+        #region Main Menu Functions
         /// <summary>
-        /// Initialize main menu and Submenu options
+        /// Initialize main menu and submenu options
         /// </summary>
         private void InitializeMenu()
         {
@@ -272,7 +271,7 @@ namespace Central_Control
             Settings.Style = FindResource("Menu") as Style;
         }
         /// <summary>
-        /// Reset all Submenu styles to their defaults
+        /// Reset all submenu styles to their defaults
         /// </summary>
         private void ResetSubmenu()
         {
@@ -286,6 +285,9 @@ namespace Central_Control
             Settings_Credentials.Style = FindResource("Submenu") as Style;
             Settings_Credentials.Visibility = Visibility.Collapsed;
         }
+        /// <summary>
+        /// Check if AD submenus should show and show if their conditions are true
+        /// </summary>
         private void ShowMenu_AD()
         {
             if (ActiveDirectory.Users.Count > 0)
@@ -293,12 +295,16 @@ namespace Central_Control
             if (ActiveDirectory.Groups.Count > 0)
                 AD_Groups.Visibility = Visibility.Visible;
         }
+        /// <summary>
+        /// Show Settings submenus
+        /// </summary>
         private void ShowMenu_Settings()
         {
             Settings_Credentials.Visibility = Visibility.Visible;
         }
+        #endregion Main Menu Functions
 
-        /* Main Menu controls */
+        #region Main Menu Controls
         /// <summary>
         /// Returns if the main menu hidden
         /// </summary>
@@ -511,8 +517,9 @@ namespace Central_Control
 
             _NavigationFrame.Navigate(Settings_Credentials_Page);
         }
+        #endregion Main Menu Controls
 
-        /* AD Event Handlers */
+        #region AD Event Handlers
         /// <summary>
         /// Remove all AD related event handlers when assigning a new handler
         /// </summary>
@@ -591,5 +598,6 @@ namespace Central_Control
                 _NavigationFrame.NavigationService.LoadCompleted += AD_Connected;
             }
         }
+        #endregion AD Event Handlers
     }
 }

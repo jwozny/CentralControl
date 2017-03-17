@@ -31,13 +31,12 @@ namespace Central_Control.AD
     /// </summary>
     public partial class Groups : Page
     {
-        /// <summary>
-        /// Primary function
-        /// </summary>
         public Groups()
         {
             InitializeComponent();
         }
+
+        #region Page Events
         /// <summary>
         /// 
         /// </summary>
@@ -61,8 +60,42 @@ namespace Central_Control.AD
                 ExitAD();
             }
         }
+        /// <summary>
+        /// When the AD Updater background worker is finished, notify the user or exit the page if disconnected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Updater_Groups_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            UpdateGroupButtons();
 
-        /* Functions */
+            if (ActiveDirectory.IsConnected)
+            {
+                ResultMessage.Text = "Group List Updated";
+                ResultMessage.Visibility = Visibility.Visible;
+
+                string tmp = SearchBox.Text;
+                SearchBox.Text = " ";
+                SearchBox.Text = null;
+                SearchBox.Text = tmp;
+            }
+            else
+            {
+                ExitAD();
+            }
+        }
+        /// <summary>
+        /// Remove event handler watchers when the page is unloaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Groups_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ActiveDirectory.Updater_Groups.RunWorkerCompleted -= Updater_Groups_Completed;
+        }
+        #endregion Page Events
+        
+        #region Common Functions
         /// <summary>
         /// 
         /// </summary>
@@ -175,8 +208,50 @@ namespace Central_Control.AD
             }
 
         }
+        /// <summary>
+        /// Action to perform when the confirm button is clicked
+        /// </summary>
+        private string Action;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Result"></param>
+        /// <param name="SuccessMessage"></param>
+        /// <returns></returns>
+        private bool Report(bool Result, string SuccessMessage)
+        {
+            ResultMessage.Visibility = Visibility.Hidden;
 
-        /* Control Actions */
+            if (Result)
+            {
+                ResultMessage.Text = SuccessMessage;
+                ResultMessage.Visibility = Visibility.Visible;
+
+                if (Action == "ReallyDelete")
+                {
+                    ClearSelection();
+                }
+
+                UpdateSelectedGroup();
+                UpdateGroupButtons();
+
+                return true;
+            }
+            else
+            {
+                ResultMessage.Text = ActiveDirectory.ConnectionError;
+                ResultMessage.Visibility = Visibility.Visible;
+
+                RefreshButton.IsEnabled = false;
+                ActiveDirectory.Connect();
+
+                return false;
+            }
+        }
+        #endregion Common Functions
+
+        #region Control Actions
+
         /// <summary>
         /// Pressing Enter in searchbox invokes fullLookup
         /// </summary>
@@ -240,7 +315,7 @@ namespace Central_Control.AD
             ActiveDirectory.Refresh("Groups");
         }
 
-        /* User Button Actions */
+        #region Group Buttons
         /// <summary>
         /// Button action to create a new group
         /// </summary>
@@ -267,6 +342,9 @@ namespace Central_Control.AD
 
             Action = "Delete";
         }
+        #endregion Group Buttons
+
+        #region Member Buttons
         /// <summary>
         /// Button action to add a member to the group
         /// </summary>
@@ -292,12 +370,9 @@ namespace Central_Control.AD
                 }
             }
         }
-
-        /* Confirm Message and Actions */
-        /// <summary>
-        /// Action to perform when the confirm button is clicked
-        /// </summary>
-        private string Action;
+        #endregion Member Buttons
+        
+        #region Warning Message
         /// <summary>
         /// Confirm the action and continue
         /// </summary>
@@ -350,62 +425,11 @@ namespace Central_Control.AD
 
             Action = null;
         }
-        private bool Report(bool Result, string SuccessMessage)
-        {
-            ResultMessage.Visibility = Visibility.Hidden;
+        #endregion Warning Message
 
-            if (Result)
-            {
-                ResultMessage.Text = SuccessMessage;
-                ResultMessage.Visibility = Visibility.Visible;
+        #endregion Control Actions
 
-                if(Action == "ReallyDelete")
-                {
-                    ClearSelection();
-                }
-
-                UpdateSelectedGroup();
-                UpdateGroupButtons();
-
-                return true;
-            }
-            else
-            {
-                ResultMessage.Text = ActiveDirectory.ConnectionError;
-                ResultMessage.Visibility = Visibility.Visible;
-
-                RefreshButton.IsEnabled = false;
-                ActiveDirectory.Connect();
-
-                return false;
-            }
-        }
-
-        /* Event Handlers */
-        /// <summary>
-        /// When the AD Updater background worker is finished, notify the user or exit the page if disconnected
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Updater_Groups_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            UpdateGroupButtons();
-
-            if (ActiveDirectory.IsConnected)
-            {
-                ResultMessage.Text = "Group List Updated";
-                ResultMessage.Visibility = Visibility.Visible;
-                
-                string tmp = SearchBox.Text;
-                SearchBox.Text = " ";
-                SearchBox.Text = null;
-                SearchBox.Text = tmp;
-            }
-            else
-            {
-                ExitAD();
-            }
-        }
+        #region Event Handlers and Triggers
         /// <summary>
         /// Event handler when AD is no longer connected
         /// </summary>
@@ -417,14 +441,6 @@ namespace Central_Control.AD
         {
             Disconnected(this, new EventArgs());
         }
-        /// <summary>
-        /// Remove event handler watchers when the page is unloaded
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Groups_Unloaded(object sender, RoutedEventArgs e)
-        {
-            ActiveDirectory.Updater_Groups.RunWorkerCompleted -= Updater_Groups_Completed;
-        }
+        #endregion Event Handlers and Triggers
     }
 }
