@@ -7,6 +7,7 @@
       mc:Ignorable="d"
       d:DesignHeight="600"
       d:DesignWidth="800"
+      Background="{StaticResource ContentBackground}"
       FontFamily="Consolas"
       FontSize="12"
       Loaded="Groups_Loaded"
@@ -16,185 +17,211 @@
                BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Margin" Value="10,0,10,10"/>
         </Style>
+        <Style x:Key="InfoLabel"
+               TargetType="{x:Type Label}"
+               BasedOn="{StaticResource {x:Type Label}}">
+            <Setter Property="Width" Value="130"/>
+        </Style>
     </Page.Resources>
     <Grid>
         <!--Main Content-->
-        <Grid Margin="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <Border x:Name="MainContent"
+                Style="{StaticResource NoBlur}">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!--Header-->
+                <Label Content="Active Directory Groups"
+                       Grid.ColumnSpan="2"
+                       Style="{StaticResource PageHeader}"/>
 
-            <!--Header-->
-            <Label Content="Active Directory Groups"
-                   Grid.ColumnSpan="2"
-                   Style="{StaticResource PageHeader}"/>
+                <!--User List-->
+                <Grid Grid.Row="1"
+                      Grid.RowSpan="2"
+                      Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    
+                    <Rectangle Grid.RowSpan="2"
+                               Fill="{StaticResource ContentBackground}"
+                               Effect="{StaticResource Shadow}"/>
+                    
+                    <!--Searchbox-->
+                    <TextBox x:Name="SearchBox"
+                             Tag="Search for groups..."
+                             Style="{StaticResource SearchBox}"
+                             KeyDown="SearchBox_KeyDown"/>
+                    <!--List-->
+                    <ListBox x:Name="GroupList"
+                             Template="{StaticResource ListBox}"
+                             Grid.Row="1"
+                             BorderThickness="1,0,1,1"
+                             SelectionChanged="GroupList_SelectionChanged"
+                             KeyDown="GroupList_KeyDown"/>
+                </Grid>
 
-            <!--User List-->
-            <DockPanel Grid.Row="1"
-                  Grid.RowSpan="2"
-                  Margin="10">
-                <!--Searchbox-->
-                <TextBox x:Name="SearchBox"
-                         Tag="Search for groups..."
-                         DockPanel.Dock="Top"
-                         Style="{StaticResource SearchBox}"
-                         KeyDown="SearchBox_KeyDown"/>
-                <!--List-->
-                <ListBox x:Name="GroupList"
-                         BorderThickness="1,0,1,1"
-                         SelectionChanged="GroupList_SelectionChanged"
-                         KeyDown="GroupList_KeyDown"/>
-            </DockPanel>
-            
-            <!--Info Area-->
-            <TabControl MinHeight="200"
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Margin="10">
-                <TabItem x:Name="GroupInfo"
-                         Header="Groups Information">
-                    <StackPanel Margin="10,10,5,10">
-                        <DockPanel>
-                            <Label Content="Name"
-                                   Style="{StaticResource InfoLabel}"/>
-                            <Label Content=":"/>
-                            <TextBox x:Name="Name"
-                                     Style="{StaticResource SelectableLabel}"/>
-                        </DockPanel>
-                        <DockPanel>
-                            <Label Content="Username"
-                                   Style="{StaticResource InfoLabel}"/>
-                            <Label Content=":"/>
-                            <TextBox x:Name="Username"
-                                     Style="{StaticResource SelectableLabel}"/>
-                        </DockPanel>
-                        <DockPanel>
-                            <Label Content="Distinguished Name"
-                                   Style="{StaticResource InfoLabel}"/>
-                            <Label Content=":"/>
-                            <TextBox x:Name="DistinguishedName"
-                                     Style="{StaticResource SelectableLabel}"/>
-                        </DockPanel>
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Members">
-                    <Grid Grid.IsSharedSizeScope="True"
-                          Margin="5,5,-2,-2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Grid Margin="5,0,0,5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition SharedSizeGroup="Name"
-                                                  MinWidth="200"/>
-                                <ColumnDefinition SharedSizeGroup="Type"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Name"
-                                       FontWeight="Bold"/>
-                            <TextBlock Text="Type"
-                                       Grid.Column="1"
-                                       FontWeight="Bold"/>
+                <!--Info Area-->
+                <TabControl MinHeight="200"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="10">
+                    <TabItem x:Name="GroupInfo"
+                             Header="Groups Information">
+                        <StackPanel Margin="10,10,5,10">
+                            <DockPanel>
+                                <Label Content="Name"
+                                       Style="{StaticResource InfoLabel}"/>
+                                <Label Content=":"/>
+                                <TextBox x:Name="Name"
+                                         Style="{StaticResource SelectableLabel}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <Label Content="Username"
+                                       Style="{StaticResource InfoLabel}"/>
+                                <Label Content=":"/>
+                                <TextBox x:Name="Username"
+                                         Style="{StaticResource SelectableLabel}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <Label Content="Distinguished Name"
+                                       Style="{StaticResource InfoLabel}"/>
+                                <Label Content=":"/>
+                                <TextBox x:Name="DistinguishedName"
+                                         Style="{StaticResource SelectableLabel}"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </TabItem>
+                    <TabItem Header="Members">
+                        <Grid Grid.IsSharedSizeScope="True"
+                              Margin="5,5,-2,-2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid Margin="5,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition SharedSizeGroup="Name"
+                                                      MinWidth="200"/>
+                                    <ColumnDefinition SharedSizeGroup="Type"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Name"
+                                           FontWeight="Bold"/>
+                                <TextBlock Text="Type"
+                                           Grid.Column="1"
+                                           FontWeight="Bold"/>
+                            </Grid>
+                            <ListBox x:Name="MemberList"
+                                     Grid.Row="1"
+                                     Template="{StaticResource ListBox-NoBorder}"
+                                     ItemsSource="{Binding DataSource}"
+                                     BorderThickness="0"
+                                     SelectionChanged="MemberList_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition SharedSizeGroup="Name"
+                                                                  Width="auto"/>
+                                                <ColumnDefinition SharedSizeGroup="Type"
+                                                                  Width="auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Padding="0,0,10,0"
+                                                       Text="{Binding Name}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding SchemaClassName}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </Grid>
-                        <ListBox x:Name="MemberList"
-                                 Grid.Row="1"
-                                 ItemsSource="{Binding DataSource}"
-                                 BorderThickness="0"
-                                 SelectionChanged="MemberList_SelectionChanged">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup="Name"
-                                                              Width="auto"/>
-                                            <ColumnDefinition SharedSizeGroup="Type"
-                                                              Width="auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0"
-                                                   Padding="0,0,10,0"
-                                                   Text="{Binding Name}"/>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding SchemaClassName}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </TabItem>
-            </TabControl>
+                    </TabItem>
+                </TabControl>
 
-            <!--Buttons-->
-            <StackPanel Grid.Row="0"
-                        Grid.RowSpan="2"
-                        Grid.Column="2"
-                        VerticalAlignment="Top"
-                        HorizontalAlignment="Center">
-                <Button x:Name="RefreshButton"
-                        Content="Refresh Groups"
-                        Margin="10"
-                        Click="RefreshButton_Click"/>
-                <Button x:Name="NewGroupButton"
-                        Content="New Group"
-                        IsEnabled="false"
-                        Click="NewGroupButton_Click"/>
-                <Button x:Name="DeleteGroupButton"
-                        Content="Delete Group"
-                        IsEnabled="false"
-                        Click="DeleteGroupButton_Click"/>
-            </StackPanel>
-            <StackPanel Grid.Row="1"
-                        Grid.Column="2"
-                        VerticalAlignment="Bottom"
-                        HorizontalAlignment="Center">
-                <Label Content="Member Controls"
-                       HorizontalAlignment="Center"/>
-                <Button x:Name="AddMemberButton"
-                        Content="Add Member"
-                        IsEnabled="false"
-                        Click="AddMemberButton_Click"/>
-                <Button x:Name="RemoveMemberButton"
-                        Content="Remove Member"
-                        IsEnabled="false"
-                        Click="RemoveMemberButton_Click"/>
-            </StackPanel>
-        </Grid>
-
-        <!--Warning/Confirmation Message-->
-        <Border x:Name="Warning"
-                Background="{StaticResource ContentBackground_Trans}"
-                Visibility="Hidden">
-            <StackPanel VerticalAlignment="Center"
-                        Background="{StaticResource ContentBackground_Black}">
-                <!--Confirm Message-->
-                <TextBlock x:Name="WarningMessage"
-                           TextWrapping="WrapWithOverflow"
-                           Style="{StaticResource OverviewMessage_Warning}"/>
-
-                <!--Warning Buttons-->
-                <DockPanel HorizontalAlignment="Center">
-                    <Button x:Name="ConfirmButton"
-                            Content="Confirm"
-                            Style="{StaticResource WarningButton_Confirm}"
-                            Click="ConfirmButton_Click"/>
-                    <Button x:Name="CancelButton"
-                            Content="Cancel"
-                            HorizontalAlignment="Right"
-                            Style="{StaticResource WarningButton_Cancel}"
-                            Click="CancelButton_Click"/>
-                </DockPanel>
-            </StackPanel>
+                <!--Buttons-->
+                <StackPanel Grid.Row="0"
+                            Grid.RowSpan="2"
+                            Grid.Column="2"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Center">
+                    <Button x:Name="RefreshButton"
+                            Content="Refresh Groups"
+                            Margin="10"
+                            Click="RefreshButton_Click"/>
+                    <Button x:Name="NewGroupButton"
+                            Content="New Group"
+                            IsEnabled="false"
+                            Click="NewGroupButton_Click"/>
+                    <Button x:Name="DeleteGroupButton"
+                            Content="Delete Group"
+                            IsEnabled="false"
+                            Click="DeleteGroupButton_Click"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1"
+                            Grid.Column="2"
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Center">
+                    <Label Content="Member"
+                           HorizontalAlignment="Center"/>
+                    <Button x:Name="AddMemberButton"
+                            Content="Add Member"
+                            IsEnabled="false"
+                            Click="AddMemberButton_Click"/>
+                    <Button x:Name="RemoveMemberButton"
+                            Content="Remove Member"
+                            IsEnabled="false"
+                            Click="RemoveMemberButton_Click"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
+        <!--Warning/Confirmation Message-->
+        <Grid x:Name="WarningBox"
+              Background="{StaticResource ContentBackground_MaxTrans}"
+              Visibility="Hidden">
+            <Border Height="{Binding ActualHeight, ElementName=Warning}"
+                    Width="{Binding ActualWidth, ElementName=Warning}"
+                    Effect="{StaticResource Shadow}"/>
+            <Border Name="Warning"
+                    Style="{StaticResource Box}">
+                <StackPanel>
+                    <!--Confirm Message-->
+                    <TextBlock x:Name="WarningMessage"
+                               Style="{StaticResource MessageText}"/>
+                    <!--Warning Buttons-->
+                    <DockPanel HorizontalAlignment="Center">
+                        <Button x:Name="ConfirmButton"
+                                Content="Confirm"
+                                Style="{StaticResource WarningButton_Confirm}"
+                                Click="ConfirmButton_Click"/>
+                        <Button x:Name="CancelButton"
+                                Content="Cancel"
+                                HorizontalAlignment="Right"
+                                Style="{StaticResource WarningButton_Cancel}"
+                                Click="CancelButton_Click"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
         <!--Result Message-->
-        <Label x:Name="ResultMessage"
-               Style="{StaticResource OverviewMessage}"
-               Visibility="Hidden"
-               IsHitTestVisible="False"/>
+        <Border x:Name="ResultBox"
+                Style="{StaticResource Box_Fading}"
+                Effect="{StaticResource Shadow}"
+                Visibility="Hidden">
+            <TextBlock x:Name="ResultMessage"
+                       Text="Testing"
+                       Style="{StaticResource MessageText}"/>
+        </Border>
     </Grid>
 </Page>

@@ -71,6 +71,7 @@ namespace Central_Control.AD
         private void EnableCurtain()
         {
             Curtain.Visibility = Visibility.Visible;
+            MainForm.IsEnabled = false;
             ConnectButton.IsEnabled = false;
             ResetButton.Content = "Cancel";
         }
@@ -80,6 +81,7 @@ namespace Central_Control.AD
         private void DisableCurtain()
         {
             Curtain.Visibility = Visibility.Hidden;
+            MainForm.IsEnabled = true;
             ConnectButton.IsEnabled = true;
             ResetButton.Content = "Reset";
         }
@@ -92,9 +94,7 @@ namespace Central_Control.AD
         private void AD_DomainTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             AD_DomainTextBox.SelectAll();
-            
-            Style TextBox = FindResource("TextBox") as Style;
-            AD_DomainTextBox.Style = TextBox;
+            AD_DomainTextBox.Style = FindResource("TextBox") as Style;
         }
         /// <summary>
         /// Select all text in the username box when getting focus
@@ -104,9 +104,7 @@ namespace Central_Control.AD
         private void AD_UsernameTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             AD_UsernameTextBox.SelectAll();
-
-            Style TextBox = FindResource("TextBox") as Style;
-            AD_UsernameTextBox.Style = TextBox;
+            AD_UsernameTextBox.Style = FindResource("TextBox") as Style;
         }
         /// <summary>
         /// Select all text in the password box when getting focus
@@ -116,9 +114,7 @@ namespace Central_Control.AD
         private void AD_PasswordBox_GotFocus(object sender, RoutedEventArgs e)
         {
             AD_PasswordBox.SelectAll();
-
-            Style PasswordBox = FindResource("PasswordBox") as Style;
-            AD_PasswordBox.Style = PasswordBox;
+            AD_PasswordBox.Style = FindResource("PasswordBox") as Style;
         }
 
         /// <summary>
@@ -161,12 +157,9 @@ namespace Central_Control.AD
             FocusManager.SetFocusedElement(scope, null);
             Keyboard.ClearFocus();
 
-            Style TextBox = FindResource("TextBox") as Style;
-            Style PasswordBox = FindResource("PasswordBox") as Style;
-
-            AD_DomainTextBox.Style = TextBox;
-            AD_UsernameTextBox.Style = TextBox;
-            AD_PasswordBox.Style = PasswordBox;
+            AD_DomainTextBox.Style = FindResource("TextBox") as Style;
+            AD_UsernameTextBox.Style = FindResource("TextBox") as Style;
+            AD_PasswordBox.Style = FindResource("PasswordBox") as Style;
 
             FormReset();
 
@@ -184,13 +177,10 @@ namespace Central_Control.AD
             var scope = FocusManager.GetFocusScope(this);
             FocusManager.SetFocusedElement(scope, null);
             Keyboard.ClearFocus();
-            
-            Style TextBox = FindResource("TextBox") as Style;
-            Style PasswordBox = FindResource("PasswordBox") as Style;
 
-            AD_DomainTextBox.Style = TextBox;
-            AD_UsernameTextBox.Style = TextBox;
-            AD_PasswordBox.Style = PasswordBox;
+            AD_DomainTextBox.Style = FindResource("TextBox") as Style;
+            AD_UsernameTextBox.Style = FindResource("TextBox") as Style;
+            AD_PasswordBox.Style = FindResource("PasswordBox") as Style;
 
             FormSave();
             FormConnect();
@@ -300,12 +290,9 @@ namespace Central_Control.AD
             StatusMessage.Visibility = Visibility.Collapsed;
             StatusProgress.Visibility = Visibility.Collapsed;
 
-            Style TextBox = FindResource("TextBox") as Style;
-            Style PasswordBox = FindResource("PasswordBox") as Style;
-
-            AD_DomainTextBox.Style = TextBox;
-            AD_UsernameTextBox.Style = TextBox;
-            AD_PasswordBox.Style = PasswordBox;
+            AD_DomainTextBox.Style = FindResource("TextBox") as Style;
+            AD_UsernameTextBox.Style = FindResource("TextBox") as Style;
+            AD_PasswordBox.Style = FindResource("PasswordBox") as Style;
 
             if (GlobalConfig.Settings.AD_UseLocalDomain)
             {
@@ -500,27 +487,23 @@ namespace Central_Control.AD
             }
             else
             {
-                Style Message_Error = FindResource("Message_Error") as Style;
-                Style TextBox_Error = FindResource("TextBox_Error") as Style;
-                Style PasswordBox_Error = FindResource("PasswordBox_Error") as Style;
-
                 StatusProgress.Visibility = Visibility.Hidden;
                 StatusMessage.Visibility = Visibility.Visible;
                 StatusMessage.Text = ActiveDirectory.ConnectionError.Replace("\r\n", String.Empty);
-                StatusMessage.Style = Message_Error;
+                StatusMessage.Style = FindResource("Message_Error") as Style;
                 
                 if (ActiveDirectory.ConnectionError == "The local computer is not joined to a domain or the domain cannot be contacted.")
                 {
-                    AD_DomainTextBox.Style = TextBox_Error;
+                    AD_DomainTextBox.Style = FindResource("TextBox_Error") as Style;
                 }
                 else if (ActiveDirectory.ConnectionError == "The server is unavailable.")
                 {
-                    AD_DomainTextBox.Style = TextBox_Error;
+                    AD_DomainTextBox.Style = FindResource("TextBox_Error") as Style;
                 }
                 else if (ActiveDirectory.ConnectionError == "The user name or password is incorrect.\r\n")
                 {
-                    AD_UsernameTextBox.Style = TextBox_Error;
-                    AD_PasswordBox.Style = PasswordBox_Error;
+                    AD_UsernameTextBox.Style = FindResource("TextBox_Error") as Style;
+                    AD_PasswordBox.Style = FindResource("PasswordBox_Error") as Style;
                 }
 
             }

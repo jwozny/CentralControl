@@ -177,7 +177,7 @@ namespace Central_Control.Settings
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             SaveButton.IsEnabled = false;
-            OverviewMessage.Visibility = Visibility.Hidden;
+            ResultBox.Visibility = Visibility.Hidden;
 
             var scope = FocusManager.GetFocusScope(this);
             FocusManager.SetFocusedElement(scope, null);
@@ -185,8 +185,8 @@ namespace Central_Control.Settings
 
             if (SaveSettings())
             {
-                OverviewMessage.Content = "Saved Successfully";
-                OverviewMessage.Visibility = Visibility.Visible;
+                ResultMessage.Text = "Saved Successfully";
+                ResultBox.Visibility = Visibility.Visible;
             }
 
             SaveButton.IsEnabled = true;

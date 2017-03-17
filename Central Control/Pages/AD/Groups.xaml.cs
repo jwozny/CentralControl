@@ -256,7 +256,9 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
         {
-            Warning.Visibility = Visibility.Visible;
+            MainContent.Style = FindResource("Blur") as Style;
+            MainContent.IsEnabled = false;
+            WarningBox.Visibility = Visibility.Visible;
 
             WarningMessage.Text = "Are you sure you want to delete " + ActiveDirectory.SelectedGroup.Name + "?";
             ConfirmButton.Content = "Delete " + ActiveDirectory.SelectedGroup.SamAccountName;
@@ -306,7 +308,9 @@ namespace Central_Control.AD
             switch (Action)
             {
                 case "Delete":
-                    Warning.Visibility = Visibility.Visible;
+                    MainContent.Style = FindResource("Blur") as Style;
+                    MainContent.IsEnabled = false;
+                    WarningBox.Visibility = Visibility.Visible;
 
                     WarningMessage.Text = "This cannot be undone! Are you super sure to DELETE " + ActiveDirectory.SelectedGroup.Name + "?";
                     ConfirmButton.Content = "DELETE " + ActiveDirectory.SelectedGroup.SamAccountName;
@@ -321,8 +325,10 @@ namespace Central_Control.AD
                 default:
                     break;
             }
-
-            Warning.Visibility = Visibility.Hidden;
+            
+            MainContent.Style = FindResource("NoBlur") as Style;
+            MainContent.IsEnabled = true;
+            WarningBox.Visibility = Visibility.Hidden;
             ConfirmButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
 
@@ -335,7 +341,9 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            Warning.Visibility = Visibility.Hidden;
+            MainContent.Style = FindResource("NoBlur") as Style;
+            MainContent.IsEnabled = true;
+            WarningBox.Visibility = Visibility.Hidden;
             
             ConfirmButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
@@ -348,7 +356,7 @@ namespace Central_Control.AD
 
             if (Result)
             {
-                ResultMessage.Content = SuccessMessage;
+                ResultMessage.Text = SuccessMessage;
                 ResultMessage.Visibility = Visibility.Visible;
 
                 if(Action == "ReallyDelete")
@@ -363,7 +371,7 @@ namespace Central_Control.AD
             }
             else
             {
-                ResultMessage.Content = ActiveDirectory.ConnectionError;
+                ResultMessage.Text = ActiveDirectory.ConnectionError;
                 ResultMessage.Visibility = Visibility.Visible;
 
                 RefreshButton.IsEnabled = false;
@@ -385,7 +393,7 @@ namespace Central_Control.AD
 
             if (ActiveDirectory.IsConnected)
             {
-                ResultMessage.Content = "Group List Updated";
+                ResultMessage.Text = "Group List Updated";
                 ResultMessage.Visibility = Visibility.Visible;
                 
                 string tmp = SearchBox.Text;

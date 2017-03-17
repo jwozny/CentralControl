@@ -45,6 +45,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Users_Loaded(object sender, RoutedEventArgs e)
         {
+            BackgroundBlur(false);
+
             ActiveDirectory.Updater_Users.RunWorkerCompleted += Updater_Users_Completed;
             UpdateUserButtons();
 
@@ -289,6 +291,23 @@ namespace Central_Control.AD
             }
 
         }
+        /// <summary>
+        /// Toggle the blur on the main content
+        /// </summary>
+        /// <param name="BlurOn"></param>
+        private void BackgroundBlur(bool BlurOn)
+        {
+            if (BlurOn)
+            {
+                MainContent.Style = FindResource("Blur") as Style;
+                MainContent.IsEnabled = false;
+            }
+            else
+            {
+                MainContent.Style = FindResource("NoBlur") as Style;
+                MainContent.IsEnabled = true;
+            }
+        }
 
         /* Control Actions */
         /// <summary>
@@ -337,7 +356,7 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            ResultMessage.Visibility = Visibility.Hidden;
+            ResultBox.Visibility = Visibility.Hidden;
 
             RefreshButton.IsEnabled = false;
             RefreshButton.Content = "Refreshing...";
@@ -353,7 +372,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void NewUserButton_Click(object sender, RoutedEventArgs e)
         {
-
+            BackgroundBlur(true);
+            NewUserBox.Visibility = Visibility.Visible;
         }
         /// <summary>
         /// Button action to import a user from an OSticket ticket
@@ -362,7 +382,7 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void ImportUserButton_Click(object sender, RoutedEventArgs e)
         {
-
+            BackgroundBlur(true);
         }
         /// <summary>
         /// Button action to delete the selected user
@@ -371,7 +391,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void DeleteUserButton_Click(object sender, RoutedEventArgs e)
         {
-            Warning.Visibility = Visibility.Visible;
+            BackgroundBlur(true);
+            WarningBox.Visibility = Visibility.Visible;
 
             WarningMessage.Text = "Are you sure you want to delete " + ActiveDirectory.SelectedUser.Name + "?";
             ConfirmButton.Content = "Delete " + ActiveDirectory.SelectedUser.SamAccountName;
@@ -425,7 +446,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void DisableUserButton_Click(object sender, RoutedEventArgs e)
         {
-            Warning.Visibility = Visibility.Visible;
+            BackgroundBlur(true);
+            WarningBox.Visibility = Visibility.Visible;
 
             WarningMessage.Text = "Are you sure you want to disable " + ActiveDirectory.SelectedUser.Name + "?";
             ConfirmButton.Content = "Disable " + ActiveDirectory.SelectedUser.SamAccountName;
@@ -434,6 +456,7 @@ namespace Central_Control.AD
 
             Action = "Disable";
         }
+
         /* Password Button Actions */
         /// <summary>
         /// Button action to refresh the selected user's password
@@ -476,14 +499,15 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void ResetPasswordButton_Click(object sender, RoutedEventArgs e)
         {
-            Warning.Visibility = Visibility.Visible;
-
+            BackgroundBlur(true);
+            WarningBox.Visibility = Visibility.Visible;
             WarningMessage.Text = "Enter a new password for " + ActiveDirectory.SelectedUser.Name + ":";
+
+            PasswordInput.Visibility = Visibility.Visible;
+
             ConfirmButton.Content = "Reset Password";
             ConfirmButton.IsEnabled = true;
             CancelButton.IsEnabled = true;
-
-            PasswordInput.Visibility = Visibility.Visible;
 
             Action = "Reset";
         }
@@ -503,7 +527,8 @@ namespace Central_Control.AD
             switch (Action)
             {
                 case "Delete":
-                    Warning.Visibility = Visibility.Visible;
+                    BackgroundBlur(true);
+                    WarningBox.Visibility = Visibility.Visible;
 
                     WarningMessage.Text = "This cannot be undone! Are you super sure to DELETE " + ActiveDirectory.SelectedUser.Name + "?";
                     ConfirmButton.Content = "DELETE " + ActiveDirectory.SelectedUser.SamAccountName;
@@ -516,21 +541,18 @@ namespace Central_Control.AD
                     Report(ActiveDirectory.SelectedUser.DeleteUser(), "User Deleted Successfully");
                     break;
                 case "Reset":
-                    Style PasswordBox = FindResource("PasswordBox") as Style;
-                    Style PasswordBox_Error = FindResource("PasswordBox_Error") as Style;
-
-                    NewPassword.Style = PasswordBox;
-                    NewPassword_Confirm.Style = PasswordBox;
+                    NewPassword.Style = FindResource("PasswordBox") as Style;
+                    NewPassword_Confirm.Style = FindResource("PasswordBox") as Style;
 
                     if ((string.IsNullOrEmpty(NewPassword.Password) ^ string.IsNullOrEmpty(NewPassword_Confirm.Password)) || (string.IsNullOrEmpty(NewPassword.Password) && string.IsNullOrEmpty(NewPassword_Confirm.Password)))
                     {
                         if (string.IsNullOrEmpty(NewPassword.Password))
                         {
-                            NewPassword.Style = PasswordBox_Error;
+                            NewPassword.Style = FindResource("PasswordBox_Error") as Style;
                         }
                         if (string.IsNullOrEmpty(NewPassword_Confirm.Password))
                         {
-                            NewPassword_Confirm.Style = PasswordBox_Error;
+                            NewPassword_Confirm.Style = FindResource("PasswordBox_Error") as Style;
                         }
                         return;
                     }
@@ -542,7 +564,7 @@ namespace Central_Control.AD
                         }
                         else
                         {
-                            NewPassword_Confirm.Style = PasswordBox_Error;
+                            NewPassword_Confirm.Style = FindResource("PasswordBox_Error") as Style;
                             return;
                         }
                     }
@@ -557,7 +579,8 @@ namespace Central_Control.AD
                     break;
             }
 
-            Warning.Visibility = Visibility.Hidden;
+            BackgroundBlur(false);
+            WarningBox.Visibility = Visibility.Hidden;
             ConfirmButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
 
@@ -571,7 +594,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            Warning.Visibility = Visibility.Hidden;
+            BackgroundBlur(false);
+            WarningBox.Visibility = Visibility.Hidden;
             
             ConfirmButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
@@ -582,12 +606,12 @@ namespace Central_Control.AD
         }
         private bool Report(bool Result, string SuccessMessage)
         {
-            ResultMessage.Visibility = Visibility.Hidden;
+            ResultBox.Visibility = Visibility.Hidden;
 
             if (Result)
             {
-                ResultMessage.Content = SuccessMessage;
-                ResultMessage.Visibility = Visibility.Visible;
+                ResultMessage.Text = SuccessMessage;
+                ResultBox.Visibility = Visibility.Visible;
 
                 if(Action == "ReallyDelete")
                 {
@@ -601,8 +625,8 @@ namespace Central_Control.AD
             }
             else
             {
-                ResultMessage.Content = ActiveDirectory.ConnectionError;
-                ResultMessage.Visibility = Visibility.Visible;
+                ResultMessage.Text = ActiveDirectory.ConnectionError;
+                ResultBox.Visibility = Visibility.Visible;
 
                 RefreshButton.IsEnabled = false;
                 ActiveDirectory.Connect();
@@ -623,8 +647,8 @@ namespace Central_Control.AD
 
             if (ActiveDirectory.IsConnected)
             {
-                ResultMessage.Content = "User List Updated";
-                ResultMessage.Visibility = Visibility.Visible;
+                ResultMessage.Text = "User List Updated";
+                ResultBox.Visibility = Visibility.Visible;
                 
                 string tmp = SearchBox.Text;
                 SearchBox.Text = " ";

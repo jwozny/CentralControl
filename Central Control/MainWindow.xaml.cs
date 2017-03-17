@@ -214,66 +214,88 @@ namespace Central_Control
                 try { DragMove(); } catch { }
             }
         }
-        
+
         /* Main Menu style functions */
-        /// <summary>
-        /// Reset all menu styles to their defaults
-        /// </summary>
-        private void ResetMenuColors()
-        {
-            RemoveAll_ADHandlers();
-            Style Menu = FindResource("Menu") as Style;
-
-            // Reset AD menu style
-            AD.Style = Menu;
-
-            // Reset Settings menu style
-            Settings.Style = Menu;
-
-            //ResetSubmenuColors();
-        }
-        /// <summary>
-        /// Reset all Submenu styles to their defaults
-        /// </summary>
-        private void ResetSubmenuColors()
-        {
-            Style Submenu = FindResource("Submenu") as Style;
-
-            // Reset AD Submenu styles
-            AD_Users.Style = Submenu;
-            AD_Groups.Style = Submenu;
-
-            // Reset Settings Submenu styles
-            Settings_Credentials.Style = Submenu;
-        }
         /// <summary>
         /// Initialize main menu and Submenu options
         /// </summary>
         private void InitializeMenu()
         {
+            int SubmenuCount;
+
             // Set AD Submenu area height
+            SubmenuCount = 0;
             AD.IsEnabled = true;
             ADPanel.Height = 26;
+
             if (ActiveDirectory.IsConnected && !ActiveDirectory.Connector.IsBusy)
             {
-                AD_Users.IsEnabled = true;
-                AD_Groups.IsEnabled = true;
-
-                ADAnimation.To = 24 * 2 + 26;
+                if (ActiveDirectory.Users.Count > 0)
+                {
+                    AD_Users.IsEnabled = true;
+                    SubmenuCount++;
+                }
+                if (ActiveDirectory.Groups.Count > 0)
+                {
+                    AD_Groups.IsEnabled = true;
+                    SubmenuCount++;
+                }
             }
             else
             {
                 AD_Users.IsEnabled = false;
                 AD_Groups.IsEnabled = false;
-
-                ADAnimation.To = 24 * 0 + 26;
             }
+            ADAnimation.To = 24 * SubmenuCount + 26;
 
             // Set Settings Submenu area height
+            SubmenuCount = 0;
             Settings.IsEnabled = true;
             SettingsPanel.Height = 26;
+
             Settings_Credentials.IsEnabled = true;
-            SettingsAnimation.To = 24 * 1 + 26;
+            SubmenuCount++;
+
+            SettingsAnimation.To = 24 * SubmenuCount + 26;
+        }
+        /// <summary>
+        /// Reset all menu styles to their defaults
+        /// </summary>
+        private void ResetMenu()
+        {
+            RemoveAll_ADHandlers();
+
+            // Reset AD menu style
+            AD.Style = FindResource("Menu") as Style;
+
+            // Reset Settings menu style
+            Settings.Style = FindResource("Menu") as Style;
+        }
+        /// <summary>
+        /// Reset all Submenu styles to their defaults
+        /// </summary>
+        private void ResetSubmenu()
+        {
+            // Reset AD Submenu styles
+            AD_Users.Style = FindResource("Submenu") as Style;
+            AD_Groups.Style = FindResource("Submenu") as Style;
+            AD_Users.Visibility = Visibility.Collapsed;
+            AD_Groups.Visibility = Visibility.Collapsed;
+
+            // Reset Settings Submenu styles
+            Settings_Credentials.Style = FindResource("Submenu") as Style;
+            Settings_Credentials.Visibility = Visibility.Collapsed;
+        }
+        private void ShowMenu_AD()
+        {
+            if (ActiveDirectory.Users.Count > 0)
+                AD_Users.Visibility = Visibility.Visible;
+            if (ActiveDirectory.Groups.Count > 0)
+                AD_Groups.Visibility = Visibility.Visible;
+        }
+        private void ShowMenu_Settings()
+        {
+            Settings_Credentials.Visibility = Visibility.Visible;
         }
 
         /* Main Menu controls */
@@ -390,30 +412,29 @@ namespace Central_Control
         /// <param name="e"></param>
         private void AD_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style Menu_Selected = FindResource("Menu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
-            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
+            ResetMenu();
+            AD.Style = FindResource("Menu_Expanded") as Style;
 
-            ResetMenuColors();
-            AD.Style = Menu_Expanded;
             if (!ActiveDirectory.IsConnected)
             {
-                _NavigationFrame.Navigate(AD_Connect_Page);
-                ResetSubmenuColors();
-                AD.Style = Menu_Selected;
+                ResetSubmenu();
+                AD.Style = FindResource("Menu_Selected") as Style;
 
-                RemoveAll_ADHandlers();
-                _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
+                _NavigationFrame.Navigate(AD_Connect_Page);
+                _NavigationFrame.NavigationService.LoadCompleted += AD_Connected;
             }
             else if (ActiveDirectory.Connector.IsBusy)
             {
+                ResetSubmenu();
+                AD.Style = FindResource("Menu_Selected") as Style;
+
                 _NavigationFrame.Navigate(AD_Connect_Page);
-                ResetSubmenuColors();
-                AD.Style = Menu_Selected;
+                _NavigationFrame.NavigationService.LoadCompleted += AD_Connected;
             }
             else
             {
                 InitializeMenu();
+                ShowMenu_AD();
             }
         }
         /// <summary>
@@ -427,18 +448,15 @@ namespace Central_Control
         /// <param name="e"></param>
         private void AD_Users_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+            ResetMenu();
+            AD.Style = FindResource("Menu_Expanded") as Style;
 
-            ResetMenuColors();
-            AD.Style = Menu_Expanded;
-
+            ResetSubmenu();
+            ShowMenu_AD();
+            AD_Users.Style = FindResource("Submenu_Selected") as Style;
+            
             _NavigationFrame.Navigate(AD_Users_Page);
-            ResetSubmenuColors();
-            AD_Users.Style = Submenu_Selected;
-
-            RemoveAll_ADHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Users);
+            _NavigationFrame.NavigationService.LoadCompleted += AD_Disconnected_Users;
         }
         /// <summary>
         /// Page initialization for AD_Groups
@@ -451,18 +469,15 @@ namespace Central_Control
         /// <param name="e"></param>
         private void AD_Groups_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+            ResetMenu();
+            AD.Style = FindResource("Menu_Expanded") as Style;
 
-            ResetMenuColors();
-            AD.Style = Menu_Expanded;
-
+            ResetSubmenu();
+            ShowMenu_AD();
+            AD_Groups.Style = FindResource("Submenu_Selected") as Style;
+            
             _NavigationFrame.Navigate(AD_Groups_Page);
-            ResetSubmenuColors();
-            AD_Groups.Style = Submenu_Selected;
-
-            RemoveAll_ADHandlers();
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Groups);
+            _NavigationFrame.NavigationService.LoadCompleted += AD_Disconnected_Groups;
         }
         /// <summary>
         /// Expand the Settings menu
@@ -471,17 +486,10 @@ namespace Central_Control
         /// <param name="e"></param>
         private void Settings_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style Menu_Selected = FindResource("Menu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+            ResetMenu();
+            Settings.Style = FindResource("Menu_Expanded") as Style;
 
-            ResetMenuColors();
-            Settings.Style = Menu_Expanded;
-            if (false/*Add check here*/)
-            {
-                //_NavigationFrame.Navigate(Settings_Page);
-                ResetSubmenuColors();
-                Settings.Style = Menu_Selected;
-            }
+            ShowMenu_Settings();
         }
         /// <summary>
         /// Page initialization for the Credentials page
@@ -494,15 +502,14 @@ namespace Central_Control
         /// <param name="e"></param>
         private void Settings_Credentials_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+            ResetMenu();
+            Settings.Style = FindResource("Menu_Expanded") as Style;
 
-            ResetMenuColors();
-            Settings.Style = Menu_Expanded;
+            ResetSubmenu();
+            ShowMenu_Settings();
+            Settings_Credentials.Style = FindResource("Submenu_Selected") as Style;
 
             _NavigationFrame.Navigate(Settings_Credentials_Page);
-            ResetSubmenuColors();
-            Settings_Credentials.Style = Submenu_Selected;
         }
 
         /* AD Event Handlers */
@@ -511,9 +518,9 @@ namespace Central_Control
         /// </summary>
         private void RemoveAll_ADHandlers()
         {
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Users);
-            _NavigationFrame.NavigationService.LoadCompleted -= new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected_Groups);
+            _NavigationFrame.NavigationService.LoadCompleted -= AD_Connected;
+            _NavigationFrame.NavigationService.LoadCompleted -= AD_Disconnected_Users;
+            _NavigationFrame.NavigationService.LoadCompleted -= AD_Disconnected_Groups;
         }
 
         /// <summary>
@@ -532,22 +539,19 @@ namespace Central_Control
         /// <param name="e"></param>
         private void AD_Connected(object sender, EventArgs e)
         {
-            RemoveAll_ADHandlers();
             InitializeMenu();
 
-            Style Submenu_Selected = FindResource("Submenu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
+            ResetMenu();
+            AD.Style = FindResource("Menu_Expanded") as Style;
 
-            ResetMenuColors();
-            AD.Style = Menu_Expanded;
-
-            _NavigationFrame.Navigate(AD_Users_Page);
-            ResetSubmenuColors();
-            AD_Users.Style = Submenu_Selected;
+            ResetSubmenu();
+            ShowMenu_AD();
+            AD_Users.Style = FindResource("Submenu_Selected") as Style;
 
             ADStoryboard.Begin();
 
-            _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Disconnected);
+            _NavigationFrame.Navigate(AD_Users_Page);
+            _NavigationFrame.NavigationService.LoadCompleted += AD_Disconnected;
         }
 
         /// <summary>
@@ -575,21 +579,16 @@ namespace Central_Control
         /// <param name="e"></param>
         private void AD_Disconnected(object sender, EventArgs e)
         {
-            RemoveAll_ADHandlers();
             InitializeMenu();
 
-            Style Menu_Selected = FindResource("Menu_Selected") as Style;
-            Style Menu_Expanded = FindResource("Menu_Expanded") as Style;
-
-            ResetMenuColors();
-            AD.Style = Menu_Expanded;
             if (!ActiveDirectory.IsConnected)
             {
-                _NavigationFrame.Navigate(AD_Connect_Page);
-                ResetSubmenuColors();
-                AD.Style = Menu_Selected;
+                AD.Style = FindResource("Menu_Selected") as Style;
 
-                _NavigationFrame.NavigationService.LoadCompleted += new System.Windows.Navigation.LoadCompletedEventHandler(AD_Connected);
+                ResetSubmenu();
+
+                _NavigationFrame.Navigate(AD_Connect_Page);
+                _NavigationFrame.NavigationService.LoadCompleted += AD_Connected;
             }
         }
     }

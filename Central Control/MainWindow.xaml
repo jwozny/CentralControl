@@ -18,6 +18,7 @@
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
         SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal"
         SizeChanged="WindowSizeChanged"
         MouseMove="MainWindow_MouseMove">
     <Grid>
@@ -67,8 +68,7 @@
                         Background="{StaticResource ContentBackground_Trans}"
                         MouseEnter="MainMenuPanel_MouseEnter"
                         MouseLeave="MainMenuPanel_MouseLeave">
-                <StackPanel x:Name="ADPanel"
-                            Panel.ZIndex="-1">
+                <StackPanel x:Name="ADPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
@@ -102,8 +102,7 @@
                                Style="{StaticResource Submenu}"
                                MouseDown="AD_Groups_MouseDown"/>
                 </StackPanel>
-                <StackPanel x:Name="SettingsPanel"
-                            Panel.ZIndex="-2">
+                <StackPanel x:Name="SettingsPanel">
                     <StackPanel.Triggers>
                         <EventTrigger RoutedEvent="UIElement.MouseLeftButtonDown">
                             <BeginStoryboard>
