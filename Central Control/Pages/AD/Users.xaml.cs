@@ -52,6 +52,10 @@ namespace Central_Control.AD
             if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
             {
                 UserList.ItemsSource = ActiveDirectory.Users;
+
+                OUBox.ItemsSource = ActiveDirectory.OUs;
+                OUBox.SelectedValuePath = "Path";
+
                 SearchBox.Focus();
 
                 ICollectionView UserView = CollectionViewSource.GetDefaultView(ActiveDirectory.Users);
@@ -138,13 +142,7 @@ namespace Central_Control.AD
         {
             if ((UserList.SelectedItem != null) && (UserList.SelectedIndex != -1))
             {
-                foreach (ActiveDirectory.UserPrincipalEx User in ActiveDirectory.Users)
-                {
-                    if (User.Name == UserList.SelectedItem.ToString())
-                    {
-                        ActiveDirectory.SelectedUser = User;
-                    }
-                }
+                ActiveDirectory.SelectedUser = UserList.Items[UserList.SelectedIndex] as ActiveDirectory.UserPrincipalEx;
             }
             else
             {
@@ -346,6 +344,104 @@ namespace Central_Control.AD
         /// </summary>
         private string Action;
         /// <summary>
+        /// Check and save the new user form, create the user if it all checks out.
+        /// </summary>
+        private void CreateUser()
+        {
+            ResultBox.Visibility = Visibility.Hidden;
+            string ErrorMessage = null;
+
+            FirstNameText.Style = FindResource("TextBox") as Style;
+            UserNameText.Style = FindResource("TextBox") as Style;
+            Password.Style = FindResource("PasswordBox") as Style;
+            Password_Confirm.Style = FindResource("PasswordBox") as Style;
+
+            bool ChecksOut = true;
+
+            if (Password.Password != Password_Confirm.Password)
+            {
+                ChecksOut = false;
+                Password_Confirm.Style = FindResource("PasswordBox_Error") as Style;
+                ErrorMessage = "Passewords don't match";
+            }
+            if (string.IsNullOrEmpty(Password_Confirm.Password))
+            {
+                ChecksOut = false;
+                Password_Confirm.Style = FindResource("PasswordBox_Error") as Style;
+                ErrorMessage = "Please confirm the password";
+            }
+            if (Password.Password.Length < 8)
+            {
+                ChecksOut = false;
+                Password.Style = FindResource("PasswordBox_Error") as Style;
+                ErrorMessage = "Password is less than 8 characters";
+            }
+            if (string.IsNullOrEmpty(Password.Password))
+            {
+                ChecksOut = false;
+                Password.Style = FindResource("PasswordBox_Error") as Style;
+                ErrorMessage = "Password is required";
+            }
+            if (string.IsNullOrEmpty(UserNameText.Text))
+            {
+                ChecksOut = false;
+                UserNameText.Style = FindResource("TextBox_Error") as Style;
+                ErrorMessage = "Username is required";
+            }
+            if (OUBox.SelectedIndex == -1)
+            {
+                ChecksOut = false;
+                ErrorMessage = "Select an OU";
+            }
+            if (string.IsNullOrEmpty(FullNameText.Text))
+            {
+                ChecksOut = false;
+                FullNameText.Style = FindResource("TextBox_Error") as Style;
+                ErrorMessage = "Full name is required";
+            }
+            if (string.IsNullOrEmpty(FirstNameText.Text))
+            {
+                ChecksOut = false;
+                FirstNameText.Style = FindResource("TextBox_Error") as Style;
+                ErrorMessage = "First name is required";
+            }
+
+            if (!ChecksOut)
+            {
+                if (ErrorMessage != null)
+                {
+                    ResultMessage.Text = ErrorMessage;
+                    ResultBox.Visibility = Visibility.Visible;
+                }
+                return;
+            }
+            else
+            {
+                ActiveDirectory.NewUser.GivenName = FirstNameText.Text;
+                ActiveDirectory.NewUser.Surname = LastNameText.Text;
+                ActiveDirectory.NewUser.Name = FullNameText.Text;
+                ActiveDirectory.NewUser.EmailAddress = EmailText.Text;
+                ActiveDirectory.NewUser.Title = Title.Text;
+                ActiveDirectory.NewUser.DistinguishedName = OUBox.SelectedValue.ToString();
+                ActiveDirectory.NewUser.SamAccountName = UserNameText.Text;
+                ActiveDirectory.NewUser.Password = Password.Password;
+                Report(ActiveDirectory.NewUser.CreateUser(), "User Create Successfully");
+
+                BackgroundBlur(false);
+                NewUserBox.Visibility = Visibility.Hidden;
+
+                FirstNameText.Text = null;
+                LastNameText.Text = null;
+                FullNameText.Text = null;
+                EmailText.Text = null;
+                Title.Text = null;
+                OUBox.SelectedIndex = -1;
+                UserNameText.Text = null;
+                Password.Password = null;
+                Password_Confirm.Password = null;
+            }
+        }
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="Result"></param>
@@ -421,6 +517,13 @@ namespace Central_Control.AD
             {
                 SearchBox.Text = string.Empty;
                 ClearSelection();
+            }
+        }
+        private void Password_Confirm_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CreateUser();
             }
         }
 
@@ -588,6 +691,83 @@ namespace Central_Control.AD
         }
         #endregion Password Buttons
 
+        #region New User Form
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FirstNameText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (FirstNameText.Text.Length > 0 || LastNameText.Text.Length > 0)
+            {
+                FullNameText.Text = FirstNameText.Text + " " + LastNameText.Text;
+
+                if (FirstNameText.Text.Length > 0)
+                    UserNameText.Text = FirstNameText.Text[0] + LastNameText.Text;
+                else
+                    UserNameText.Text = LastNameText.Text;
+
+                EmailText.Text = UserNameText.Text + "@" + ActiveDirectory.Domain.Name;
+            }
+            else
+            {
+                FullNameText.Text = null;
+                UserNameText.Text = null;
+                EmailText.Text = null;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LastNameText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (FirstNameText.Text.Length > 0 || LastNameText.Text.Length > 0)
+            {
+                FullNameText.Text = FirstNameText.Text + " " + LastNameText.Text;
+
+                if (FirstNameText.Text.Length > 0)
+                    UserNameText.Text = FirstNameText.Text[0] + LastNameText.Text;
+                else
+                    UserNameText.Text = LastNameText.Text;
+
+                EmailText.Text = UserNameText.Text + "@" + ActiveDirectory.Domain.Name;
+            }
+            else
+            {
+                FullNameText.Text = null;
+                UserNameText.Text = null;
+                EmailText.Text = null;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewUserSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            CreateUser();
+        }
+        private void NewUserCancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            BackgroundBlur(false);
+            NewUserBox.Visibility = Visibility.Hidden;
+            ResultBox.Visibility = Visibility.Hidden;
+
+            FirstNameText.Text = null;
+            LastNameText.Text = null;
+            FullNameText.Text = null;
+            EmailText.Text = null;
+            Title.Text = null;
+            OUBox.SelectedIndex = -1;
+            UserNameText.Text = null;
+            Password.Password = null;
+            Password_Confirm.Password = null;
+        }
+        #endregion New User Form
 
         #region Warning Message
         /// <summary>

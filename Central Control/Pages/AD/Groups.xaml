@@ -39,10 +39,10 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <!--Header-->
                 <Label Content="Active Directory Groups"
-                       Grid.ColumnSpan="2"
+                       Grid.ColumnSpan="3"
                        Style="{StaticResource PageHeader}"/>
 
                 <!--User List-->

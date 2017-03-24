@@ -28,6 +28,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using WinInterop = System.Windows.Interop;
+using System.Diagnostics;
 
 namespace Central_Control
 {
@@ -36,66 +37,8 @@ namespace Central_Control
     /// </summary>
     public static class ActiveDirectory
     {
-        #region Connection Function and Status
-        /// <summary>
-        /// Connect to AD using current or provided credentials
-        /// </summary>
-        /// <returns></returns>
-        private static bool EstablishConnection()
-        {
-            try
-            {
-                if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !(ReferenceEquals(GlobalConfig.Settings.AD_Username, null) ^ ReferenceEquals(GlobalConfig.Settings.AD_Password, null)))
-                {
-                    Domain = new PrincipalContext(ContextType.Domain, GlobalConfig.Settings.AD_Domain, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-                }
-                else if (!(ReferenceEquals(GlobalConfig.Settings.AD_Username, null) ^ ReferenceEquals(GlobalConfig.Settings.AD_Password, null)))
-                {
-                    Domain = new PrincipalContext(ContextType.Domain, System.DirectoryServices.ActiveDirectory.Domain.GetComputerDomain().ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-                }
-                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
-                {
-                    Domain = new PrincipalContext(ContextType.Domain, GlobalConfig.Settings.AD_Domain);
-                }
-                else
-                {
-                    Domain = new PrincipalContext(ContextType.Domain);
-                }
-                Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
-            }
-            catch (COMException E)
-            {
-                ConnectionError = E.Message.ToString();
-                return false;
-            }
-            catch (PrincipalServerDownException E)
-            {
-                ConnectionError = E.Message.ToString();
-                return false;
-            }
-            catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
-            {
-                ConnectionError = E.Message.ToString();
-                return false;
-            }
-            catch (System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException E)
-            {
-                ConnectionError = E.Message.ToString();
-                return false;
-            }
-            return true;
-        }
-        /// <summary>
-        /// Connect to AD using a background worker and fetch all properties
-        /// </summary>
-        public static void Connect()
-        {
-            Connector_Initialize();
-            if (!Connector.IsBusy)
-            {
-                Connector.RunWorkerAsync();
-            }
-        }
+        #region Domain Properties
+
         /// <summary>
         /// Bool defining if the application is communicating with AD
         /// </summary>
@@ -104,11 +47,57 @@ namespace Central_Control
         /// Error returned from AD connector
         /// </summary>
         public static string ConnectionError;
-        #endregion Connection Function and Status
+        /// <summary>
+        /// Current domain
+        /// </summary>
+        public static PrincipalContext Domain;
+        /// <summary>
+        /// Root of the directory data tree on the directory server
+        /// </summary>
+        public static DirectoryEntry rootDSE;
+        /// <summary>
+        /// Root DN (DC=domain,DC=tld)
+        /// </summary>
+        public static string defaultContext;
+        /// <summary>
+        /// Domain searcher
+        /// </summary>
+        private static PrincipalSearcher Searcher = new PrincipalSearcher();
+        /// <summary>
+        /// Temporary reference to the count of users found by the searcher
+        /// </summary>
+        public static int UserCount;
+        /// <summary>
+        /// List of AD users
+        /// </summary>
+        public static List<UserPrincipalEx> Users { get; set; } = new List<UserPrincipalEx>();
+        /// <summary>
+        /// Currently selected user
+        /// </summary>
+        public static UserPrincipalEx SelectedUser;
+        /// <summary>
+        /// Temporary reference to the count of groups found by the searcher
+        /// </summary>
+        public static int GroupCount;
+        /// <summary>
+        /// List of AD groups
+        /// </summary>
+        public static List<GroupPrincipalEx> Groups { get; set; } = new List<GroupPrincipalEx>();
+        /// <summary>
+        /// Currently selected group
+        /// </summary>
+        public static GroupPrincipalEx SelectedGroup;
+        /// <summary>
+        /// List of OUs in the domain
+        /// </summary>
+        public static List<OrganizationalUnit> OUs { get; set; } = new List<OrganizationalUnit>();
+
+        #endregion Domain Properties
 
         #region Background Workers
 
         #region Background Worker - Connector
+
         /// <summary>
         /// Create background worker instance
         /// </summary>
@@ -141,16 +130,18 @@ namespace Central_Control
 
             if (IsConnected)
             {
+                if (!Connector.CancellationPending) RefreshOUs(Connector);
                 if (!Connector.CancellationPending) RefreshUsers(Connector);
                 if (!Connector.CancellationPending) RefreshGroups(Connector);
             }
-            
+
             if (Connector.CancellationPending)
             {
                 IsConnected = false;
                 ConnectionError = "Connection Canceled";
             }
         }
+
         #endregion Background Worker - Connector
 
         #region Background Worker - Updater_Users
@@ -211,36 +202,146 @@ namespace Central_Control
 
         #endregion Background Workers
 
-        #region Domain Properties
+        #region Common Functions
+
         /// <summary>
-        /// Current domain
+        /// Connect to AD using a background worker and fetch all properties
         /// </summary>
-        public static PrincipalContext Domain;
+        public static void Connect()
+        {
+            Connector_Initialize();
+            if (!Connector.IsBusy)
+            {
+                Connector.RunWorkerAsync();
+            }
+        }
         /// <summary>
-        /// Domain searcher
+        /// Connect to AD using current or provided credentials
         /// </summary>
-        private static PrincipalSearcher Searcher;
+        /// <returns></returns>
+        private static bool EstablishConnection()
+        {
+            try
+            {
+                if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !(ReferenceEquals(GlobalConfig.Settings.AD_Username, null) ^ ReferenceEquals(GlobalConfig.Settings.AD_Password, null)))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, GlobalConfig.Settings.AD_Domain, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!(ReferenceEquals(GlobalConfig.Settings.AD_Username, null) ^ ReferenceEquals(GlobalConfig.Settings.AD_Password, null)))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, System.DirectoryServices.ActiveDirectory.Domain.GetComputerDomain().ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, GlobalConfig.Settings.AD_Domain);
+                }
+                else
+                {
+                    Domain = new PrincipalContext(ContextType.Domain);
+                }
+
+                if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                {
+                    rootDSE = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/RootDSE", GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                {
+                    rootDSE = new DirectoryEntry("LDAP://RootDSE", GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                {
+                    rootDSE = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/RootDSE");
+                }
+                else
+                {
+                    rootDSE = new DirectoryEntry("LDAP://RootDSE");
+                }
+                defaultContext = rootDSE.Properties["defaultNamingContext"][0].ToString();
+            }
+            catch (COMException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (PrincipalServerDownException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            return true;
+        }
         /// <summary>
-        /// Temporary reference to the count of users found by the searcher
+        /// Converts a DN path to a tree-formatted location
         /// </summary>
-        public static int UserCount;
+        /// <param name="DN"></param>
+        /// <returns></returns>
+        private static string PathtoTree(string DN)
+        {
+            var sb = new StringBuilder();
+
+            string[] ou = DN.Replace("LDAP://", "").Replace("," + defaultContext, "").ToString().Split(',');
+            for (int i = ou.Length - 1; i >= 0; i--)
+            {
+                sb.AppendLine("/" + ou[i].Replace("DC=", "").Replace("OU=", ""));
+            }
+
+            return sb.ToString().Replace("\r\n", "").Substring(1);
+        }
         /// <summary>
-        /// Temporary reference to the count of groups found by the searcher
+        /// Converts a DN path to a tree-formatted location
         /// </summary>
-        public static int GroupCount;
-        /// <summary>
-        /// List of AD users
-        /// </summary>
-        public static List<UserPrincipalEx> Users { get; set; } = new List<UserPrincipalEx>();
-        public static UserPrincipalEx SelectedUser;
-        /// <summary>
-        /// List of AD groups
-        /// </summary>
-        public static List<GroupPrincipalEx> Groups { get; set; } = new List<GroupPrincipalEx>();
-        public static GroupPrincipalEx SelectedGroup;
-        #endregion Domain Properties
+        /// <param name="DN"></param>
+        /// <returns></returns>
+        private static void AddUserToList(string DN)
+        {
+            UserPrincipal AddedUser = UserPrincipal.FindByIdentity(Domain, DN);
+            if (AddedUser != null)
+            {
+                Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, AddedUser.SamAccountName));
+            }
+            Users.Sort((x, y) => x.Name.CompareTo(y.Name));
+
+            foreach (UserPrincipalEx User in Users)
+            {
+                if(User.DistinguishedName == AddedUser.DistinguishedName)
+                {
+                    var sb = new StringBuilder();
+
+                    foreach (var propertyInfo in
+                        from p in typeof(UserPrincipalEx).GetProperties()
+                        where Equals(p.PropertyType, typeof(String))
+                        select p)
+                    {
+                        sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
+                    }
+
+                    User.CreatedDate = User.GetProperty("whenCreated");
+
+                    if (!ReferenceEquals(User.AccountExpirationDate, null))
+                        if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) <= 0)
+                            User.Expiring = true;
+
+                    User.LockedOut = User.IsAccountLockedOut();
+
+                    User.Groups = User.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
+                }
+            }
+        }
+
+        #endregion
 
         #region Refresh Functions
+
         /// <summary>
         /// Refresh everything from AD or a specific item
         /// </summary>
@@ -431,6 +532,52 @@ namespace Central_Control
                 IsConnected = EstablishConnection();
             }
         }
+        /// <summary>
+        /// Clear the list of groups and repopulate it from AD
+        /// </summary>
+        private static void RefreshOUs(BackgroundWorker Worker)
+        {
+            try
+            {
+                DirectoryEntry startingPoint;
+                if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                {
+                    startingPoint = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + defaultContext, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                {
+                    startingPoint = new DirectoryEntry("LDAP://" + defaultContext, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                }
+                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                {
+                    startingPoint = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + defaultContext);
+                }
+                else
+                {
+                    startingPoint = new DirectoryEntry("LDAP://" + defaultContext);
+                }
+
+                DirectorySearcher searcher = new DirectorySearcher(startingPoint);
+                searcher.Filter = "(objectCategory=organizationalUnit)";
+
+                OUs.Clear();
+
+                foreach (SearchResult res in searcher.FindAll())
+                {
+                    OrganizationalUnit OU = new OrganizationalUnit();
+                    OU.Path = res.Path.Replace("LDAP://", "").Replace(Domain.ConnectedServer + "/", "");
+                    OU.Tree = PathtoTree(OU.Path);
+                    OUs.Add(OU);
+                }
+
+                OUs.Sort((x, y) => x.Tree.CompareTo(y.Tree));
+            }
+            catch
+            {
+                IsConnected = EstablishConnection();
+            }
+        }
+
         #endregion Refresh Functions
 
         #region Extended User Functions
@@ -956,6 +1103,131 @@ namespace Central_Control
 
         #region Custom Classes
 
+        /// <summary>
+        /// New user class for adding a user to Active Directory
+        /// </summary>
+        public static class NewUser
+        {
+            public static string GivenName { get; set; }
+            public static string Surname { get; set; }
+            public static string Name { get; set; }
+            public static string Title { get; set; }
+            public static string EmailAddress { get; set; }
+            public static string DistinguishedName { get; set; }
+            public static string SamAccountName { get; set; }
+            public static string Password { get; set; }
+            private static DirectoryEntry User;
+
+            public static bool CreateUser()
+            {
+                try
+                {
+                    using (var NewUser = new UserPrincipal(Domain))
+                    {
+                        // Define user principal(up) properties
+                        NewUser.GivenName = GivenName;
+                        NewUser.Surname = Surname;
+                        NewUser.Name = Name;
+                        NewUser.DisplayName = Name;
+                        NewUser.SamAccountName = SamAccountName;
+                        NewUser.EmailAddress = EmailAddress;
+                        NewUser.SetPassword(Password);
+                        NewUser.Enabled = true;
+                        NewUser.ExpirePasswordNow();
+
+                        // Save user principal to AD store
+                        NewUser.Save();
+
+                        // Move user to specified OU
+                        if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                        {
+                            User = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + NewUser.DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                            User.MoveTo(new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password));
+                        }
+                        else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                        {
+                            User = new DirectoryEntry("LDAP://" + NewUser.DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                            User.MoveTo(new DirectoryEntry("LDAP://" + DistinguishedName, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password));
+                        }
+                        else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                        {
+                            User = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + NewUser.DistinguishedName);
+                            User.MoveTo(new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + DistinguishedName));
+                        }
+                        else
+                        {
+                            User = new DirectoryEntry("LDAP://" + NewUser.DistinguishedName);
+                            User.MoveTo(new DirectoryEntry("LDAP://" + DistinguishedName));
+                        }
+                    }
+                }
+                catch (COMException E)
+                {
+                    Clear();
+                    ConnectionError = E.Message.ToString();
+                    return false;
+                }
+                catch (PrincipalServerDownException E)
+                {
+                    Clear();
+                    ConnectionError = E.Message.ToString();
+                    return false;
+                }
+                catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
+                {
+                    Clear();
+                    ConnectionError = E.Message.ToString();
+                    return false;
+                }
+                catch (System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException E)
+                {
+                    Clear();
+                    ConnectionError = E.Message.ToString();
+                    return false;
+                }
+
+                AddUserToList(User.Path.Replace("LDAP://", ""));
+                Clear();
+                return true;
+            }
+
+            public static void Clear()
+            {
+                GivenName = null;
+                Surname = null;
+                Name = null;
+                SamAccountName = null;
+                EmailAddress = null;
+                Password = null;
+
+                User.Dispose();
+            }
+        }
+        /// <summary>
+        /// Custom member class for GroupPrincipalEx
+        /// </summary>
+        public class Member
+        {
+            public string Name { get; set; }
+            public string DistinguishedName { get; set; }
+            public string SchemaClassName { get; set; }
+        }
+        /// <summary>
+        /// Organizational Unit path and tree-formatted location
+        /// </summary>
+        [DebuggerDisplay("Tree ( {Tree} )")]
+        public class OrganizationalUnit
+        {
+            public string Tree { get; set; }
+            public string Path { get; set; }
+
+            [SecurityCritical]
+            public override string ToString()
+            {
+                return Tree;
+            }
+        }
+
         #region UserPrincipalEx
         [DirectoryRdnPrefix("CN")]
         [DirectoryObjectClass("user")]
@@ -1081,16 +1353,6 @@ namespace Central_Control
             }
         }
         #endregion GroupPrincipalEx
-
-        /// <summary>
-        /// Custom member class for GroupPrincipalEx
-        /// </summary>
-        public class Member
-        {
-            public string Name { get; set; }
-            public string DistinguishedName { get; set; }
-            public string SchemaClassName { get; set; }
-        }
 
         #endregion Custom Classes
     }

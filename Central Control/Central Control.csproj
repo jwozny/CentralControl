@@ -104,6 +104,9 @@
     <Compile Include="inc\cs\MathConverter.cs" />
     <Compile Include="inc\cs\SnapAssist.cs" />
     <Compile Include="inc\cs\TextSearchFilter.cs" />
+    <Compile Include="Pages\AD\Computers.xaml.cs">
+      <DependentUpon>Computers.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\AD\Connect.xaml.cs">
       <DependentUpon>Connect.xaml</DependentUpon>
     </Compile>
@@ -119,6 +122,10 @@
     <Compile Include="Pages\AD\Users.xaml.cs">
       <DependentUpon>Users.xaml</DependentUpon>
     </Compile>
+    <Page Include="Pages\AD\Computers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\AD\Connect.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
