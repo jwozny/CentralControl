@@ -227,7 +227,7 @@ namespace Central_Control
             AD.IsEnabled = true;
             ADPanel.Height = 26;
 
-            if (ActiveDirectory.IsConnected && !ActiveDirectory.Connector.IsBusy)
+            if (ActiveDirectory.IsConnected)
             {
                 if (ActiveDirectory.Users.Count > 0)
                 {

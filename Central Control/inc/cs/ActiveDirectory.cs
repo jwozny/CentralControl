@@ -130,9 +130,14 @@ namespace Central_Control
 
             if (IsConnected)
             {
-                if (!Connector.CancellationPending) RefreshOUs(Connector);
-                if (!Connector.CancellationPending) RefreshUsers(Connector);
-                if (!Connector.CancellationPending) RefreshGroups(Connector);
+                if (!Connector.CancellationPending) GetOUList(Connector);
+                if (!Connector.CancellationPending) GetUserList(Connector);
+                if (!Connector.CancellationPending) GetGroupList(Connector);
+
+                if (!Connector.CancellationPending) Connector.ReportProgress(100);
+
+                if (!Connector.CancellationPending) GetUserProperties(Connector);
+                if (!Connector.CancellationPending) GetGroupProperties(Connector);
             }
 
             if (Connector.CancellationPending)
@@ -144,61 +149,92 @@ namespace Central_Control
 
         #endregion Background Worker - Connector
 
-        #region Background Worker - Updater_Users
+        #region Background Worker - OU_Fetcher
+
         /// <summary>
         /// Create background worker instance
         /// </summary>
-        public static BackgroundWorker Updater_Users = new BackgroundWorker();
+        public static BackgroundWorker OU_Fetcher = new BackgroundWorker();
         /// <summary>
         /// Initialize background worker with actions
         /// </summary>
-        public static void Updater_Users_Initialize()
+        public static void OU_Fetcher_Initialize()
         {
-            Updater_Users.WorkerReportsProgress = true;
-            Updater_Users.WorkerSupportsCancellation = true;
+            OU_Fetcher.WorkerReportsProgress = true;
+            OU_Fetcher.WorkerSupportsCancellation = true;
 
-            Updater_Users.DoWork += Updater_Users_DoWork;
+            OU_Fetcher.DoWork += OU_Fetcher_DoWork;
         }
         /// <summary>
         /// Updater worker to only refresh users from AD
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void Updater_Users_DoWork(object sender, DoWorkEventArgs e)
+        private static void OU_Fetcher_DoWork(object sender, DoWorkEventArgs e)
         {
-            // Work Started - Do this.
             IsConnected = EstablishConnection();
-            if (IsConnected) RefreshUsers(Updater_Users);
+            if (IsConnected) RefreshUsers(OU_Fetcher);
         }
-        #endregion Background Worker - Updater_Users
 
-        #region Background Worker - Updater_Groups
+        #endregion Background Worker - OU_Fetcher
+        
+        #region Background Worker - User_Fetcher
+
         /// <summary>
         /// Create background worker instance
         /// </summary>
-        public static BackgroundWorker Updater_Groups = new BackgroundWorker();
+        public static BackgroundWorker User_Fetcher = new BackgroundWorker();
         /// <summary>
         /// Initialize background worker with actions
         /// </summary>
-        public static void Updater_Groups_Initialize()
+        public static void User_Fetcher_Initialize()
         {
-            Updater_Groups.WorkerReportsProgress = true;
-            Updater_Groups.WorkerSupportsCancellation = true;
+            User_Fetcher.WorkerReportsProgress = true;
+            User_Fetcher.WorkerSupportsCancellation = true;
 
-            Updater_Groups.DoWork += Updater_Groups_DoWork;
+            User_Fetcher.DoWork += User_Fetcher_DoWork;
+        }
+        /// <summary>
+        /// Updater worker to only refresh users from AD
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void User_Fetcher_DoWork(object sender, DoWorkEventArgs e)
+        {
+            IsConnected = EstablishConnection();
+            if (IsConnected) RefreshUsers(User_Fetcher);
+        }
+
+        #endregion Background Worker - User_Fetcher
+
+        #region Background Worker - Group_Fetcher
+
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker Group_Fetcher = new BackgroundWorker();
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public static void Group_Fetcher_Initialize()
+        {
+            Group_Fetcher.WorkerReportsProgress = true;
+            Group_Fetcher.WorkerSupportsCancellation = true;
+
+            Group_Fetcher.DoWork += Group_Fetcher_DoWork;
         }
         /// <summary>
         /// Updater worker to only refresh groups from AD
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void Updater_Groups_DoWork(object sender, DoWorkEventArgs e)
+        private static void Group_Fetcher_DoWork(object sender, DoWorkEventArgs e)
         {
-            // Work Started - Do this.
             IsConnected = EstablishConnection();
-            if (IsConnected) RefreshGroups(Updater_Groups);
+            if (IsConnected) RefreshGroups(Group_Fetcher);
         }
-        #endregion Background Worker - Updater_Groups
+
+        #endregion Background Worker - Group_Fetcher
 
         #endregion Background Workers
 
@@ -345,191 +381,49 @@ namespace Central_Control
         /// <summary>
         /// Refresh everything from AD or a specific item
         /// </summary>
-        /// <param name="filter">null, "Users", "Groups"</param>
+        /// <param name="filter">null, "OUs", "Users", "Groups"</param>
         public static void Refresh(string filter)
         {
             switch (filter)
             {
-                case "Users":
-                    Updater_Users_Initialize();
-                    if (!Updater_Users.IsBusy)
+                case "OUs":
+                    OU_Fetcher_Initialize();
+                    if (!OU_Fetcher.IsBusy)
                     {
-                        Updater_Users.RunWorkerAsync();
+                        OU_Fetcher.RunWorkerAsync();
+                    }
+                    break;
+                case "Users":
+                    User_Fetcher_Initialize();
+                    if (!User_Fetcher.IsBusy)
+                    {
+                        User_Fetcher.RunWorkerAsync();
                     }
                     break;
                 case "Groups":
-                    Updater_Groups_Initialize();
-                    if (!Updater_Groups.IsBusy)
+                    Group_Fetcher_Initialize();
+                    if (!Group_Fetcher.IsBusy)
                     {
-                        Updater_Groups.RunWorkerAsync();
+                        Group_Fetcher.RunWorkerAsync();
                     }
                     break;
                 default:
-                    Updater_Users_Initialize();
-                    if (!Updater_Users.IsBusy)
+                    OU_Fetcher_Initialize();
+                    if (!OU_Fetcher.IsBusy)
                     {
-                        Updater_Users.RunWorkerAsync();
+                        OU_Fetcher.RunWorkerAsync();
                     }
-                    Updater_Groups_Initialize();
-                    if (!Updater_Groups.IsBusy)
+                    User_Fetcher_Initialize();
+                    if (!User_Fetcher.IsBusy)
                     {
-                        Updater_Groups.RunWorkerAsync();
+                        User_Fetcher.RunWorkerAsync();
+                    }
+                    Group_Fetcher_Initialize();
+                    if (!Group_Fetcher.IsBusy)
+                    {
+                        Group_Fetcher.RunWorkerAsync();
                     }
                     break;
-            }
-        }
-        /// <summary>
-        /// Clear the list of users and repopulate it from AD
-        /// </summary>
-        private static void RefreshUsers(BackgroundWorker Worker)
-        {
-            try
-            {
-                Searcher.Dispose();
-                Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
-
-                Worker.ReportProgress(0, "Finding Users");
-                if (Worker.CancellationPending) return;
-
-                Users.Clear();
-                UserCount = Searcher.FindAll().Count();
-
-                Worker.ReportProgress(0, "Retrieving User");
-                if (Worker.CancellationPending) return;
-
-                foreach (UserPrincipal User in Searcher.FindAll())
-                {
-                    if (User != null)
-                    {
-                        Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, User.SamAccountName));
-                    }
-                    Worker.ReportProgress(0, "Retrieving User");
-                    if (Worker.CancellationPending) return;
-                }
-
-                Users.Sort((x, y) => x.Name.CompareTo(y.Name));
-
-                UserCount = 0;
-                foreach (UserPrincipalEx User in Users)
-                {
-                    var sb = new StringBuilder();
-
-                    foreach (var propertyInfo in
-                        from p in typeof(UserPrincipalEx).GetProperties()
-                        where Equals(p.PropertyType, typeof(String))
-                        select p)
-                    {
-                        sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
-                    }
-
-                    User.CreatedDate = User.GetProperty("whenCreated");
-
-                    if (!ReferenceEquals(User.AccountExpirationDate, null))
-                        if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) <= 0)
-                            User.Expiring = true;
-
-                    User.LockedOut = User.IsAccountLockedOut();
-
-                    User.Groups = User.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
-
-                    UserCount++;
-                    Worker.ReportProgress(0, "Retrieving User Properties");
-                    if (Worker.CancellationPending) return;
-                }
-            }
-            catch
-            {
-                IsConnected = EstablishConnection();
-            }
-        }
-        /// <summary>
-        /// Clear the list of groups and repopulate it from AD
-        /// </summary>
-        private static void RefreshGroups(BackgroundWorker Worker)
-        {
-            try
-            {
-                Searcher.Dispose();
-                Searcher = new PrincipalSearcher(new GroupPrincipal(Domain));
-
-                Worker.ReportProgress(0, "Finding Groups");
-                if (Worker.CancellationPending) return;
-
-                Groups.Clear();
-                GroupCount = Searcher.FindAll().Count();
-
-                Worker.ReportProgress(0, "Retrieving Group");
-                if (Worker.CancellationPending) return;
-
-                foreach (GroupPrincipal Group in Searcher.FindAll())
-                {
-                    if (Group != null)
-                    {
-                        Groups.Add(GroupPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, Group.SamAccountName));
-                    }
-                    Worker.ReportProgress(0, "Retrieving Group");
-                    if (Worker.CancellationPending) return;
-                }
-
-                Groups.Sort((x, y) => x.Name.CompareTo(y.Name));
-
-                GroupCount = 0;
-                foreach (GroupPrincipalEx Group in Groups)
-                {
-                    List<Member> Members = new List<Member>(1);
-                    Members.Clear();
-
-                    DirectoryEntry thisGroup = Group.GetUnderlyingObject() as DirectoryEntry;
-                    PropertyValueCollection pvcMembers = thisGroup.Properties["Member"];
-                    foreach (object pvcMember in pvcMembers)
-                    {
-                        DirectoryEntry deMember;
-                        if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
-                        {
-                            deMember = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + pvcMember.ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-                        }
-                        else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
-                        {
-                            deMember = new DirectoryEntry("LDAP://" + pvcMember.ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-                        }
-                        else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
-                        {
-                            deMember = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + pvcMember.ToString());
-                        }
-                        else
-                        {
-                            deMember = new DirectoryEntry("LDAP://" + pvcMember.ToString());
-                        }
-
-                        Members.Add(new Member()
-                        {
-                            Name = deMember.Properties["Name"][0].ToString(),
-                            DistinguishedName = pvcMember.ToString(),
-                            SchemaClassName = deMember.SchemaClassName.ToUpperInvariant()
-                        });
-                    }
-
-                    Members.Sort((x, y) => x.Name.CompareTo(y.Name));
-                    Group.AllMembers = Members;
-
-                    var sb = new StringBuilder();
-
-                    foreach (var propertyInfo in
-                        from p in typeof(GroupPrincipalEx).GetProperties()
-                        where Equals(p.PropertyType, typeof(String))
-                        select p)
-                    {
-                        sb.AppendLine(propertyInfo.GetValue(Group, null) + " ");
-                    }
-
-                    GroupCount++;
-                    Worker.ReportProgress(0, "Retrieving Group Members");
-                    if (Worker.CancellationPending) return;
-                }
-            }
-            catch
-            {
-                IsConnected = EstablishConnection();
             }
         }
         /// <summary>
@@ -539,42 +433,214 @@ namespace Central_Control
         {
             try
             {
-                DirectoryEntry startingPoint;
-                if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
-                {
-                    startingPoint = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + defaultContext, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-                }
-                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
-                {
-                    startingPoint = new DirectoryEntry("LDAP://" + defaultContext, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
-                }
-                else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
-                {
-                    startingPoint = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + defaultContext);
-                }
-                else
-                {
-                    startingPoint = new DirectoryEntry("LDAP://" + defaultContext);
-                }
-
-                DirectorySearcher searcher = new DirectorySearcher(startingPoint);
-                searcher.Filter = "(objectCategory=organizationalUnit)";
-
-                OUs.Clear();
-
-                foreach (SearchResult res in searcher.FindAll())
-                {
-                    OrganizationalUnit OU = new OrganizationalUnit();
-                    OU.Path = res.Path.Replace("LDAP://", "").Replace(Domain.ConnectedServer + "/", "");
-                    OU.Tree = PathtoTree(OU.Path);
-                    OUs.Add(OU);
-                }
-
-                OUs.Sort((x, y) => x.Tree.CompareTo(y.Tree));
+                GetOUList(Worker);
             }
             catch
             {
                 IsConnected = EstablishConnection();
+            }
+        }
+        private static void GetOUList(BackgroundWorker Worker)
+        {
+            DirectoryEntry startingPoint;
+            if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+            {
+                startingPoint = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + defaultContext, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+            }
+            else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+            {
+                startingPoint = new DirectoryEntry("LDAP://" + defaultContext, GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+            }
+            else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+            {
+                startingPoint = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + defaultContext);
+            }
+            else
+            {
+                startingPoint = new DirectoryEntry("LDAP://" + defaultContext);
+            }
+
+            DirectorySearcher searcher = new DirectorySearcher(startingPoint);
+            searcher.Filter = "(objectCategory=organizationalUnit)";
+
+            OUs.Clear();
+
+            foreach (SearchResult res in searcher.FindAll())
+            {
+                OrganizationalUnit OU = new OrganizationalUnit();
+                OU.Path = res.Path.Replace("LDAP://", "").Replace(Domain.ConnectedServer + "/", "");
+                OU.Tree = PathtoTree(OU.Path);
+                OUs.Add(OU);
+            }
+
+            OUs.Sort((x, y) => x.Tree.CompareTo(y.Tree));
+        }
+        /// <summary>
+        /// Clear the list of users and repopulate it from AD
+        /// </summary>
+        private static void RefreshUsers(BackgroundWorker Worker)
+        {
+            try
+            {
+                GetUserList(Worker);
+                GetUserProperties(Worker);
+            }
+            catch
+            {
+                IsConnected = EstablishConnection();
+            }
+        }
+        private static void GetUserList(BackgroundWorker Worker)
+        {
+            Searcher.Dispose();
+            Searcher = new PrincipalSearcher(new UserPrincipal(Domain));
+
+            Worker.ReportProgress(0, "Finding Users");
+            if (Worker.CancellationPending) return;
+
+            Users.Clear();
+            UserCount = Searcher.FindAll().Count();
+
+            Worker.ReportProgress(0, "Retrieving User");
+            if (Worker.CancellationPending) return;
+
+            foreach (UserPrincipal User in Searcher.FindAll())
+            {
+                if (User != null)
+                {
+                    Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, User.SamAccountName));
+                }
+                Worker.ReportProgress(0, "Retrieving User");
+                if (Worker.CancellationPending) return;
+            }
+
+            Users.Sort((x, y) => x.Name.CompareTo(y.Name));
+        }
+        private static void GetUserProperties(BackgroundWorker Worker)
+        {
+            UserCount = 0;
+            foreach (UserPrincipalEx User in Users)
+            {
+                var sb = new StringBuilder();
+
+                foreach (var propertyInfo in
+                    from p in typeof(UserPrincipalEx).GetProperties()
+                    where Equals(p.PropertyType, typeof(String))
+                    select p)
+                {
+                    sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
+                }
+
+                User.CreatedDate = User.GetProperty("whenCreated");
+
+                if (!ReferenceEquals(User.AccountExpirationDate, null))
+                    if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) <= 0)
+                        User.Expiring = true;
+
+                User.LockedOut = User.IsAccountLockedOut();
+
+                User.Groups = User.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
+
+                UserCount++;
+                Worker.ReportProgress(0, "Retrieving User Properties");
+                if (Worker.CancellationPending) return;
+            }
+        }
+        /// <summary>
+        /// Clear the list of groups and repopulate it from AD
+        /// </summary>
+        private static void RefreshGroups(BackgroundWorker Worker)
+        {
+            try
+            {
+                GetGroupList(Worker);
+                GetGroupProperties(Worker);
+            }
+            catch
+            {
+                IsConnected = EstablishConnection();
+            }
+        }
+        private static void GetGroupList(BackgroundWorker Worker)
+        {
+            Searcher.Dispose();
+            Searcher = new PrincipalSearcher(new GroupPrincipal(Domain));
+
+            Worker.ReportProgress(0, "Finding Groups");
+            if (Worker.CancellationPending) return;
+
+            Groups.Clear();
+            GroupCount = Searcher.FindAll().Count();
+
+            Worker.ReportProgress(0, "Retrieving Group");
+            if (Worker.CancellationPending) return;
+
+            foreach (GroupPrincipal Group in Searcher.FindAll())
+            {
+                if (Group != null)
+                {
+                    Groups.Add(GroupPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, Group.SamAccountName));
+                }
+                Worker.ReportProgress(0, "Retrieving Group");
+                if (Worker.CancellationPending) return;
+            }
+
+            Groups.Sort((x, y) => x.Name.CompareTo(y.Name));
+        }
+        private static void GetGroupProperties(BackgroundWorker Worker)
+        {
+            GroupCount = 0;
+            foreach (GroupPrincipalEx Group in Groups)
+            {
+                List<Member> Members = new List<Member>(1);
+                Members.Clear();
+
+                DirectoryEntry thisGroup = Group.GetUnderlyingObject() as DirectoryEntry;
+                PropertyValueCollection pvcMembers = thisGroup.Properties["Member"];
+                foreach (object pvcMember in pvcMembers)
+                {
+                    DirectoryEntry deMember;
+                    if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                    {
+                        deMember = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + pvcMember.ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                    }
+                    else if (!ReferenceEquals(GlobalConfig.Settings.AD_Username, null) && !ReferenceEquals(GlobalConfig.Settings.AD_Password, null))
+                    {
+                        deMember = new DirectoryEntry("LDAP://" + pvcMember.ToString(), GlobalConfig.Settings.AD_Username, GlobalConfig.Settings.AD_Password);
+                    }
+                    else if (!ReferenceEquals(GlobalConfig.Settings.AD_Domain, null))
+                    {
+                        deMember = new DirectoryEntry("LDAP://" + Domain.ConnectedServer + "/" + pvcMember.ToString());
+                    }
+                    else
+                    {
+                        deMember = new DirectoryEntry("LDAP://" + pvcMember.ToString());
+                    }
+
+                    Members.Add(new Member()
+                    {
+                        Name = deMember.Properties["Name"][0].ToString(),
+                        DistinguishedName = pvcMember.ToString(),
+                        SchemaClassName = deMember.SchemaClassName.ToUpperInvariant()
+                    });
+                }
+
+                Members.Sort((x, y) => x.Name.CompareTo(y.Name));
+                Group.AllMembers = Members;
+
+                var sb = new StringBuilder();
+
+                foreach (var propertyInfo in
+                    from p in typeof(GroupPrincipalEx).GetProperties()
+                    where Equals(p.PropertyType, typeof(String))
+                    select p)
+                {
+                    sb.AppendLine(propertyInfo.GetValue(Group, null) + " ");
+                }
+
+                GroupCount++;
+                Worker.ReportProgress(0, "Retrieving Group Members");
+                if (Worker.CancellationPending) return;
             }
         }
 

@@ -70,6 +70,12 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Connector_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            if (e.ProgressPercentage == 100)
+            {
+                Continue();
+                return;
+            }
+
             Style Message = FindResource("Message") as Style;
             Style Message_Success = FindResource("Message_Success") as Style;
             Style Progress = FindResource("Progress") as Style;
@@ -107,18 +113,10 @@ namespace Central_Control.AD
                 StatusMessage.Text = "(2/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
             }
 
-            if (e.UserState.ToString() == "Retrieving User Properties")
-            {
-                StatusProgress.Maximum = ActiveDirectory.Users.Count;
-                StatusProgress.Value = ActiveDirectory.UserCount;
-
-                StatusMessage.Text = "(3/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
-            }
-
             if (e.UserState.ToString() == "Finding Groups")
             {
                 StatusProgress.IsIndeterminate = true;
-                StatusMessage.Text = "(4/6) " + e.UserState.ToString();
+                StatusMessage.Text = "(3/6) " + e.UserState.ToString();
             }
 
             if (e.UserState.ToString() == "Retrieving Group")
@@ -126,10 +124,18 @@ namespace Central_Control.AD
                 StatusProgress.Maximum = ActiveDirectory.GroupCount;
                 StatusProgress.Value = ActiveDirectory.Groups.Count;
 
+                StatusMessage.Text = "(4/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
+            }
+
+            if (e.UserState.ToString() == "Retrieving User Properties")
+            {
+                StatusProgress.Maximum = ActiveDirectory.Users.Count;
+                StatusProgress.Value = ActiveDirectory.UserCount;
+
                 StatusMessage.Text = "(5/6) " + e.UserState.ToString() + " " + StatusProgress.Value.ToString() + "/" + StatusProgress.Maximum.ToString();
             }
 
-            if (e.UserState.ToString() == "Retrieving Group Members")
+            if (e.UserState.ToString() == "Retrieving Group Properties")
             {
                 StatusProgress.Maximum = ActiveDirectory.Groups.Count;
                 StatusProgress.Value = ActiveDirectory.GroupCount;

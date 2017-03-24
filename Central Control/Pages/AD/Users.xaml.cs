@@ -46,7 +46,8 @@ namespace Central_Control.AD
         {
             BackgroundBlur(false);
 
-            ActiveDirectory.Updater_Users.RunWorkerCompleted += Updater_Users_Completed;
+            ActiveDirectory.Connector.RunWorkerCompleted += User_Fetcher_Completed;
+            ActiveDirectory.User_Fetcher.RunWorkerCompleted += User_Fetcher_Completed;
             UpdateUserButtons();
 
             if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
@@ -71,7 +72,7 @@ namespace Central_Control.AD
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Updater_Users_Completed(object sender, RunWorkerCompletedEventArgs e)
+        private void User_Fetcher_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
             UpdateUserButtons();
 
@@ -97,7 +98,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Users_Unloaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.Updater_Users.RunWorkerCompleted -= Updater_Users_Completed;
+            ActiveDirectory.User_Fetcher.RunWorkerCompleted -= User_Fetcher_Completed;
+            ActiveDirectory.Connector.RunWorkerCompleted -= User_Fetcher_Completed;
         }
         #endregion Page Events
 
@@ -154,12 +156,17 @@ namespace Central_Control.AD
         /// </summary>
         private void UpdateUserButtons()
         {
-            if (ActiveDirectory.Updater_Users.IsBusy)
+            if (ActiveDirectory.Connector.IsBusy)
+            {
+                RefreshButton.IsEnabled = false;
+                RefreshButton.Content = "Fetching...";
+            }
+            else if(ActiveDirectory.User_Fetcher.IsBusy)
             {
                 RefreshButton.IsEnabled = false;
                 RefreshButton.Content = "Refreshing...";
             }
-            else
+            else 
             {
                 RefreshButton.IsEnabled = true;
                 RefreshButton.Content = "Refresh Users";

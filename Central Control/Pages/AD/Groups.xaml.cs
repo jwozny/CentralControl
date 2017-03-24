@@ -44,7 +44,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Groups_Loaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.Updater_Groups.RunWorkerCompleted += Updater_Groups_Completed;
+            ActiveDirectory.Connector.RunWorkerCompleted += Group_Fetcher_Completed;
+            ActiveDirectory.Group_Fetcher.RunWorkerCompleted += Group_Fetcher_Completed;
             UpdateGroupButtons();
 
             if (!ReferenceEquals(ActiveDirectory.Groups, null) && ActiveDirectory.IsConnected)
@@ -65,7 +66,7 @@ namespace Central_Control.AD
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Updater_Groups_Completed(object sender, RunWorkerCompletedEventArgs e)
+        private void Group_Fetcher_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
             UpdateGroupButtons();
 
@@ -91,7 +92,8 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Groups_Unloaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.Updater_Groups.RunWorkerCompleted -= Updater_Groups_Completed;
+            ActiveDirectory.Group_Fetcher.RunWorkerCompleted -= Group_Fetcher_Completed;
+            ActiveDirectory.Connector.RunWorkerCompleted -= Group_Fetcher_Completed;
         }
         #endregion Page Events
         
@@ -144,7 +146,12 @@ namespace Central_Control.AD
         /// </summary>
         private void UpdateGroupButtons()
         {
-            if (ActiveDirectory.Updater_Groups.IsBusy)
+            if (ActiveDirectory.Connector.IsBusy)
+            {
+                RefreshButton.IsEnabled = false;
+                RefreshButton.Content = "Fetching...";
+            }
+            else if (ActiveDirectory.Group_Fetcher.IsBusy)
             {
                 RefreshButton.IsEnabled = false;
                 RefreshButton.Content = "Refreshing...";
