@@ -344,34 +344,36 @@ namespace Central_Control
             if (AddedUser != null)
             {
                 Users.Add(UserPrincipalEx.FindByIdentity(Domain, IdentityType.SamAccountName, AddedUser.SamAccountName));
-            }
-            Users.Sort((x, y) => x.Name.CompareTo(y.Name));
-
-            foreach (UserPrincipalEx User in Users)
-            {
-                if(User.DistinguishedName == AddedUser.DistinguishedName)
+                
+                foreach (UserPrincipalEx User in Users)
                 {
-                    var sb = new StringBuilder();
-
-                    foreach (var propertyInfo in
-                        from p in typeof(UserPrincipalEx).GetProperties()
-                        where Equals(p.PropertyType, typeof(String))
-                        select p)
+                    if (User.DistinguishedName == AddedUser.DistinguishedName)
                     {
-                        sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
+                        var sb = new StringBuilder();
+
+                        foreach (var propertyInfo in
+                            from p in typeof(UserPrincipalEx).GetProperties()
+                            where Equals(p.PropertyType, typeof(String))
+                            select p)
+                        {
+                            sb.AppendLine(propertyInfo.GetValue(User, null) + " ");
+                        }
+
+                        User.CreatedDate = User.GetProperty("whenCreated");
+
+                        if (!ReferenceEquals(User.AccountExpirationDate, null))
+                            if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) <= 0)
+                                User.Expiring = true;
+
+                        User.LockedOut = User.IsAccountLockedOut();
+
+                        User.Groups = User.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
+
+                        break;
                     }
-
-                    User.CreatedDate = User.GetProperty("whenCreated");
-
-                    if (!ReferenceEquals(User.AccountExpirationDate, null))
-                        if (DateTime.Compare(User.AccountExpirationDate.Value, DateTime.Now.AddDays(8)) <= 0)
-                            User.Expiring = true;
-
-                    User.LockedOut = User.IsAccountLockedOut();
-
-                    User.Groups = User.GetGroups().OrderBy(GroupItem => GroupItem.Name).ToList();
                 }
             }
+            Users.Sort((x, y) => x.Name.CompareTo(y.Name));
         }
 
         #endregion
@@ -639,7 +641,7 @@ namespace Central_Control
                 }
 
                 GroupCount++;
-                Worker.ReportProgress(0, "Retrieving Group Members");
+                Worker.ReportProgress(0, "Retrieving Group Properties");
                 if (Worker.CancellationPending) return;
             }
         }

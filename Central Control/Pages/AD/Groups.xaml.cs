@@ -45,7 +45,9 @@ namespace Central_Control.AD
         private void Groups_Loaded(object sender, RoutedEventArgs e)
         {
             ActiveDirectory.Connector.RunWorkerCompleted += Group_Fetcher_Completed;
+            ActiveDirectory.Connector.ProgressChanged += Group_Fetcher_ProgressChanged;
             ActiveDirectory.Group_Fetcher.RunWorkerCompleted += Group_Fetcher_Completed;
+            ActiveDirectory.Group_Fetcher.ProgressChanged += Group_Fetcher_ProgressChanged;
             UpdateGroupButtons();
 
             if (!ReferenceEquals(ActiveDirectory.Groups, null) && ActiveDirectory.IsConnected)
@@ -62,6 +64,30 @@ namespace Central_Control.AD
             }
         }
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Group_Fetcher_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.UserState.ToString() == "Retrieving Group")
+            {
+                RefreshProgress.IsIndeterminate = false;
+                RefreshProgress.Maximum = ActiveDirectory.GroupCount;
+                RefreshProgress.Value = ActiveDirectory.Groups.Count;
+            }
+            else if (e.UserState.ToString() == "Retrieving Group Properties")
+            {
+                RefreshProgress.IsIndeterminate = false;
+                RefreshProgress.Maximum = ActiveDirectory.Groups.Count;
+                RefreshProgress.Value = ActiveDirectory.GroupCount;
+            }
+            else
+            {
+                RefreshProgress.IsIndeterminate = true;
+            }
+        }
+        /// <summary>
         /// When the AD Updater background worker is finished, notify the user or exit the page if disconnected
         /// </summary>
         /// <param name="sender"></param>
@@ -73,7 +99,7 @@ namespace Central_Control.AD
             if (ActiveDirectory.IsConnected)
             {
                 ResultMessage.Text = "Group List Updated";
-                ResultMessage.Visibility = Visibility.Visible;
+                ResultBox.Visibility = Visibility.Visible;
 
                 string tmp = SearchBox.Text;
                 SearchBox.Text = " ";
@@ -92,8 +118,10 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Groups_Unloaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.Group_Fetcher.RunWorkerCompleted -= Group_Fetcher_Completed;
             ActiveDirectory.Connector.RunWorkerCompleted -= Group_Fetcher_Completed;
+            ActiveDirectory.Connector.ProgressChanged -= Group_Fetcher_ProgressChanged;
+            ActiveDirectory.Group_Fetcher.RunWorkerCompleted -= Group_Fetcher_Completed;
+            ActiveDirectory.Group_Fetcher.ProgressChanged -= Group_Fetcher_ProgressChanged;
         }
         #endregion Page Events
         
@@ -149,17 +177,28 @@ namespace Central_Control.AD
             if (ActiveDirectory.Connector.IsBusy)
             {
                 RefreshButton.IsEnabled = false;
-                RefreshButton.Content = "Fetching...";
+                RefreshButton.Content = null;
+
+                RefreshProgress.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Text = "Fetching...";
             }
             else if (ActiveDirectory.Group_Fetcher.IsBusy)
             {
                 RefreshButton.IsEnabled = false;
-                RefreshButton.Content = "Refreshing...";
+                RefreshButton.Content = null;
+
+                RefreshProgress.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Text = "Refreshing...";
             }
             else
             {
                 RefreshButton.IsEnabled = true;
                 RefreshButton.Content = "Refresh Groups";
+
+                RefreshProgressMessage.Visibility = Visibility.Hidden;
+                RefreshProgress.Visibility = Visibility.Hidden;
             }
 
             if (ActiveDirectory.SelectedGroup != null)
@@ -227,12 +266,12 @@ namespace Central_Control.AD
         /// <returns></returns>
         private bool Report(bool Result, string SuccessMessage)
         {
-            ResultMessage.Visibility = Visibility.Hidden;
+            ResultBox.Visibility = Visibility.Hidden;
 
             if (Result)
             {
                 ResultMessage.Text = SuccessMessage;
-                ResultMessage.Visibility = Visibility.Visible;
+                ResultBox.Visibility = Visibility.Visible;
 
                 if (Action == "ReallyDelete")
                 {
@@ -247,7 +286,7 @@ namespace Central_Control.AD
             else
             {
                 ResultMessage.Text = ActiveDirectory.ConnectionError;
-                ResultMessage.Visibility = Visibility.Visible;
+                ResultBox.Visibility = Visibility.Visible;
 
                 RefreshButton.IsEnabled = false;
                 ActiveDirectory.Connect();
@@ -314,10 +353,14 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            ResultMessage.Visibility = Visibility.Hidden;
-
+            ResultBox.Visibility = Visibility.Hidden;
+            
             RefreshButton.IsEnabled = false;
-            RefreshButton.Content = "Refreshing...";
+            RefreshButton.Content = null;
+
+            RefreshProgress.Visibility = Visibility.Visible;
+            RefreshProgressMessage.Visibility = Visibility.Visible;
+            RefreshProgressMessage.Text = "Refreshing...";
 
             ActiveDirectory.Refresh("Groups");
         }

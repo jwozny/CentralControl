@@ -162,10 +162,20 @@
                             Grid.Column="2"
                             VerticalAlignment="Top"
                             HorizontalAlignment="Center">
-                    <Button x:Name="RefreshButton"
-                            Content="Refresh Groups"
-                            Margin="10"
-                            Click="RefreshButton_Click"/>
+                    <Grid>
+                        <Button x:Name="RefreshButton"
+                                Content="Refresh Groups"
+                                Margin="10"
+                                Click="RefreshButton_Click"/>
+                        <ProgressBar x:Name="RefreshProgress"
+                                     Margin="10"
+                                     IsIndeterminate="True"
+                                     Visibility="Hidden"/>
+                        <TextBlock x:Name="RefreshProgressMessage"
+                                   Margin="10"
+                                   Style="{StaticResource Message}"
+                                   Visibility="Hidden"/>
+                    </Grid>
                     <Button x:Name="NewGroupButton"
                             Content="New Group"
                             IsEnabled="false"

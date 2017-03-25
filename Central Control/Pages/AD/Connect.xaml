@@ -36,8 +36,7 @@
                     <Grid>
                         <ProgressBar x:Name="StatusProgress"
                                      IsIndeterminate="True"
-                                     Minimum="0"
-                                     Style="{StaticResource Progress}"/>
+                                     Minimum="0"/>
                         <TextBlock x:Name="StatusMessage"
                                    Text="Testing"
                                    Style="{StaticResource Message}"

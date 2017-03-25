@@ -47,7 +47,9 @@ namespace Central_Control.AD
             BackgroundBlur(false);
 
             ActiveDirectory.Connector.RunWorkerCompleted += User_Fetcher_Completed;
+            ActiveDirectory.Connector.ProgressChanged += User_Fetcher_ProgressChanged;
             ActiveDirectory.User_Fetcher.RunWorkerCompleted += User_Fetcher_Completed;
+            ActiveDirectory.User_Fetcher.ProgressChanged += User_Fetcher_ProgressChanged;
             UpdateUserButtons();
 
             if (!ReferenceEquals(ActiveDirectory.Users, null) && ActiveDirectory.IsConnected)
@@ -67,6 +69,31 @@ namespace Central_Control.AD
                 ExitAD();
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void User_Fetcher_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.UserState.ToString() == "Retrieving User")
+            {
+                RefreshProgress.IsIndeterminate = false;
+                RefreshProgress.Maximum = ActiveDirectory.UserCount;
+                RefreshProgress.Value = ActiveDirectory.Users.Count;
+            }
+            else if (e.UserState.ToString() == "Retrieving User Properties")
+            {
+                RefreshProgress.IsIndeterminate = false;
+                RefreshProgress.Maximum = ActiveDirectory.Users.Count;
+                RefreshProgress.Value = ActiveDirectory.UserCount;
+            }
+            else
+            {
+                RefreshProgress.IsIndeterminate = true;
+            }
+        }
+
         /// <summary>
         /// When the AD Updater_Users background worker is finished, notify the user or exit the page if disconnected
         /// </summary>
@@ -98,8 +125,10 @@ namespace Central_Control.AD
         /// <param name="e"></param>
         private void Users_Unloaded(object sender, RoutedEventArgs e)
         {
-            ActiveDirectory.User_Fetcher.RunWorkerCompleted -= User_Fetcher_Completed;
             ActiveDirectory.Connector.RunWorkerCompleted -= User_Fetcher_Completed;
+            ActiveDirectory.Connector.ProgressChanged -= User_Fetcher_ProgressChanged;
+            ActiveDirectory.User_Fetcher.RunWorkerCompleted -= User_Fetcher_Completed;
+            ActiveDirectory.User_Fetcher.ProgressChanged -= User_Fetcher_ProgressChanged;
         }
         #endregion Page Events
 
@@ -159,17 +188,28 @@ namespace Central_Control.AD
             if (ActiveDirectory.Connector.IsBusy)
             {
                 RefreshButton.IsEnabled = false;
-                RefreshButton.Content = "Fetching...";
+                RefreshButton.Content = null;
+
+                RefreshProgress.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Text = "Fetching...";
             }
             else if(ActiveDirectory.User_Fetcher.IsBusy)
             {
                 RefreshButton.IsEnabled = false;
-                RefreshButton.Content = "Refreshing...";
+                RefreshButton.Content = null;
+
+                RefreshProgress.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Visibility = Visibility.Visible;
+                RefreshProgressMessage.Text = "Refreshing...";
             }
             else 
             {
                 RefreshButton.IsEnabled = true;
                 RefreshButton.Content = "Refresh Users";
+
+                RefreshProgressMessage.Visibility = Visibility.Hidden;
+                RefreshProgress.Visibility = Visibility.Hidden;
             }
 
             if (ActiveDirectory.SelectedUser != null)
@@ -545,7 +585,11 @@ namespace Central_Control.AD
             ResultBox.Visibility = Visibility.Hidden;
 
             RefreshButton.IsEnabled = false;
-            RefreshButton.Content = "Refreshing...";
+            RefreshButton.Content = null;
+
+            RefreshProgress.Visibility = Visibility.Visible;
+            RefreshProgressMessage.Visibility = Visibility.Visible;
+            RefreshProgressMessage.Text = "Refreshing...";
 
             ActiveDirectory.Refresh("Users");
         }
