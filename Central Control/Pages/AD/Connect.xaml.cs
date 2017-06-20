@@ -49,7 +49,7 @@ namespace Central_Control.AD
             FocusManager.SetFocusedElement(scope, null);
             Keyboard.ClearFocus();
 
-            if (ActiveDirectory.IsConnected && !ActiveDirectory.Connector.IsBusy)
+            if (ActiveDirectory.IsPopulated() && !ActiveDirectory.Connector.IsBusy)
             {
                 Continue();
             }

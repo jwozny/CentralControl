@@ -252,7 +252,9 @@ namespace Central_Control
             Settings.IsEnabled = true;
             SettingsPanel.Height = 26;
 
-            Settings_Credentials.IsEnabled = true;
+            Settings_ActiveDirectory.IsEnabled = true;
+            SubmenuCount++;
+            Settings_osTicket.IsEnabled = true;
             SubmenuCount++;
 
             SettingsAnimation.To = 24 * SubmenuCount + 26;
@@ -277,13 +279,15 @@ namespace Central_Control
         {
             // Reset AD Submenu styles
             AD_Users.Style = FindResource("Submenu") as Style;
-            AD_Groups.Style = FindResource("Submenu") as Style;
             AD_Users.Visibility = Visibility.Collapsed;
+            AD_Groups.Style = FindResource("Submenu") as Style;
             AD_Groups.Visibility = Visibility.Collapsed;
 
             // Reset Settings Submenu styles
-            Settings_Credentials.Style = FindResource("Submenu") as Style;
-            Settings_Credentials.Visibility = Visibility.Collapsed;
+            Settings_ActiveDirectory.Style = FindResource("Submenu") as Style;
+            Settings_ActiveDirectory.Visibility = Visibility.Collapsed;
+            Settings_osTicket.Style = FindResource("Submenu") as Style;
+            Settings_osTicket.Visibility = Visibility.Collapsed;
         }
         /// <summary>
         /// Check if AD submenus should show and show if their conditions are true
@@ -300,7 +304,8 @@ namespace Central_Control
         /// </summary>
         private void ShowMenu_Settings()
         {
-            Settings_Credentials.Visibility = Visibility.Visible;
+            Settings_ActiveDirectory.Visibility = Visibility.Visible;
+            Settings_osTicket.Visibility = Visibility.Visible;
         }
         #endregion Main Menu Functions
 
@@ -421,15 +426,7 @@ namespace Central_Control
             ResetMenu();
             AD.Style = FindResource("Menu_Expanded") as Style;
 
-            if (!ActiveDirectory.IsConnected)
-            {
-                ResetSubmenu();
-                AD.Style = FindResource("Menu_Selected") as Style;
-
-                _NavigationFrame.Navigate(AD_Connect_Page);
-                _NavigationFrame.NavigationService.LoadCompleted += AD_Connected;
-            }
-            else if (ActiveDirectory.Connector.IsBusy)
+            if (!ActiveDirectory.IsPopulated())
             {
                 ResetSubmenu();
                 AD.Style = FindResource("Menu_Selected") as Style;
@@ -500,22 +497,42 @@ namespace Central_Control
         /// <summary>
         /// Page initialization for the Credentials page
         /// </summary>
-        private Settings.Credentials Settings_Credentials_Page = new Settings.Credentials();
+        private Settings.ActiveDirectory Settings_ActiveDirectory_Page = new Settings.ActiveDirectory();
         /// <summary>
         /// Go to the Credentials page
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Settings_Credentials_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Settings_ActiveDirectory_MouseDown(object sender, MouseButtonEventArgs e)
         {
             ResetMenu();
             Settings.Style = FindResource("Menu_Expanded") as Style;
 
             ResetSubmenu();
             ShowMenu_Settings();
-            Settings_Credentials.Style = FindResource("Submenu_Selected") as Style;
+            Settings_ActiveDirectory.Style = FindResource("Submenu_Selected") as Style;
 
-            _NavigationFrame.Navigate(Settings_Credentials_Page);
+            _NavigationFrame.Navigate(Settings_ActiveDirectory_Page);
+        }
+        /// <summary>
+        /// Page initialization for the Credentials page
+        /// </summary>
+        private Settings.osTicket Settings_osTicket_Page = new Settings.osTicket();
+        /// <summary>
+        /// Go to the Credentials page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Settings_osTicket_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ResetMenu();
+            Settings.Style = FindResource("Menu_Expanded") as Style;
+
+            ResetSubmenu();
+            ShowMenu_Settings();
+            Settings_osTicket.Style = FindResource("Submenu_Selected") as Style;
+
+            _NavigationFrame.Navigate(Settings_osTicket_Page);
         }
         #endregion Main Menu Controls
 

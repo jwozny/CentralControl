@@ -44,11 +44,16 @@
                     </Grid>
                     <Grid x:Name="MainForm">
                         <StackPanel>
-                            <CheckBox x:Name="AD_LocalDomainCheckbox"
-                                      Content="Use Local Domain"
-                                      IsChecked="False"
-                                      Checked="AD_LocalDomainCheckbox_Checked"
-                                      Unchecked="AD_LocalDomainCheckbox_Unchecked"/>
+
+                            <DockPanel>
+                                <Label Content="Use Local Domain"/>
+                                <CheckBox x:Name="AD_LocalDomainCheckbox"
+                                          IsChecked="False"
+                                          Style="{StaticResource Switch}"
+                                          HorizontalAlignment="Right"
+                                          Checked="AD_LocalDomainCheckbox_Checked"
+                                          Unchecked="AD_LocalDomainCheckbox_Unchecked"/>
+                            </DockPanel>
 
                             <DockPanel>
                                 <Label Content="Domain Name"/>
@@ -58,11 +63,16 @@
                                          GotFocus="AD_DomainTextBox_GotFocus"/>
                             </DockPanel>
 
-                            <CheckBox x:Name="AD_LocalAuthCheckbox"
-                                      Content="Use Windows Authentication"
-                                      IsChecked="False"
-                                      Checked="AD_LocalAuthCheckbox_Checked"
-                                      Unchecked="AD_LocalAuthCheckbox_Unchecked"/>
+                            <DockPanel>
+                                <Label Content="Use Windows Authentication"/>
+
+                                <CheckBox x:Name="AD_LocalAuthCheckbox"
+                                          IsChecked="False"
+                                          Style="{StaticResource Switch}"
+                                          HorizontalAlignment="Right"
+                                          Checked="AD_LocalAuthCheckbox_Checked"
+                                          Unchecked="AD_LocalAuthCheckbox_Unchecked"/>
+                            </DockPanel>
 
                             <DockPanel>
                                 <Label Content="Username"/>

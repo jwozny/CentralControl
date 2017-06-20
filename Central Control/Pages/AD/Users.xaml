@@ -22,6 +22,14 @@
                BasedOn="{StaticResource {x:Type Label}}">
             <Setter Property="Width" Value="130"/>
         </Style>
+        <Style x:Key="TicketMetaGrid"
+               TargetType="{x:Type Label}"
+               BasedOn="{StaticResource {x:Type Label}}">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Disabled_Border}"/>
+            <Setter Property="BorderThickness" Value="1,0,0,1"/>
+        </Style>
     </Page.Resources>
     <Grid>
         <!--Main Content-->
@@ -69,6 +77,7 @@
                              Template="{StaticResource ListBox}"
                              Grid.Row="1"
                              BorderThickness="1,0,1,1"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              SelectionChanged="UserList_SelectionChanged"
                              KeyDown="UserList_KeyDown"/>
 
@@ -303,6 +312,49 @@
                 </StackPanel>
             </Grid>
         </Border>
+
+        <!--Ticket Import Selection-->
+        <Grid x:Name="TicketImportBox"
+              Background="{StaticResource ContentBackground_MaxTrans}"
+              Visibility="Visible">
+            <Border Height="{Binding ActualHeight, ElementName=TicketImportForm}"
+                    Width="{Binding ActualWidth, ElementName=TicketImportForm}"
+                    Effect="{StaticResource Shadow}"/>
+            <Border Name="TicketImportForm"
+                    Style="{StaticResource Box}"
+                    Padding="20">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                    <DockPanel>
+                        <Label Content="Ticket Number"
+                               Style="{StaticResource TicketMetaGrid}"
+                               BorderThickness="1,1,0,1"/>
+                        <Label Content="Ticket Status"
+                               Style="{StaticResource TicketMetaGrid}"
+                               BorderThickness="1,1,0,1"/>
+                        <Label Content="New User Name"
+                               Style="{StaticResource TicketMetaGrid}"
+                               BorderThickness="1,1,0,1"/>
+                        <Label Content="Created By"
+                               Style="{StaticResource TicketMetaGrid}"
+                               BorderThickness="1,1,0,1"/>
+                        <Label Style="{StaticResource TicketMetaGrid}"
+                               BorderThickness="1">
+                            <!--Button Content="Import" Margin="0" Style="{StaticResource SmallButton}"/-->
+                        </Label>
+                    </DockPanel>
+                    <StackPanel x:Name="TicketList">
+                    </StackPanel>
+                    <DockPanel Margin="0,20,0,0">
+                        <Button Content="Cancel"
+                                Margin="0"
+                                DockPanel.Dock="Right"
+                                HorizontalAlignment="Right"
+                                Click="TicketCancelButton_Click"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <!--New User Form-->
         <Grid x:Name="NewUserBox"

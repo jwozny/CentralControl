@@ -90,17 +90,17 @@
                         </EventTrigger>
                     </StackPanel.Triggers>
                     <Label x:Name="AD"
-                               Content="Active Directory"
-                               Style="{StaticResource Menu}"
-                               MouseDown="AD_MouseDown"/>
+                           Content="Active Directory"
+                           Style="{StaticResource Menu}"
+                           MouseDown="AD_MouseDown"/>
                     <Label x:Name="AD_Users"
-                               Content="Users"
-                               Style="{StaticResource Submenu}"
-                               MouseDown="AD_Users_MouseDown"/>
+                           Content="Users"
+                           Style="{StaticResource Submenu}"
+                           MouseDown="AD_Users_MouseDown"/>
                     <Label x:Name="AD_Groups"
-                               Content="Groups"
-                               Style="{StaticResource Submenu}"
-                               MouseDown="AD_Groups_MouseDown"/>
+                           Content="Groups"
+                           Style="{StaticResource Submenu}"
+                           MouseDown="AD_Groups_MouseDown"/>
                 </StackPanel>
                 <StackPanel x:Name="SettingsPanel">
                     <StackPanel.Triggers>
@@ -124,13 +124,17 @@
                         </EventTrigger>
                     </StackPanel.Triggers>
                     <Label x:Name="Settings"
-                               Content="Settings"
-                               Style="{StaticResource Menu}"
-                               MouseDown="Settings_MouseDown"/>
-                    <Label x:Name="Settings_Credentials"
-                               Content="Credentials"
-                               Style="{StaticResource Submenu}"
-                               MouseDown="Settings_Credentials_MouseDown"/>
+                           Content="Settings"
+                           Style="{StaticResource Menu}"
+                           MouseDown="Settings_MouseDown"/>
+                    <Label x:Name="Settings_ActiveDirectory"
+                           Content="Active Directory"
+                           Style="{StaticResource Submenu}"
+                           MouseDown="Settings_ActiveDirectory_MouseDown"/>
+                    <Label x:Name="Settings_osTicket"
+                           Content="osTicket Integration"
+                           Style="{StaticResource Submenu}"
+                           MouseDown="Settings_osTicket_MouseDown"/>
                 </StackPanel>
             </StackPanel>
         </Border>

@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -45,6 +45,17 @@ namespace Central_Control.AD
         private void Users_Loaded(object sender, RoutedEventArgs e)
         {
             BackgroundBlur(false);
+
+            if (GlobalConfig.Settings.OST_Integration == true)
+            {
+                ImportUserButton.IsEnabled = true;
+                ImportUserButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ImportUserButton.IsEnabled = false;
+                ImportUserButton.Visibility = Visibility.Collapsed;
+            }
 
             ActiveDirectory.Connector.RunWorkerCompleted += User_Fetcher_Completed;
             ActiveDirectory.Connector.ProgressChanged += User_Fetcher_ProgressChanged;
@@ -391,6 +402,61 @@ namespace Central_Control.AD
         /// </summary>
         private string Action;
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="NewUserTicket"></param>
+        private void AddTicketInfo(osTicket.NewUserTicket NewUserTicket)
+        {
+            DockPanel Ticket = new DockPanel();
+            Ticket.Name = "Ticket_" + Ticket_Count;
+
+            Label TicketNumber = new Label();
+            TicketNumber.Name = "TicketNumber_" + Ticket_Count;
+            TicketNumber.Style = FindResource("TicketMetaGrid") as Style;
+            if (NewUserTicket.TicketNumber != null) TicketNumber.Content = NewUserTicket.TicketNumber;
+
+            Label TicketStatus = new Label();
+            TicketStatus.Name = "TicketStatus_" + Ticket_Count;
+            TicketStatus.Style = FindResource("TicketMetaGrid") as Style;
+            if (NewUserTicket.TicketStatus != null) TicketStatus.Content = NewUserTicket.TicketStatus;
+
+            Label NewUserName = new Label();
+            NewUserName.Name = "NewUserName_" + Ticket_Count;
+            NewUserName.Style = FindResource("TicketMetaGrid") as Style;
+            if (NewUserTicket.NewUserName != null) NewUserName.Content = NewUserTicket.NewUserName;
+
+            Label CreatedBy = new Label();
+            CreatedBy.Name = "CreatedBy_" + Ticket_Count;
+            CreatedBy.Style = FindResource("TicketMetaGrid") as Style;
+            if (NewUserTicket.CreatedBy != null) CreatedBy.Content = NewUserTicket.CreatedBy;
+
+            Label Import = new Label();
+            Import.Name = "Import_" + Ticket_Count;
+            Import.Style = FindResource("TicketMetaGrid") as Style;
+            Import.BorderThickness = new Thickness(1,0,1,1);
+
+            Button ImportButton = new Button();
+            ImportButton.Name = "ImportButton_" + Ticket_Count;
+            ImportButton.Style = FindResource("SmallButton") as Style;
+            ImportButton.Margin = new Thickness(0);
+            ImportButton.HorizontalAlignment = HorizontalAlignment.Right;
+            ImportButton.Content = "Import";
+            ImportButton.Click += TicketImportButton_Click;
+
+            Import.Content = ImportButton;
+
+            TicketList.Children.Add(Ticket);
+            Ticket.Children.Add(TicketNumber);
+            Ticket.Children.Add(TicketStatus);
+            Ticket.Children.Add(NewUserName);
+            Ticket.Children.Add(CreatedBy);
+            Ticket.Children.Add(Import);
+
+            Ticket_Count++;
+        }
+        private int Ticket_Count = 0;
+
+        /// <summary>
         /// Check and save the new user form, create the user if it all checks out.
         /// </summary>
         private void CreateUser()
@@ -566,6 +632,11 @@ namespace Central_Control.AD
                 ClearSelection();
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Password_Confirm_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -611,6 +682,15 @@ namespace Central_Control.AD
         private void ImportUserButton_Click(object sender, RoutedEventArgs e)
         {
             BackgroundBlur(true);
+            TicketImportBox.Visibility = Visibility.Visible;
+            
+            TicketList.Children.Clear();
+
+            osTicket.GetTickets();
+            foreach(osTicket.NewUserTicket ticket in osTicket.Tickets)
+            {
+                AddTicketInfo(ticket);
+            }
         }
         /// <summary>
         /// Button action to delete the selected user
@@ -742,6 +822,65 @@ namespace Central_Control.AD
         }
         #endregion Password Buttons
 
+        #region Ticket Import Form
+
+        private string TicketNumber = null;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TicketImportButton_Click(object sender, RoutedEventArgs e)
+        {
+            BackgroundBlur(true);
+            NewUserBox.Visibility = Visibility.Visible;
+            TicketImportBox.Visibility = Visibility.Hidden;
+
+            Button thisButton = sender as Button;
+            Label ParentLabel = thisButton.Parent as Label;
+            DockPanel ParentPanel = ParentLabel.Parent as DockPanel;
+            Label Ticket = ParentPanel.Children[0] as Label;
+            TicketNumber = Ticket.Content.ToString();
+
+            foreach(osTicket.NewUserTicket ticket in osTicket.Tickets)
+            {
+                if (ticket.TicketNumber == TicketNumber)
+                {
+                    ticket.NewUserName = ticket.NewUserName.Trim();
+                    string[] Name = ticket.NewUserName.Split(' ');
+                    FirstNameText.Text = Name[0];
+                    LastNameText.Text = Name[ticket.NewUserName.Split(' ').Length - 1];
+
+                    TitleText.Text = ticket.Title;
+                    
+                    string OUtree = GlobalConfig.Settings.OST_OU[GlobalConfig.Settings.OST_Dept.FindIndex(p => p == ticket.Department)];
+                    OUBox.SelectedValue = Central_Control.ActiveDirectory.OUs.Find(p => p.Tree == OUtree).Path;
+                }
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TicketCancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            BackgroundBlur(false);
+            TicketImportBox.Visibility = Visibility.Hidden;
+            ResultBox.Visibility = Visibility.Hidden;
+
+            FirstNameText.Text = null;
+            LastNameText.Text = null;
+            FullNameText.Text = null;
+            EmailText.Text = null;
+            Title.Text = null;
+            OUBox.SelectedIndex = -1;
+            UserNameText.Text = null;
+            Password.Password = null;
+            Password_Confirm.Password = null;
+        }
+        #endregion Ticket Import Form
+
         #region New User Form
         /// <summary>
         /// 
@@ -802,6 +941,11 @@ namespace Central_Control.AD
         {
             CreateUser();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void NewUserCancelButton_Click(object sender, RoutedEventArgs e)
         {
             BackgroundBlur(false);

@@ -1,0 +1,260 @@
+﻿<Page x:Class="Central_Control.Settings.osTicket"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Central_Control.Settings"
+      mc:Ignorable="d" 
+      d:DesignHeight="600"
+      d:DesignWidth="800"
+      Background="{StaticResource ContentBackground}"
+      FontFamily="Consolas"
+      FontSize="12" 
+      Loaded="osTicket_Loaded">
+    <Grid>
+        <Grid x:Name="MainContent"
+              Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="740"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition x:Name="FullContentRow"/>
+            </Grid.RowDefinitions>
+
+            <!--Header-->
+            <Label Content="osTicket Integration"
+                   Grid.Column="1"
+                   Style="{StaticResource PageHeader}"/>
+            <CheckBox x:Name="OST_IntegrationCheckbox"
+                      Grid.Column="1"
+                      IsChecked="False"
+                      Margin="20,0"
+                      HorizontalAlignment="Right"
+                      Style="{StaticResource Switch}"
+                      Checked="OST_IntegrationCheckbox_Checked"
+                      Unchecked="OST_IntegrationCheckbox_Unchecked"/>
+
+            <Grid Grid.Row="1"
+                  Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="365"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="365"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="ContentRow"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Column="1">
+                    <Separator Margin="10,10,10,0"
+                               Background="{StaticResource Selected_Foreground}"
+                               Effect="{StaticResource Pressed_ButtonShadow}"
+                               DockPanel.Dock="Top"/>
+                    <Separator Margin="10,0,10,10"
+                               Background="{StaticResource Selected_Foreground}"
+                               DockPanel.Dock="Bottom"/>
+
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  VerticalAlignment="Stretch">
+                        <StackPanel x:Name="Form1"
+                                    Margin="25,10"
+                                    IsEnabled="False">
+
+                            <Label Content="Database Server"
+                                   Style="{StaticResource PageSubHeader}"/>
+
+                            <DockPanel>
+                                <Label Content="Server URL or IP"/>
+                                <TextBox x:Name="OST_ServerTextBox"
+                                         HorizontalAlignment="Right"
+                                         Style="{StaticResource Textbox_wPlaceholder}"
+                                         Tag="support.domain.tld"
+                                         GotFocus="OST_ServerTextBox_GotFocus"/>
+                            </DockPanel>
+
+                            <DockPanel>
+                                <Label Content="Server Port" IsEnabled="False"/>
+                                <TextBox x:Name="OST_ServerPortTextBox"
+                                         HorizontalAlignment="Right"
+                                         Style="{StaticResource Textbox_wPlaceholder}"
+                                         Tag="3306"
+                                         IsEnabled="False"
+                                         GotFocus="OST_ServerPortTextBox_GotFocus"/>
+                            </DockPanel>
+
+                            <DockPanel>
+                                <Label Content="Username"/>
+                                <TextBox x:Name="OST_UsernameTextBox"
+                                         HorizontalAlignment="Right"
+                                         GotFocus="OST_UsernameTextBox_GotFocus"/>
+                            </DockPanel>
+
+                            <DockPanel>
+                                <Label Content="Password"/>
+                                <PasswordBox x:Name="OST_PasswordBox"
+                                             HorizontalAlignment="Right"
+                                             GotFocus="OST_PasswordBox_GotFocus"/>
+                            </DockPanel>
+
+                            <DockPanel>
+                                <TextBlock x:Name="TestServResult"
+                                           Style="{StaticResource Message}"
+                                           Width="240"
+                                           TextAlignment="Left"/>
+                                <Button x:Name="TestServButton" Content="Test"
+                                        Style="{StaticResource SmallButton}"
+                                        VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Click="TestServButton_Click"/>
+                            </DockPanel>
+
+                            <Separator Margin="10"/>
+
+                            <Label Content="Select Custom Form"
+                                       Style="{StaticResource PageSubHeader}"/>
+
+                            <TextBlock Text="Select the custom osTicket form that new user requests will use to import into the Active Directory."
+                                       Style="{StaticResource PageDescription}"/>
+
+                            <DockPanel x:Name="Database_Selector">
+                                <Label Content="Database Schema"/>
+                                <ComboBox x:Name="OST_DatabaseComboBox"
+                                          IsEditable="True"
+                                          HorizontalAlignment="Right"
+                                          SelectionChanged="OST_DatabaseComboBox_SelectionChanged"/>
+                            </DockPanel>
+
+                            <DockPanel x:Name="HelpTopic_Selector">
+                                <Label Content="Help Topic"/>
+                                <ComboBox x:Name="OST_HelpTopicComboBox"
+                                          IsEditable="True"
+                                          HorizontalAlignment="Right"
+                                          SelectionChanged="OST_HelpTopicComboBox_SelectionChanged"/>
+                            </DockPanel>
+
+                            <DockPanel x:Name="Form_Selector">
+                                <Label Content="Form"/>
+                                <ComboBox x:Name="OST_FormComboBox"
+                                          IsEditable="True"
+                                          HorizontalAlignment="Right"
+                                          SelectionChanged="OST_FormComboBox_SelectionChanged"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+
+                <GridSplitter Grid.Column="2"
+                              Margin="0,10"
+                              IsEnabled="False"
+                              Width="1"
+                              HorizontalAlignment="Center"
+                              Background="{StaticResource Border}"/>
+
+                <DockPanel Grid.Column="3">
+                    <Separator Margin="10,10,10,0"
+                               Background="{StaticResource Selected_Foreground}"
+                               Effect="{StaticResource Pressed_ButtonShadow}"
+                               DockPanel.Dock="Top"/>
+                    <!--Save and Reset Buttons-->
+                    <DockPanel DockPanel.Dock="Bottom">
+                        <Button x:Name="SaveButton"
+                                Content="Save"
+                                DockPanel.Dock="Right"
+                                Click="SaveButton_Click"/>
+                        <Button x:Name="ResetButton"
+                                Content="Reset"
+                                DockPanel.Dock="Right"
+                                Click="ResetButton_Click"/>
+                        <TextBlock/>
+                    </DockPanel>
+                    <Separator Margin="10,0,10,10"
+                               Background="{StaticResource Selected_Foreground}"
+                               DockPanel.Dock="Bottom"/>
+
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  VerticalAlignment="Stretch">
+                        <StackPanel x:Name="Form2"
+                                    Margin="25,10"
+                                    IsEnabled="False">
+
+                            <Label Content="Assign Form Fields to User Data"
+                                   Style="{StaticResource PageSubHeader}"/>
+
+                            <TextBlock Text="Assign the selected form fields to the required user data for importing."
+                                       Style="{StaticResource PageDescription}"/>
+
+                            <DockPanel x:Name="Field_Name_Selector">
+                                <Label Content="New User 'Name'"/>
+                                <ComboBox x:Name="OST_NUNameComboBox"
+                                          IsEditable="True"
+                                          HorizontalAlignment="Right"/>
+                            </DockPanel>
+
+                            <DockPanel x:Name="Field_Dept_Selector">
+                                <Label Content="New User 'Department'"/>
+                                <ComboBox x:Name="OST_NUDeptComboBox"
+                                          IsEditable="True"
+                                          HorizontalAlignment="Right"
+                                          SelectionChanged="OST_NUDeptComboBox_SelectionChanged"/>
+                            </DockPanel>
+
+                            <DockPanel x:Name="Field_Title_Selector">
+                                <Label Content="New User 'Title'"/>
+                                <ComboBox x:Name="OST_NUTitleComboBox"
+                                          IsEditable="True"
+                                          HorizontalAlignment="Right"/>
+                            </DockPanel>
+
+                            <Separator Margin="10"/>
+
+                            <Label Content="Organizational Unit Mapping"
+                                   Style="{StaticResource PageSubHeader}"/>
+
+                            <TextBlock Text="Map the department field options to specific OUs in the Active Directory"
+                                       Style="{StaticResource PageDescription}"/>
+
+                            <StackPanel x:Name="Dept_OU_List"
+                                        Margin="0,0,-20,0">
+                            </StackPanel>
+                            <DockPanel Margin="0,0,-20,0">
+                                <ComboBox x:Name="Example0_Dept"
+                                          IsEditable="True"
+                                          IsEnabled="False"/>
+                                <ComboBox x:Name="Example0_OU"
+                                          IsEditable="True"
+                                          Margin="3,2,2,2"
+                                          IsEnabled="False"/>
+                                <Button x:Name="AddDeptOUMapping"
+                                        HorizontalAlignment="Right"
+                                        Style="{StaticResource TinyButton}"
+                                        Click="AddDeptOUMapping_Click">
+                                    <Path Data="M0,4 H8 M4,4 V8Z"
+                                          StrokeThickness="1"
+                                          Height="8"
+                                          Width="8"
+                                          Style="{StaticResource ButtonPath}"/>
+                                </Button>
+                            </DockPanel>
+
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Grid>
+        </Grid>
+
+        <!--Result Message-->
+        <Border x:Name="ResultBox"
+                Style="{StaticResource Box_Fading}"
+                Effect="{StaticResource Shadow}"
+                Visibility="Hidden">
+            <TextBlock x:Name="ResultMessage"
+                       Text="Testing"
+                       Style="{StaticResource MessageText}"/>
+        </Border>
+    </Grid>
+</Page>

@@ -68,6 +68,7 @@
                              Template="{StaticResource ListBox}"
                              Grid.Row="1"
                              BorderThickness="1,0,1,1"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              SelectionChanged="GroupList_SelectionChanged"
                              KeyDown="GroupList_KeyDown"/>
                 </Grid>

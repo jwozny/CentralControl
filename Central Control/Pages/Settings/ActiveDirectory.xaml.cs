@@ -18,17 +18,22 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 using System.DirectoryServices.ActiveDirectory;
+using System.Net.NetworkInformation;
+using System.Net;
+using System.ComponentModel;
 
 namespace Central_Control.Settings
 {
     /// <summary>
-    /// Interaction logic for Credentials.xaml
+    /// Interaction logic for ActiveDirectory.xaml
     /// </summary>
-    public partial class Credentials : Page
+    public partial class ActiveDirectory : Page
     {
-        public Credentials()
+        public ActiveDirectory()
         {
             InitializeComponent();
+            TestServ.RunWorkerCompleted += TestServ_Completed;
+            TestCred.RunWorkerCompleted += TestCred_Completed;
         }
 
         #region Page Events
@@ -37,7 +42,7 @@ namespace Central_Control.Settings
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Credentials_Loaded(object sender, RoutedEventArgs e)
+        private void ActiveDirectory_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
         }
@@ -182,8 +187,7 @@ namespace Central_Control.Settings
         #endregion Settings Functions
 
         #region Control Actions
-
-        #region Active Directory Form
+        
         /// <summary>
         /// Select all text in the AD Domain box when getting focus
         /// </summary>
@@ -288,9 +292,7 @@ namespace Central_Control.Settings
 
             AD_UsernameTextBox.Focus();
         }
-        #endregion Active Directory
 
-        #region Buttons
         /// <summary>
         /// Button action to reset settings and repopulate from configuration
         /// </summary>
@@ -330,9 +332,177 @@ namespace Central_Control.Settings
 
             SaveButton.IsEnabled = true;
         }
-        #endregion Buttons
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TestServButton_Click(object sender, RoutedEventArgs e)
+        {
+            Server = AD_DomainTextBox.Text;
+            Ping = null;
+            Error = null;
+
+            if (String.IsNullOrEmpty(Server))
+            {
+                TestServResult.Text = "The local computer is not joined to a domain or the domain cannot be contacted.";
+                TestServResult.Style = FindResource("Message_Error") as Style;
+            }
+            else
+            {
+                TestServButton.IsEnabled = false;
+                TestServResult.Text = null;
+                TestServ_Initialize();
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TestCredButton_Click(object sender, RoutedEventArgs e)
+        {
+            Server = AD_DomainTextBox.Text;
+            Username = AD_UsernameTextBox.Text;
+            Password = AD_PasswordBox.Password;
+            Connection = false;
+            
+            if (String.IsNullOrEmpty(Server))
+            {
+                TestCredResult.Text = "The local computer is not joined to a domain or the domain cannot be contacted.";
+                TestCredResult.Style = FindResource("Message_Error") as Style;
+            }
+            else
+            {
+                TestCredButton.IsEnabled = false;
+                TestCredResult.Text = null;
+                TestCred_Initialize();
+            }
+        }
 
         #endregion Control Actions
 
+        #region Background Workers
+
+        private static string Server = null;
+        private static string Username = null;
+        private static string Password = null;
+        private static PingReply Ping = null;
+        private static bool Connection = false;
+        private static string Error = null;
+
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker TestServ = new BackgroundWorker();
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public void TestServ_Initialize()
+        {
+            TestServ.DoWork -= TestServ_DoWork;
+
+            if (!TestServ.IsBusy)
+            {
+                TestServ.DoWork += TestServ_DoWork;
+                TestServ.RunWorkerAsync();
+            }
+        }
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TestServ_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                IPAddress Address = Dns.GetHostAddresses(Server)[0];
+                Ping = new Ping().Send(Server);
+            }
+            catch (System.Net.Sockets.SocketException E)
+            {
+                Error = E.Message;
+            }
+            catch (System.FormatException E)
+            {
+                Error = E.Message;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TestServ_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            TestServButton.IsEnabled = true;
+
+            if (Error != null)
+            {
+                TestServResult.Text = Error;
+                TestServResult.Style = FindResource("Message_Error") as Style;
+            }
+            else if (Ping.Status == IPStatus.Success)
+            {
+                TestServResult.Text = Ping.Status.ToString();
+                TestServResult.Style = FindResource("Message_Success") as Style;
+            }
+            else
+            {
+                TestServResult.Text = Ping.Status.ToString();
+                TestServResult.Style = FindResource("Message_Error") as Style;
+            }
+        }
+
+        /// <summary>
+        /// Create background worker instance
+        /// </summary>
+        public static BackgroundWorker TestCred = new BackgroundWorker();
+        /// <summary>
+        /// Initialize background worker with actions
+        /// </summary>
+        public void TestCred_Initialize()
+        {
+            TestCred.DoWork -= TestCred_DoWork;
+
+            if (!TestCred.IsBusy)
+            {
+                TestCred.DoWork += TestCred_DoWork;
+                TestCred.RunWorkerAsync();
+            }
+        }
+        /// <summary>
+        /// Define background worker actions
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TestCred_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Connection = Central_Control.ActiveDirectory.TestConnection(Server, Username, Password);
+            if (!Connection) Error = Central_Control.ActiveDirectory.ConnectionError;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TestCred_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            TestCredButton.IsEnabled = true;
+            
+            if (Connection)
+            {
+                TestCredResult.Text = "Success!";
+                TestCredResult.Style = FindResource("Message_Success") as Style;
+            }
+            else
+            {
+                TestCredResult.Text = Error;
+                TestCredResult.Style = FindResource("Message_Error") as Style;
+            }
+        }
+
+        #endregion Background Workers
     }
 }

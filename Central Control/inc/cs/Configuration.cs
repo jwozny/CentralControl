@@ -10,22 +10,33 @@ namespace Central_Control
 {
     public class Configuration
     {
-
         /* Active Directory */
-        public string AD_Domain { get; set; }
-        public bool AD_UseLocalDomain { get; set; }
-        public string AD_Username { get; set; }
-        public string AD_Password { get; set; }
-        public bool AD_UseLocalAuth { get; set; }
+        public string AD_Domain { get; set; } = null;
+        public bool AD_UseLocalDomain { get; set; } = true;
+        public string AD_Username { get; set; } = null;
+        public string AD_Password { get; set; } = null;
+        public bool AD_UseLocalAuth { get; set; } = true;
 
-        public Configuration()
-        {
-            AD_Domain = null;
-            AD_UseLocalDomain = true;
-            AD_Username = null;
-            AD_Password = null;
-            AD_UseLocalAuth = true;
-        }
+        /* osTicket */
+        public bool OST_Integration { get; set; } = false;
+        public string OST_Server { get; set; } = null;
+        public string OST_ServerPort { get; set; } = null;
+        public string OST_Username { get; set; } = null;
+        public string OST_Password { get; set; } = null;
+        public string OST_Database { get; set; } = null;
+        public string OST_TablePrefix { get; set; } = null;
+        public string OST_HelpTopic_ID { get; set; } = null;
+        public string OST_HelpTopic { get; set; } = null;
+        public string OST_Form_ID { get; set; } = null;
+        public string OST_Form { get; set; } = null;
+        public string OST_NUNameField_ID { get; set; } = null;
+        public string OST_NUNameField { get; set; } = null;
+        public string OST_NUDeptField_ID { get; set; } = null;
+        public string OST_NUDeptField { get; set; } = null;
+        public string OST_NUTitleField_ID { get; set; } = null;
+        public string OST_NUTitleField { get; set; } = null;
+        public List<String> OST_Dept { get; set; } = null;
+        public List<String> OST_OU { get; set; } = null;
     }
 
     public static class GlobalConfig

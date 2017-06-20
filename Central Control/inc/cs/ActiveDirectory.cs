@@ -29,6 +29,8 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using WinInterop = System.Windows.Interop;
 using System.Diagnostics;
+using System.Net;
+using System.Net.NetworkInformation;
 
 namespace Central_Control
 {
@@ -126,18 +128,22 @@ namespace Central_Control
         {
             // Work Started - Do this.
             Connector.ReportProgress(0, "Connecting...");
-            IsConnected = EstablishConnection();
 
-            if (IsConnected)
+            if (EstablishConnection())
             {
                 if (!Connector.CancellationPending) GetOUList(Connector);
                 if (!Connector.CancellationPending) GetUserList(Connector);
                 if (!Connector.CancellationPending) GetGroupList(Connector);
 
+                IsConnected = true;
                 if (!Connector.CancellationPending) Connector.ReportProgress(100);
 
                 if (!Connector.CancellationPending) GetUserProperties(Connector);
                 if (!Connector.CancellationPending) GetGroupProperties(Connector);
+            }
+            else
+            {
+                IsConnected = false;
             }
 
             if (Connector.CancellationPending)
@@ -173,7 +179,7 @@ namespace Central_Control
         private static void OU_Fetcher_DoWork(object sender, DoWorkEventArgs e)
         {
             IsConnected = EstablishConnection();
-            if (IsConnected) RefreshUsers(OU_Fetcher);
+            if (IsConnected) RefreshOUs(OU_Fetcher);
         }
 
         #endregion Background Worker - OU_Fetcher
@@ -315,6 +321,68 @@ namespace Central_Control
                 return false;
             }
             return true;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Server"></param>
+        /// <param name="Username"></param>
+        /// <param name="Password"></param>
+        /// <returns></returns>
+        public static bool TestConnection(string Server, string Username, string Password)
+        {
+            try
+            {
+                Domain = null;
+                if (!ReferenceEquals(Server, null) && !(ReferenceEquals(Username, null) ^ ReferenceEquals(Password, null)) && Password != "")
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, Server, Username, Password);
+                }
+                else if (!(ReferenceEquals(Username, null) ^ ReferenceEquals(Password, null)) && Password != "")
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, System.DirectoryServices.ActiveDirectory.Domain.GetComputerDomain().ToString(), Username, Password);
+                }
+                else if (!ReferenceEquals(Server, null))
+                {
+                    Domain = new PrincipalContext(ContextType.Domain, Server);
+                }
+                else
+                {
+                    Domain = new PrincipalContext(ContextType.Domain);
+                }
+
+                if (Domain.ConnectedServer != Server) ConnectionError = "Error";
+            }
+            catch (COMException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (PrincipalServerDownException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.DirectoryServices.Protocols.DirectoryOperationException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+            catch (System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException E)
+            {
+                ConnectionError = E.Message.ToString();
+                return false;
+            }
+
+            return true;
+        }
+        public static bool IsPopulated()
+        {
+            if (IsConnected && ( Users.Count > 0 || Groups.Count > 0 ))
+            {
+                return true;
+            }
+            return false;
         }
         /// <summary>
         /// Converts a DN path to a tree-formatted location

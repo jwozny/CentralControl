@@ -26,6 +26,8 @@ namespace Central_Control
 
                 if (obj.GetType().ToString() == "Central_Control.ActiveDirectory+UserPrincipalEx")
                 {
+                    //TODO: Optimize search
+                    // Make search only parse existing properties (name, email, username, etc only) while background worker is pulling extra properties from AD
                     foreach (var propertyInfo in
                         from p in typeof(ActiveDirectory.UserPrincipalEx).GetProperties()
                         where Equals(p.PropertyType, typeof(String))
