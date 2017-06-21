@@ -53,50 +53,57 @@ namespace Central_Control.Settings
         /// <param name="e"></param>
         private void osTicket_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadSettings();
-            Central_Control.ActiveDirectory.Refresh("OUs");
-            TestServer();
+			LoadSettings();
+			Central_Control.ActiveDirectory.Refresh("OUs");
+			if (GlobalConfig.Settings.OST_Integration == true) TestServer();
         }
         #endregion Page Events
 
         #region Common Functions
 
         private void TestServer()
-        {
-            Server = OST_ServerTextBox.Text;
-            if (String.IsNullOrEmpty(OST_ServerPortTextBox.Text)) Port = 3306;
-            else Port = Int32.Parse(OST_ServerPortTextBox.Text);
+		{
+			try
+			{
+				Server = OST_ServerTextBox.Text;
+				if (String.IsNullOrEmpty(OST_ServerPortTextBox.Text)) Port = 3306;
+				else Port = Int32.Parse(OST_ServerPortTextBox.Text);
 
-            Username = OST_UsernameTextBox.Text;
-            Password = OST_PasswordBox.Password;
+				Username = OST_UsernameTextBox.Text;
+				Password = OST_PasswordBox.Password;
 
-            Connection = false;
-            Ping = null;
-            Error = null;
+				Connection = false;
+				Ping = null;
+				Error = null;
 
-            if (String.IsNullOrEmpty(Server))
-            {
-                TestServResult.Text = "Database server not specified.";
-                TestServResult.Style = FindResource("Message_Error") as Style;
-            }
-            else if (String.IsNullOrEmpty(Username) || String.IsNullOrEmpty(Password))
-            {
-                TestServResult.Text = "Username and password required.";
-                TestServResult.Style = FindResource("Message_Error") as Style;
-            }
-            //else if (String.IsNullOrEmpty(Database))
-            //{
-            //    TestServResult.Text = "Database is not specified.";
-            //    TestServResult.Style = FindResource("Message_Error") as Style;
-            //}
-            else
-            {
-                TestServButton.IsEnabled = false;
-                TestServResult.Text = null;
-                TestServ_Initialize();
-            }
+				if (String.IsNullOrEmpty(Server))
+				{
+					TestServResult.Text = "Database server not specified.";
+					TestServResult.Style = FindResource("Message_Error") as Style;
+				}
+				else if (String.IsNullOrEmpty(Username) || String.IsNullOrEmpty(Password))
+				{
+					TestServResult.Text = "Username and password required.";
+					TestServResult.Style = FindResource("Message_Error") as Style;
+				}
+				//else if (String.IsNullOrEmpty(Database))
+				//{
+				//    TestServResult.Text = "Database is not specified.";
+				//    TestServResult.Style = FindResource("Message_Error") as Style;
+				//}
+				else
+				{
+					TestServButton.IsEnabled = false;
+					TestServResult.Text = null;
+					TestServ_Initialize();
+				}
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
 
-        }
+		}
 
         /// <summary>
         /// 
@@ -186,10 +193,13 @@ namespace Central_Control.Settings
 
             Dept_OU_List.Children.Clear();
             Dept_OU_Count = 0;
-            for (int i = 0; i < GlobalConfig.Settings.OST_OU.Count; i++)
-            {
-                AddDeptOUMap(GlobalConfig.Settings.OST_Dept[i], GlobalConfig.Settings.OST_OU[i]);
-            }
+			if (GlobalConfig.Settings.OST_OU != null && GlobalConfig.Settings.OST_Dept != null)
+			{
+				for (int i = 0; i < GlobalConfig.Settings.OST_OU.Count; i++)
+				{
+					AddDeptOUMap(GlobalConfig.Settings.OST_Dept[i], GlobalConfig.Settings.OST_OU[i]);
+				}
+			}
         }
         /// <summary>
         /// Save settings into configuration
@@ -241,24 +251,27 @@ namespace Central_Control.Settings
                     GlobalConfig.Settings.OST_NUTitleField_ID = formfield.ID;
                     GlobalConfig.Settings.OST_NUTitleField = formfield.Name;
                 }
-
-                GlobalConfig.Settings.OST_Dept.Clear();
-                GlobalConfig.Settings.OST_OU.Clear();
+				
+				GlobalConfig.Settings.OST_Dept.Clear();
+				GlobalConfig.Settings.OST_OU.Clear();
                 for ( int i=0; i < Dept_OU_List.Children.Count; i++)
                 {
                     DockPanel Panel = Dept_OU_List.Children[i] as DockPanel;
+					ComboBox Dept = Panel.Children[0] as ComboBox;
+					ComboBox OU = Panel.Children[1] as ComboBox;
 
-                    ComboBox Dept = Panel.Children[0] as ComboBox;
-                    GlobalConfig.Settings.OST_Dept.Add(Dept.SelectedValue.ToString());
-
-                    ComboBox OU = Panel.Children[1] as ComboBox;
-                    GlobalConfig.Settings.OST_OU.Add(OU.SelectedValue.ToString());
+					if (!String.IsNullOrEmpty(Dept.SelectedValue.ToString()) && !String.IsNullOrEmpty(OU.SelectedValue.ToString()))
+					{
+						GlobalConfig.Settings.OST_Dept.Add(Dept.SelectedValue.ToString());
+						GlobalConfig.Settings.OST_OU.Add(OU.SelectedValue.ToString());
+					}
                 }
             }
-            catch
+            catch (Exception E)
             {
-                // Caught unexpected error , reload global config from disk and return false 
-                GlobalConfig.LoadFromDisk();
+				// Caught unexpected error , reload global config from disk and return false 
+				MessageBox.Show(E.Message, "ERROR");
+				GlobalConfig.LoadFromDisk();
                 return false;
             }
 
@@ -290,7 +303,11 @@ namespace Central_Control.Settings
         {
             Form1.IsEnabled = true;
             Form2.IsEnabled = true;
-        }
+			if (!String.IsNullOrEmpty(OST_ServerTextBox.Text) && !String.IsNullOrEmpty(OST_UsernameTextBox.Text) && !String.IsNullOrEmpty(OST_PasswordBox.Password))
+			{
+				TestServer();
+			}
+		}
         /// <summary>
         /// Select all text in the AD Domain box when getting focus
         /// </summary>
@@ -415,25 +432,50 @@ namespace Central_Control.Settings
             // Title
             ClearComboBox(OST_NUTitleComboBox);
             OST_NUTitleComboBox.ItemsSource = Central_Control.osTicket.FormFields;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OST_NUDeptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (OST_NUDeptComboBox.SelectedIndex != -1)
-            {
-                Central_Control.osTicket.NUDept_List = Central_Control.osTicket.GetFieldChoices(Central_Control.osTicket.SelectedDatabase, Central_Control.osTicket.NUDept.ID);
-            }
-        }
-        /// <summary>
-        /// Add a row of dept-to-ou mapping
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AddDeptOUMapping_Click(object sender, RoutedEventArgs e)
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void OST_NUNameComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (OST_NUNameComboBox.SelectedIndex != -1)
+			{
+				Central_Control.osTicket.NUName = OST_NUNameComboBox.Items[OST_NUNameComboBox.SelectedIndex] as Central_Control.osTicket.FormField;
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void OST_NUDeptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (OST_NUDeptComboBox.SelectedIndex != -1)
+			{
+				Central_Control.osTicket.NUDept = OST_NUDeptComboBox.Items[OST_NUDeptComboBox.SelectedIndex] as Central_Control.osTicket.FormField;
+				Central_Control.osTicket.NUDept_List = Central_Control.osTicket.GetFieldChoices(Central_Control.osTicket.SelectedDatabase, Central_Control.osTicket.NUDept.ID);
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void OST_NUTitleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (OST_NUTitleComboBox.SelectedIndex != -1)
+			{
+				Central_Control.osTicket.NUTitle = OST_NUTitleComboBox.Items[OST_NUTitleComboBox.SelectedIndex] as Central_Control.osTicket.FormField;
+			}
+		}
+		/// <summary>
+		/// Add a row of dept-to-ou mapping
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void AddDeptOUMapping_Click(object sender, RoutedEventArgs e)
         {
             AddDeptOUMap();
         }
@@ -549,9 +591,13 @@ namespace Central_Control.Settings
             catch (System.FormatException E)
             {
                 Error = E.Message;
-            }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
 
-        }
+		}
         /// <summary>
         /// 
         /// </summary>
@@ -561,77 +607,82 @@ namespace Central_Control.Settings
         {
             TestServButton.IsEnabled = true;
 
-            if (String.IsNullOrEmpty(Error) && Connection)
-            {
-                TestServResult.Text = "Success";
-                TestServResult.Style = FindResource("Message_Success") as Style;
+			try
+			{
+				if (String.IsNullOrEmpty(Error) && Connection)
+				{
+					TestServResult.Text = "Success";
+					TestServResult.Style = FindResource("Message_Success") as Style;
 
-                ClearComboBox(OST_DatabaseComboBox);
-                ClearComboBox(OST_HelpTopicComboBox);
-                ClearComboBox(OST_FormComboBox);
-                ClearComboBox(OST_NUNameComboBox);
-                ClearComboBox(OST_NUDeptComboBox);
-                ClearComboBox(OST_NUTitleComboBox);
+					ClearComboBox(OST_DatabaseComboBox);
+					ClearComboBox(OST_HelpTopicComboBox);
+					ClearComboBox(OST_FormComboBox);
+					ClearComboBox(OST_NUNameComboBox);
+					ClearComboBox(OST_NUDeptComboBox);
+					ClearComboBox(OST_NUTitleComboBox);
 
-                Central_Control.osTicket.GetDatabases();
-                OST_DatabaseComboBox.ItemsSource = Central_Control.osTicket.Databases;
+					Central_Control.osTicket.GetDatabases();
+					OST_DatabaseComboBox.ItemsSource = Central_Control.osTicket.Databases;
 
-                if (!String.IsNullOrEmpty(Central_Control.osTicket.SelectedDatabase))
-                {
-                    OST_DatabaseComboBox.SelectedValue = Central_Control.osTicket.SelectedDatabase;
+					if (!String.IsNullOrEmpty(Central_Control.osTicket.SelectedDatabase))
+					{
+						OST_DatabaseComboBox.SelectedValue = Central_Control.osTicket.SelectedDatabase;
 
-                    if (OST_DatabaseComboBox.SelectedIndex != -1)
-                    {
-                        Central_Control.osTicket.GetHelpTopics(Central_Control.osTicket.SelectedDatabase);
-                        OST_HelpTopicComboBox.ItemsSource = Central_Control.osTicket.HelpTopics;
+						if (OST_DatabaseComboBox.SelectedIndex != -1)
+						{
+							Central_Control.osTicket.GetHelpTopics(Central_Control.osTicket.SelectedDatabase);
+							OST_HelpTopicComboBox.ItemsSource = Central_Control.osTicket.HelpTopics;
 
-                        if (!String.IsNullOrEmpty(Central_Control.osTicket.SelectedHelpTopic.Name))
-                        {
-                            OST_HelpTopicComboBox.SelectedValue = Central_Control.osTicket.SelectedHelpTopic.Name;
+							if (!String.IsNullOrEmpty(Central_Control.osTicket.SelectedHelpTopic.Name))
+							{
+								OST_HelpTopicComboBox.SelectedValue = Central_Control.osTicket.SelectedHelpTopic.Name;
 
-                            if (OST_HelpTopicComboBox.SelectedIndex != -1)
-                            {
-                                Central_Control.osTicket.GetForms(Central_Control.osTicket.SelectedDatabase, Central_Control.osTicket.SelectedHelpTopic.ID);
-                                OST_FormComboBox.ItemsSource = Central_Control.osTicket.Forms;
+								if (OST_HelpTopicComboBox.SelectedIndex != -1)
+								{
+									Central_Control.osTicket.GetForms(Central_Control.osTicket.SelectedDatabase, Central_Control.osTicket.SelectedHelpTopic.ID);
+									OST_FormComboBox.ItemsSource = Central_Control.osTicket.Forms;
 
-                                if (!String.IsNullOrEmpty(Central_Control.osTicket.SelectedForm.Name))
-                                {
-                                    OST_FormComboBox.SelectedValue = Central_Control.osTicket.SelectedForm.Name;
+									if (!String.IsNullOrEmpty(Central_Control.osTicket.SelectedForm.Name))
+									{
+										OST_FormComboBox.SelectedValue = Central_Control.osTicket.SelectedForm.Name;
 
-                                    if (OST_FormComboBox.SelectedIndex != -1)
-                                    {
-                                        Central_Control.osTicket.GetFormFields(Central_Control.osTicket.SelectedDatabase, Central_Control.osTicket.SelectedForm.ID);
-                                        OST_NUNameComboBox.ItemsSource = Central_Control.osTicket.FormFields;
-                                        OST_NUDeptComboBox.ItemsSource = Central_Control.osTicket.FormFields;
-                                        OST_NUTitleComboBox.ItemsSource = Central_Control.osTicket.FormFields;
+										if (OST_FormComboBox.SelectedIndex != -1)
+										{
+											Central_Control.osTicket.GetFormFields(Central_Control.osTicket.SelectedDatabase, Central_Control.osTicket.SelectedForm.ID);
+											OST_NUNameComboBox.ItemsSource = Central_Control.osTicket.FormFields;
+											OST_NUDeptComboBox.ItemsSource = Central_Control.osTicket.FormFields;
+											OST_NUTitleComboBox.ItemsSource = Central_Control.osTicket.FormFields;
 
-                                        if (!String.IsNullOrEmpty(Central_Control.osTicket.NUName.Name))
-                                        {
-                                            OST_NUNameComboBox.SelectedValue = Central_Control.osTicket.NUName.Name;
-                                        }
-                                        if (!String.IsNullOrEmpty(Central_Control.osTicket.NUDept.Name))
-                                        {
-                                            OST_NUDeptComboBox.SelectedValue = Central_Control.osTicket.NUDept.Name;
-                                        }
-                                        if (!String.IsNullOrEmpty(Central_Control.osTicket.NUTitle.Name))
-                                        {
-                                            OST_NUTitleComboBox.SelectedValue = Central_Control.osTicket.NUTitle.Name;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                LoadSettings();
-            }
-            else
-            {
-                TestServResult.Text = Error;
-                TestServResult.Style = FindResource("Message_Error") as Style;
-            }
-        }
+											if (!String.IsNullOrEmpty(Central_Control.osTicket.NUName.Name))
+											{
+												OST_NUNameComboBox.SelectedValue = Central_Control.osTicket.NUName.Name;
+											}
+											if (!String.IsNullOrEmpty(Central_Control.osTicket.NUDept.Name))
+											{
+												OST_NUDeptComboBox.SelectedValue = Central_Control.osTicket.NUDept.Name;
+											}
+											if (!String.IsNullOrEmpty(Central_Control.osTicket.NUTitle.Name))
+											{
+												OST_NUTitleComboBox.SelectedValue = Central_Control.osTicket.NUTitle.Name;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					TestServResult.Text = Error;
+					TestServResult.Style = FindResource("Message_Error") as Style;
+				}
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
+		}
 
         private void OUFetcher_Completed(object sender, RunWorkerCompletedEventArgs e)
         {

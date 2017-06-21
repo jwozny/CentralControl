@@ -1247,8 +1247,9 @@ namespace Central_Control
             public static string GivenName { get; set; }
             public static string Surname { get; set; }
             public static string Name { get; set; }
-            public static string Title { get; set; }
             public static string EmailAddress { get; set; }
+            public static string Title { get; set; }
+            public static string Department { get; set; }
             public static string DistinguishedName { get; set; }
             public static string SamAccountName { get; set; }
             public static string Password { get; set; }
@@ -1258,15 +1259,17 @@ namespace Central_Control
             {
                 try
                 {
-                    using (var NewUser = new UserPrincipal(Domain))
+                    using (var NewUser = new UserPrincipalEx(Domain))
                     {
                         // Define user principal(up) properties
                         NewUser.GivenName = GivenName;
                         NewUser.Surname = Surname;
                         NewUser.Name = Name;
                         NewUser.DisplayName = Name;
-                        NewUser.SamAccountName = SamAccountName;
                         NewUser.EmailAddress = EmailAddress;
+                        NewUser.Title = Title;
+                        NewUser.Department = Department;
+                        NewUser.SamAccountName = SamAccountName;
                         NewUser.SetPassword(Password);
                         NewUser.Enabled = true;
                         NewUser.ExpirePasswordNow();

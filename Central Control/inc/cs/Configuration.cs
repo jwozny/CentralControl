@@ -35,8 +35,8 @@ namespace Central_Control
         public string OST_NUDeptField { get; set; } = null;
         public string OST_NUTitleField_ID { get; set; } = null;
         public string OST_NUTitleField { get; set; } = null;
-        public List<String> OST_Dept { get; set; } = null;
-        public List<String> OST_OU { get; set; } = null;
+        public List<string> OST_Dept { get; set; } = new List<string>();
+        public List<string> OST_OU { get; set; } = new List<string>();
     }
 
     public static class GlobalConfig

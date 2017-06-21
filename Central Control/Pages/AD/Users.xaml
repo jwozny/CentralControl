@@ -316,7 +316,7 @@
         <!--Ticket Import Selection-->
         <Grid x:Name="TicketImportBox"
               Background="{StaticResource ContentBackground_MaxTrans}"
-              Visibility="Visible">
+              Visibility="Hidden">
             <Border Height="{Binding ActualHeight, ElementName=TicketImportForm}"
                     Width="{Binding ActualWidth, ElementName=TicketImportForm}"
                     Effect="{StaticResource Shadow}"/>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Security;
+using System.Windows;
 
 namespace Central_Control
 {
@@ -38,27 +39,33 @@ namespace Central_Control
         {
             if (String.IsNullOrEmpty(Database))
             {
-                ConnectionString = "server=" + Server + ";uid=" + Username + ";pwd=" + Password + ";";
+				ConnectionString = "server=" + Server + ";uid=" + Username + ";pwd=" + Password + ";";
             }
             else
-            {
-                ConnectionString = "server=" + Server + ";uid=" + Username + ";pwd=" + Password + ";database=" + Database + ";";
+			{
+				ConnectionString = "server=" + Server + ";uid=" + Username + ";pwd=" + Password + ";database=" + Database + ";";
             }
 
             try
             {
                 Connection = new MySqlConnection(ConnectionString);
-                Connection.Open();
-                Connection.Close();
-                return true;
+				Connection.Open();
+				Connection.Close();
+				return true;
             }
             catch (MySqlException E)
-            {
-                ConnectionError = E.Message;
-
-                return false;
-            }
-        }
+			{
+				ConnectionError = E.Message;
+				
+				return false;
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+				
+				return false;
+			}
+		}
 
         public static void GetDatabases()
         {
@@ -87,8 +94,12 @@ namespace Central_Control
             {
                 Connection.Close();
                 ConnectionError = E.Message;
-            }
-        }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
+		}
 
         public static void GetHelpTopics(string Database)
         {
@@ -144,8 +155,12 @@ namespace Central_Control
             {
                 Connection.Close();
                 ConnectionError = E.Message;
-            }
-        }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
+		}
 
         public static void GetForms(string Database, string HelpTopic_ID)
         {
@@ -184,8 +199,12 @@ namespace Central_Control
             {
                 Connection.Close();
                 ConnectionError = E.Message;
-            }
-        }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
+		}
 
         public static void GetFormFields(string Database, string Form_ID)
         {
@@ -226,8 +245,12 @@ namespace Central_Control
             {
                 Connection.Close();
                 ConnectionError = E.Message;
-            }
-        }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
+		}
 
         public static void GetTickets()
         {
@@ -371,8 +394,12 @@ namespace Central_Control
             {
                 Connection.Close();
                 ConnectionError = E.Message;
-            }
-        }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+			}
+		}
 
         public static List<string> GetFieldChoices(string Database, string Field_ID)
         {
@@ -419,8 +446,13 @@ namespace Central_Control
                 Connection.Close();
                 ConnectionError = E.Message;
                 return null;
-            }
-        }
+			}
+			catch (Exception E)
+			{
+				MessageBox.Show(E.Message, "ERROR");
+				return null;
+			}
+		}
 
         public class HelpTopic
         {

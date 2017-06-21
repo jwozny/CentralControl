@@ -534,7 +534,16 @@ namespace Central_Control.AD
                 ActiveDirectory.NewUser.Surname = LastNameText.Text;
                 ActiveDirectory.NewUser.Name = FullNameText.Text;
                 ActiveDirectory.NewUser.EmailAddress = EmailText.Text;
-                ActiveDirectory.NewUser.Title = Title.Text;
+                ActiveDirectory.NewUser.Title = TitleText.Text;
+
+                foreach (osTicket.NewUserTicket ticket in osTicket.Tickets)
+                {
+                    if (ticket.TicketNumber == TicketNumber)
+                    {
+                        ActiveDirectory.NewUser.Department = ticket.Department;
+                    }
+                }
+
                 ActiveDirectory.NewUser.DistinguishedName = OUBox.SelectedValue.ToString();
                 ActiveDirectory.NewUser.SamAccountName = UserNameText.Text;
                 ActiveDirectory.NewUser.Password = Password.Password;

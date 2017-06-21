@@ -191,7 +191,8 @@
                                 <Label Content="New User 'Name'"/>
                                 <ComboBox x:Name="OST_NUNameComboBox"
                                           IsEditable="True"
-                                          HorizontalAlignment="Right"/>
+                                          HorizontalAlignment="Right"
+                                          SelectionChanged="OST_NUNameComboBox_SelectionChanged"/>
                             </DockPanel>
 
                             <DockPanel x:Name="Field_Dept_Selector">
@@ -206,7 +207,8 @@
                                 <Label Content="New User 'Title'"/>
                                 <ComboBox x:Name="OST_NUTitleComboBox"
                                           IsEditable="True"
-                                          HorizontalAlignment="Right"/>
+                                          HorizontalAlignment="Right"
+                                          SelectionChanged="OST_NUTitleComboBox_SelectionChanged"/>
                             </DockPanel>
 
                             <Separator Margin="10"/>
