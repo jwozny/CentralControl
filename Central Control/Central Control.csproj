@@ -29,7 +29,7 @@
     <InstallUrl>\\asse.org\Shares\IT\CentralControl\</InstallUrl>
     <SupportUrl>https://jackwozny.com</SupportUrl>
     <PublisherName>Jack Wozny</PublisherName>
-    <ApplicationRevision>18</ApplicationRevision>
+    <ApplicationRevision>20</ApplicationRevision>
     <ApplicationVersion>1.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
